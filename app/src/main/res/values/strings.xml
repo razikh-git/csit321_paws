@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">PAWS</string>
     <string name="app_detail">CSIT321\nPAWS\nPrivate prototype</string>
+    <string name="app_txt_placeholder">placeholder</string>
+    <string name="app_txt_fallback">Unable to load information at this time.</string>
+    <string name="app_btn_continue">continue</string>
+    <string name="app_btn_return">return</string>
     <string name="pp_prompt">Begin profiling?</string>
     <string name="pp_btn_decline">later</string>
     <string name="pp_btn_accept">proceed</string>
-    <string name="pp_info_fallback">Unable to load information at this time.</string>
-    <string name="slp_info_fallback">Unable to load information at this time.</string>
+    <string name="pm_btn_survey">survey</string>
+    <string name="pm_btn_facebook">facebook</string>
+    <string name="pm_card_survey">Complete a short survey</string>
+    <string name="pm_card_facebook">Use Facebook integration</string>
 </resources>

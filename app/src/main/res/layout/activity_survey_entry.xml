@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SurveyEntryActivity">
+
+    <LinearLayout
+        android:id="@+id/layProfPromptMenu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="2dp"
+        tools:layout_editor_absoluteY="2dp">
+
+        <ImageView
+            android:id="@+id/imgLogoCombo"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginLeft="@dimen/app_gutter"
+            android:layout_marginTop="@dimen/app_gutter"
+            android:layout_marginRight="@dimen/app_gutter"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/logo_combo" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardInfo"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginLeft="@dimen/app_gutter"
+            android:layout_marginTop="@dimen/app_spacing"
+            android:layout_marginRight="@dimen/app_gutter" >
+
+            <TextView
+                android:id="@+id/txtInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSurveyDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/app_gutter"
+            android:layout_marginTop="@dimen/app_spacing"
+            android:layout_marginRight="@dimen/app_gutter" >
+
+            <LinearLayout
+                android:id="@+id/laySurveyDetailsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/app_gutter"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:layout_marginRight="@dimen/app_gutter"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/laySurveyDetailsTop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/app_gutter"
+                    android:layout_marginTop="@dimen/app_spacing"
+                    android:layout_marginRight="@dimen/app_gutter"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/layButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/app_gutter"
+            android:layout_marginTop="@dimen/app_spacing"
+            android:layout_marginRight="@dimen/app_gutter"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnContinue"
+                style="@style/PawsButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/app_spacing"
+                android:text="@string/app_btn_continue" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReturn"
+                style="@style/PawsTextButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/app_spacing"
+                android:text="@string/app_btn_return" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

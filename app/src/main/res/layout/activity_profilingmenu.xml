@@ -12,6 +12,7 @@
         android:id="@+id/layProfilingMenuMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <com.google.android.material.card.MaterialCardView
@@ -20,16 +21,16 @@
             android:layout_height="260dp"
             android:layout_marginLeft="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter" >
+            android:layout_marginRight="@dimen/app_gutter">
 
             <TextView
                 android:id="@+id/txtInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:padding="@dimen/app_padding"
                 android:textAlignment="center"
-                android:padding="@dimen/app_padding" />
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -39,9 +40,66 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter" >
+            android:layout_marginRight="@dimen/app_gutter"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2">
+
+            <LinearLayout
+                android:id="@+id/layButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/app_gutter"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:layout_marginRight="@dimen/app_gutter"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSurvey"
+                    style="@style/PawsButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/pm_btn_survey" />
+
+                <TextView
+                    android:id="@+id/txtSurvey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="@dimen/app_padding"
+                    android:text="@string/pm_card_survey"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFacebook"
+                    style="@style/PawsButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/pm_btn_facebook" />
+
+                <TextView
+                    android:id="@+id/txtFacebook"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="@dimen/app_padding"
+                    android:text="@string/pm_card_facebook"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+
+            </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReturn"
+            style="@style/PawsTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/app_spacing"
+            android:text="@string/app_btn_return" />
 
     </LinearLayout>
 

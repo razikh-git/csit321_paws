@@ -40,7 +40,7 @@ public class ProfilingPromptActivity extends AppCompatActivity {
             txt.setMovementMethod(new ScrollingMovementMethod());
         } catch (Exception e){
             e.printStackTrace();
-            txt.setText(R.string.pp_info_fallback);
+            txt.setText(R.string.app_txt_fallback);
         }
     }
 

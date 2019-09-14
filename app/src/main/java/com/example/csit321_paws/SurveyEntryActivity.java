@@ -2,29 +2,27 @@ package com.example.csit321_paws;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
 import java.io.InputStream;
 
-public class ProfilingMenuActivity extends AppCompatActivity {
+public class SurveyEntryActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profilingmenu);
+        setContentView(R.layout.activity_survey_entry);
 
         // Button functionality.
-        findViewById(R.id.btnSurvey).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) { onClickSurvey(view); }
+        findViewById(R.id.cardSurveyDetails).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) { onClickDetails(view); }
         });
 
-        findViewById(R.id.btnFacebook).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) { onClickFacebook(view); }
+        findViewById(R.id.btnContinue).setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) { onClickContinue(view); }
         });
 
         findViewById(R.id.btnReturn).setOnClickListener(new View.OnClickListener() {
@@ -37,7 +35,7 @@ public class ProfilingMenuActivity extends AppCompatActivity {
         TextView txt = findViewById(R.id.txtInfo);
         try {
             Resources res = getResources();
-            InputStream in = res.openRawResource(R.raw.slp_info);
+            InputStream in = res.openRawResource(R.raw.se_info);
             byte[] b = new byte[in.available()];
             in.read(b);
 
@@ -48,15 +46,17 @@ public class ProfilingMenuActivity extends AppCompatActivity {
         }
     }
 
-    public void onClickSurvey(View view){
-        // Redirect to survey intro screen.
-        //Intent intent = new Intent(this, HomeActivity.class);
-        //startActivity(intent);
+    public void onClickDetails(View view){
+        // Redirect to post-completion details summary screen.
+        //if (asdf) {
+        //  Intent intent = new Intent(this, SurveyDetailsActivity.class);
+        //  startActivity(intent);
+        //}
     }
 
-    public void onClickFacebook(View view){
-        // Redirect to facebook intro screen.
-        //Intent intent = new Intent(this, ProfilingMenuActivity.class);
+    public void onClickContinue(View view){
+        // Redirect to live survey screen.
+        //Intent intent = new Intent(this, SurveyActivity.class);
         //startActivity(intent);
     }
 
