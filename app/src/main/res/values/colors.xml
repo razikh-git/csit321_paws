@@ -2,6 +2,7 @@
 <resources>
     <color name="color_background">#F9F9F9</color>
     <color name="color_tile">#FFFDFDFD</color>
+    <color name="color_dark">#8D8D8D</color>
     <color name="color_primary">#7FDDE9</color>
     <color name="color_secondary">#39BED1</color>
     <color name="color_error">#E982C2</color>

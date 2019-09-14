@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.material.card.MaterialCardView;
+
 import java.io.InputStream;
 
 public class SurveyEntryActivity extends AppCompatActivity {
@@ -54,19 +56,31 @@ public class SurveyEntryActivity extends AppCompatActivity {
         // TODO : integrate binary files to load user data
 
         if (true) {
-            // Update complete/incomplete indicator icon
+            // Complete/incomplete outline
+            MaterialCardView cardView = findViewById(R.id.cardSurveyDetails);
+            //cardView.setStrokeColor(R.color.color_primary);
+
+            // Complete/incomplete indicator icon
             // . . .
 
-            // Update progress bar for survey completion percentage
-            ProgressBar progressBar = findViewById(R.id.progressSurveyDetails);
+            // Progress bar for survey completion percentage
+            ProgressBar progressBar = findViewById(R.id.barProgressSurvey);
+            progressBar.setIndeterminate(false);
             int progress = 30;
             progressBar.setProgress(progress);
 
-            // Update timestamp of survey completion
-            TextView timestamp = findViewById(R.id.timestampTop);
-            //timestamp.setText();
-            timestamp = findViewById(R.id.timestampBottom);
-            //timestamp.setText();
+            txt = findViewById(R.id.txtProgressSurvey);
+            String str = "0/20";
+            //str =
+            txt.setText(str);
+
+            // Timestamp of survey completion
+            txt = findViewById(R.id.txtTimestampTop);
+            //str =
+            //txt.setText(str);
+            txt = findViewById(R.id.txtTimestampBottom);
+            //str =
+            //txt.setText(str);
         }
     }
 
