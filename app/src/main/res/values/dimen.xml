@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Application layout dimensions. -->
+    <dimen name="app_spacing">20dp</dimen>
+    <dimen name="app_gutter">40dp</dimen>
+    <dimen name="app_padding">15dp</dimen>
+    <dimen name="btn_padding">8dp</dimen>
+    <dimen name="btn_text_size">16dp</dimen>
+
+</resources>

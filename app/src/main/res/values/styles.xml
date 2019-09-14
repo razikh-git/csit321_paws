@@ -1,0 +1,40 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="mainAppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+
+        <!-- AppCompat attributes. -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorSecondary">@color/color_secondary</item>
+        <item name="android:colorBackground">@color/color_background</item>
+        <item name="colorError">@color/color_error</item>
+
+        <!-- Material attributes. -->
+        <item name="colorOnPrimary">@color/color_on_primary</item>
+        <item name="colorOnSecondary">@color/color_on_secondary</item>
+    </style>
+
+    <!-- Custom preloader splash screen. -->
+    <style name="splashTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:colorBackground">@color/color_background</item>
+        <item name="android:windowBackground">@drawable/splash_drawable</item>
+    </style>
+
+    <!-- Custom material buttons. -->
+    <style name="PawsTextAppearanceButton" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">@dimen/btn_text_size</item>
+    </style>
+    <style name="PawsButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textAppearance">@style/PawsTextAppearanceButton</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">@dimen/btn_padding</item>
+        <item name="android:clipToPadding">false</item>
+    </style>
+    <style name="PawsTextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAppearance">@style/PawsTextAppearanceButton</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">@dimen/btn_padding</item>
+        <item name="android:clipToPadding">false</item>
+    </style>
+
+</resources>

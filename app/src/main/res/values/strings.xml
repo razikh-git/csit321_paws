@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PAWS</string>
+    <string name="app_detail">CSIT321\nPAWS\nPrivate prototype</string>
+    <string name="pp_prompt">Begin profiling?</string>
+    <string name="pp_btn_decline">later</string>
+    <string name="pp_btn_accept">proceed</string>
+    <string name="pp_info_fallback">Unable to load information at this time.</string>
+    <string name="slp_info_fallback">Unable to load information at this time.</string>
+</resources>
