@@ -50,8 +50,8 @@ public class ProfilingMenuActivity extends AppCompatActivity {
 
     public void onClickSurvey(View view){
         // Redirect to survey intro screen.
-        //Intent intent = new Intent(this, HomeActivity.class);
-        //startActivity(intent);
+        Intent intent = new Intent(this, SurveyEntryActivity.class);
+        startActivity(intent);
     }
 
     public void onClickFacebook(View view){

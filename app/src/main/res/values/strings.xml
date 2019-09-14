@@ -12,4 +12,5 @@
     <string name="pm_btn_facebook">facebook</string>
     <string name="pm_card_survey">Complete a short survey</string>
     <string name="pm_card_facebook">Use Facebook integration</string>
+    <string name="se_title">Survey</string>
 </resources>

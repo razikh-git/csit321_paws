@@ -2,12 +2,14 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/color_background"
     tools:context=".SurveyEntryActivity">
 
     <LinearLayout
-        android:id="@+id/layProfPromptMenu"
+        android:id="@+id/laySurveyEntryMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
@@ -15,29 +17,61 @@
         tools:layout_editor_absoluteX="2dp"
         tools:layout_editor_absoluteY="2dp">
 
-        <ImageView
-            android:id="@+id/imgLogoCombo"
+        <LinearLayout
+            android:id="@+id/laySurveyEntryHeader"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginLeft="@dimen/app_gutter"
-            android:layout_marginTop="@dimen/app_gutter"
-            android:layout_marginRight="@dimen/app_gutter"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/logo_combo" />
+            android:layout_height="@dimen/header_height"
+            android:layout_marginTop="@dimen/app_spacing"
+            android:clipChildren="false"
+            android:orientation="horizontal"
+            tools:layout_editor_absoluteX="2dp"
+            tools:layout_editor_absoluteY="2dp">
+
+            <ImageView
+                android:id="@+id/imgLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/app_gutter"
+                android:layout_marginRight="@dimen/app_gutter"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:gravity="center"
+                app:srcCompat="@drawable/logo2" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardHeader"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/app_gutter"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/txtTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/app_padding"
+                    android:gravity="center"
+                    android:text="@string/se_title"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardInfo"
             android:layout_width="match_parent"
-            android:layout_height="260dp"
+            android:layout_height="160dp"
             android:layout_marginLeft="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter" >
+            android:layout_marginRight="@dimen/app_gutter">
 
             <TextView
                 android:id="@+id/txtInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:padding="@dimen/app_padding"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
         </com.google.android.material.card.MaterialCardView>
@@ -48,10 +82,10 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter" >
+            android:layout_marginRight="@dimen/app_gutter">
 
             <LinearLayout
-                android:id="@+id/laySurveyDetailsContainer"
+                android:id="@+id/laySurveyDetailsTop"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/app_gutter"
@@ -60,18 +94,42 @@
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <LinearLayout
-                    android:id="@+id/laySurveyDetailsTop"
+                <ProgressBar
+                    android:id="@+id/progressSurveyDetails"
+                    style="@style/Widget.AppCompat.ProgressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="false"
+                    android:max="100"
+                    android:progress="0"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/laySurveyDetailsBottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/app_gutter"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:layout_marginRight="@dimen/app_gutter"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtTimestampTop"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/app_gutter"
-                    android:layout_marginTop="@dimen/app_spacing"
-                    android:layout_marginRight="@dimen/app_gutter"
                     android:gravity="center"
-                    android:orientation="horizontal">
+                    android:text="--:--/--/--"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
-
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/txtTimestampBottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="----"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
             </LinearLayout>
 
@@ -90,16 +148,16 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnContinue"
                 style="@style/PawsButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/app_spacing"
                 android:text="@string/app_btn_continue" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReturn"
                 style="@style/PawsTextButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/app_spacing"
                 android:text="@string/app_btn_return" />
 
