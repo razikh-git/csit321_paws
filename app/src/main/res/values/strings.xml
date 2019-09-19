@@ -13,4 +13,12 @@
     <string name="pm_card_survey">Complete a short survey</string>
     <string name="pm_card_facebook">Use Facebook integration</string>
     <string name="se_title">Survey</string>
+    <string name="home_warning">Survey incomplete</string>
+    <string name="home_weather_footer">Last updated:</string>
+    <string name="home_weather_temp">Temperature</string>
+    <string name="home_weather_wind">Wind</string>
+    <string name="home_weather_precip">Precipitation</string>
+    <string name="file_survey_questions">paws_survey_questions</string>
+    <string name="file_survey_results">paws_survey_results</string>
+    <string name="file_facebook_results">paws_fb_results</string>
 </resources>

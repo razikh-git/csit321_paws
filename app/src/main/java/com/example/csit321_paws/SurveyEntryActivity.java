@@ -2,6 +2,8 @@ package com.example.csit321_paws;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +22,9 @@ public class SurveyEntryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey_entry);
 
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor = sharedPref.edit();
+
         // Button functionality.
         /*
         findViewById(R.id.cardSurveyDetails).setOnClickListener(new View.OnClickListener() {
@@ -35,7 +40,8 @@ public class SurveyEntryActivity extends AppCompatActivity {
             @Override public void onClick(View view) { onClickReturn(view); }
         });
 
-        // TODO : integrate binary files to allow for contextual highlighting of survey cards
+        // Initialise file data.
+        //sharedEditor.
 
         // Initialise info screen contents.
         TextView txt = findViewById(R.id.txtInfo);

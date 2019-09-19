@@ -2,25 +2,38 @@ package com.example.csit321_paws;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 public class MainActivity extends AppCompatActivity {
 
     // TODO : preload data and assets in this activity
 
-    static final boolean isProfileInitialised = false; // TODO integrate with binary load
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.mainAppTheme);
         super.onCreate(savedInstanceState);
 
-        // Display profiling prompt screen if required.
-        if (isProfileInitialised)
-            enterHome();
-        else
-            enterProfilingPrompt();
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor = sharedPref.edit();
+
+        // Handle first-time launches.
+        if (sharedPref.contains("app_init")) {
+            boolean is_init = sharedPref.getBoolean("app_init", false);
+            if (is_init)
+                // Proceed straight to the home screen.
+                enterHome();
+        }
+
+        // Pass first-time flag.
+        sharedEditor.putBoolean("app_init", true);
+        //sharedEditor.apply();
+        // TODO : remove comment to allow skipping the profiling prompt
+
+        // Display a prompt for the user to begin profiling.
+        enterProfilingPrompt();
     }
 
     private void enterProfilingPrompt() {
@@ -34,6 +47,4 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
     }
-
-
 }
