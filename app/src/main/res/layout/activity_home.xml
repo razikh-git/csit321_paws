@@ -213,16 +213,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/app_spacing"
                 android:padding="@dimen/btn_padding"
-                android:text="@string/app_btn_continue" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnReturn"
-                style="@style/PawsTextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:padding="@dimen/btn_padding"
-                android:text="@string/app_btn_return" />
+                android:text="@string/app_txt_placeholder" />
 
         </LinearLayout>
 

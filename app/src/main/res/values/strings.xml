@@ -1,10 +1,21 @@
 <resources>
     <string name="app_name">PAWS</string>
     <string name="app_detail">CSIT321\nPAWS\nPrivate prototype</string>
+
     <string name="app_txt_placeholder">placeholder</string>
     <string name="app_txt_fallback">Unable to load information at this time.</string>
+
     <string name="app_btn_continue">continue</string>
     <string name="app_btn_return">return</string>
+    <string name="app_btn_perm_grant">accept</string>
+    <string name="app_btn_perm_deny">later</string>
+
+    <string name="app_title_request_loc_coarse">Broad location data</string>
+    <string name="app_title_request_loc_fine">Precise location data</string>
+
+    <string name="app_msg_request_loc_coarse">PAWS would like to use broad location tracking to fetch local weather and maps data.</string>
+    <string name="app_msg_request_loc_fine">PAWS would like to use precise location tracking when prompted to watch for your safety.</string>
+
     <string name="pp_prompt">Begin profiling?</string>
     <string name="pp_btn_decline">later</string>
     <string name="pp_btn_accept">proceed</string>
@@ -21,4 +32,6 @@
     <string name="file_survey_questions">paws_survey_questions</string>
     <string name="file_survey_results">paws_survey_results</string>
     <string name="file_facebook_results">paws_fb_results</string>
+
+    <string name="pref_survey_completed">pref_survey_completed</string>
 </resources>
