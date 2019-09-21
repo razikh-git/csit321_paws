@@ -49,6 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+
             </ScrollView>
 
         </com.google.android.material.card.MaterialCardView>
@@ -100,7 +101,9 @@
                 android:layout_marginStart="@dimen/app_spacing"
                 android:layout_weight="1"
                 android:text="@string/pp_btn_accept" />
+
         </LinearLayout>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

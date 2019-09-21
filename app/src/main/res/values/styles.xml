@@ -24,17 +24,28 @@
     <style name="PawsTextAppearanceButton" parent="TextAppearance.MaterialComponents.Button">
         <item name="android:textSize">@dimen/btn_text_size</item>
     </style>
+
     <style name="PawsButton" parent="Widget.MaterialComponents.Button">
         <item name="android:textAppearance">@style/PawsTextAppearanceButton</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">@dimen/btn_padding</item>
         <item name="android:clipToPadding">false</item>
     </style>
+
     <style name="PawsTextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textAppearance">@style/PawsTextAppearanceButton</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">@dimen/btn_padding</item>
         <item name="android:clipToPadding">false</item>
     </style>
+
+    <style name="mainAppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="mainAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="mainAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

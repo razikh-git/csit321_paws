@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer name="app_default_loc_min_interval">5000</integer>
+    <integer name="app_default_loc_min_distance">0</integer>
+
+</resources>
