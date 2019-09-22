@@ -1,34 +1,32 @@
 package com.example.csit321_paws;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.io.InputStream;
 
-public class ProfilingMenuActivity extends AppCompatActivity {
+public class ProfilingMenuActivity extends BottomNavBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profilingmenu);
 
+        // Bottom navigation bar functionality.
+        BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
+        nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         // Button functionality.
         findViewById(R.id.btnSurvey).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) { onClickSurvey(view); }
         });
-
         findViewById(R.id.btnFacebook).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) { onClickFacebook(view); }
-        });
-
-        findViewById(R.id.btnReturn).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) { onClickReturn(view); }
         });
 
         // TODO : integrate binary files to allow for contextual highlighting of survey cards
@@ -58,10 +56,5 @@ public class ProfilingMenuActivity extends AppCompatActivity {
         // Redirect to facebook intro screen.
         //Intent intent = new Intent(this, ProfilingMenuActivity.class);
         //startActivity(intent);
-    }
-
-    public void onClickReturn(View view){
-        // Redirect to previous screen.
-        this.finish();
     }
 }

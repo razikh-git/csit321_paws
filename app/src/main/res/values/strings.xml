@@ -1,19 +1,20 @@
 <resources>
+
+    <!-- Generic app strings. -->
     <string name="app_name">PAWS</string>
     <string name="app_detail">CSIT321\nPAWS\nPrivate prototype</string>
 
+    <!-- Generic text strings. -->
     <string name="app_txt_placeholder">placeholder</string>
     <string name="app_txt_fallback">Unable to load information at this time.</string>
 
-    <string name="app_nav_home">HOME</string>
-    <string name="app_nav_maps">MAPS</string>
-    <string name="app_nav_weather">WEATHER</string>
-
+    <!-- Generic button strings. -->
     <string name="app_btn_continue">continue</string>
     <string name="app_btn_return">return</string>
     <string name="app_btn_perm_grant">accept</string>
     <string name="app_btn_perm_deny">later</string>
 
+    <!-- Permissions popups. -->
     <string name="app_title_request_loc_coarse">Vague location data</string>
     <string name="app_title_request_loc_fine">Precise location data</string>
     <string name="app_title_request_internet">Internet access</string>
@@ -24,24 +25,24 @@
     <string name="app_msg_request_internet">Internet access is needed to gather weather data from public-access stations.</string>
     <string name="app_msg_request_network_state">Network connectivity is needed to balance GPS and WiFi usage.</string>
 
+    <!-- Emulated device lat/lon. -->
     <string name="app_default_loc_lon">150.89</string>
     <string name="app_default_loc_lat">-34.43</string>
 
-    <string name="app_url_owmapi_root">https://api.openweathermap.org/</string>
+    <!-- Open Weather Maps. -->
+    <string name="app_url_owm_root">https://openweathermap.org/</string>
+    <string name="app_url_owm_api_root">https://api.openweathermap.org/</string>
 
     <string name="owm_default_api_key">442dabf9a4b790d1198c03fbd0d31550</string>
 
-    <string name="pp_prompt">Begin profiling?</string>
-    <string name="pp_btn_decline">later</string>
-    <string name="pp_btn_accept">proceed</string>
-    <string name="pm_btn_survey">survey</string>
-    <string name="pm_btn_facebook">facebook</string>
-    <string name="pm_card_survey">Complete a short survey</string>
-    <string name="pm_card_facebook">Use Facebook integration</string>
-    <string name="se_title">Survey</string>
+    <!-- Bottom navigation bar. -->
+    <string name="app_nav_maps">Maps</string>
+    <string name="app_nav_home">Home</string>
+    <string name="app_nav_weather">Weather</string>
 
-    <string name="home_warning">Survey incomplete</string>
-    <string name="home_weather_footer">Last updated:</string>
+    <!-- Home Screen Activity. -->
+    <string name="home_warning">Survey Incomplete</string>
+    <string name="home_weather_footer">last updated:</string>
     <string name="home_weather_temp">Temperature</string>
     <string name="home_weather_wind">Wind</string>
     <string name="home_weather_precip">Precipitation</string>
@@ -49,12 +50,37 @@
     <string name="home_precip_rain">Rain</string>
     <string name="home_precip_snow">Snow</string>
 
+    <!-- Profiling Prompt Activity. -->
+    <string name="pp_prompt">Begin profiling?</string>
+    <string name="pp_btn_decline">later</string>
+    <string name="pp_btn_accept">proceed</string>
+
+    <!-- Profiling Menu Activity. -->
+    <string name="pm_btn_survey">survey</string>
+    <string name="pm_btn_facebook">facebook</string>
+    <string name="pm_card_survey">
+        "Complete a short survey"
+        " to discover your personality type"
+    </string>
+    <string name="pm_card_facebook">
+        "Use Facebook integration to"
+        " weight results with your profile"
+    </string>
+
+    <!-- Survey Entry Activity. -->
+    <string name="se_title">Survey Home</string>
+    <string name="se_results_label">last completed survey</string>
+
+    <!-- Survey Question Activity. -->
+    <string name="sq_title">Question</string>
+    <string name="sq_subtitle">mini-IPIP personality survey</string>
+    <string name="sq_answer">I feel this statement is:</string>
+    <string name="sq_done">Done!</string>
+
+    <!-- Survey data. -->
     <string name="file_survey_questions">paws_survey_questions</string>
     <string name="file_survey_results">paws_survey_results</string>
     <string name="file_facebook_results">paws_fb_results</string>
-
-    <string name="pref_survey_completed">pref_survey_completed</string>
-    <string name="title_activity_scrolling">ScrollingActivity</string>
 
     <string name="large_text">
         "Material is the metaphor.\n\n"
@@ -146,4 +172,8 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_weather">WeatherActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>

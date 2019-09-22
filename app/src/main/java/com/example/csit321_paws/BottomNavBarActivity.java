@@ -1,6 +1,7 @@
 package com.example.csit321_paws;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -17,10 +18,13 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navHome:
                     onClickHome();
+                    break;
                 case R.id.navMaps:
                     onClickMaps();
+                    break;
                 case R.id.navWeather:
                     onClickWeather();
+                    break;
             }
             return true;
         }
@@ -41,7 +45,8 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
 
     public void onClickWeather() {
         // Redirect to home screen.
-
-        // . . .
+        this.finish();
+        Intent intent = new Intent(this, WeatherActivity.class);
+        startActivity(intent);
     }
 }

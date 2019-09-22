@@ -12,8 +12,8 @@
         android:id="@+id/laySurveyEntryMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/app_gutter"
-        android:layout_marginRight="@dimen/app_gutter"
+        android:layout_marginStart="@dimen/app_gutter"
+        android:layout_marginEnd="@dimen/app_gutter"
         android:clipChildren="false"
         android:orientation="vertical"
         tools:layout_editor_absoluteX="2dp"
@@ -22,7 +22,7 @@
         <LinearLayout
             android:id="@+id/laySurveyEntryHeader"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/header_height"
+            android:layout_height="@dimen/height_headers"
             android:layout_marginTop="@dimen/app_spacing"
             android:clipChildren="false"
             android:orientation="horizontal"
@@ -42,18 +42,17 @@
                 android:id="@+id/cardHeader"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/app_gutter"
+                android:layout_marginStart="@dimen/app_spacing"
                 android:gravity="center">
 
                 <TextView
-                    android:id="@+id/txtTitle"
+                    android:id="@+id/txtHeader"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="@dimen/app_padding"
                     android:gravity="center"
                     android:text="@string/se_title"
                     android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                    android:textAppearance="@style/TextAppearance.Paws.Large" />
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -70,73 +69,87 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/app_padding"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+                android:textAppearance="@style/TextAppearance.Paws.Small" />
 
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardSurveyDetails"
+            android:id="@+id/cardSurveyResults"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/app_spacing"
             android:padding="@dimen/app_padding"
-            app:strokeWidth="@dimen/app_stroke_width"
-            app:strokeColor="@color/color_error">
+            android:backgroundTint="@color/survey_results_colors"
+            android:backgroundTintMode="src_over"
+            app:strokeWidth="@dimen/width_stroke"
+            app:strokeColor="@color/color_error_dark">
 
             <LinearLayout
-                android:id="@+id/laySurveyDetailsContainer"
+                android:id="@+id/laySurveyResultsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="@dimen/app_padding"
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/laySurveyDetailsTop"
+                    android:id="@+id/laySurveyResultsTop"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="horizontal">
 
-                    <ProgressBar
-                        android:id="@+id/barProgressSurvey"
-                        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                        android:progressDrawable="@drawable/progress_circular"
+                    <LinearLayout
+                        android:id="@+id/laySurveyResultsProgress"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:max="100"/>
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ProgressBar
+                            android:id="@+id/barProgressSurvey"
+                            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                            android:visibility="gone"
+                            android:progressDrawable="@drawable/progress_circular_thick"
+                            android:layout_width="@dimen/dimen_icon_medium"
+                            android:layout_height="@dimen/dimen_icon_medium"
+                            android:max="100"/>
+
+                        <ImageView
+                            android:id="@+id/imgProgressIcon"
+                            android:visibility="gone"
+                            android:layout_width="@dimen/dimen_icon_medium"
+                            android:layout_height="@dimen/dimen_icon_medium"
+                            app:srcCompat="@drawable/ic_radiobutton_unchecked" />
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/txtProgressSurvey"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="center"
                         android:text="--/--"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                        android:textAppearance="@style/TextAppearance.Paws.Small" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/laySurveyDetailsBottom"
+                    android:id="@+id/laySurveyResultsBottom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/txtTimestampTop"
+                        android:id="@+id/txtTimestamp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="--:--/--/--"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
-
-                    <TextView
-                        android:id="@+id/txtTimestampBottom"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="----"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                        android:textAppearance="@style/TextAppearance.Paws.Small" />
 
                 </LinearLayout>
 
@@ -144,42 +157,34 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:id="@+id/layButtons"
+        <TextView
+            android:id="@+id/txtSurveyResultsLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_marginTop="@dimen/margin_text"
+            android:text="@string/se_results_label"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.Paws.Caption" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnContinue"
-                style="@style/PawsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:padding="@dimen/btn_padding"
-                android:text="@string/app_btn_continue" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnReturn"
-                style="@style/PawsTextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:padding="@dimen/btn_padding"
-                android:text="@string/app_btn_return" />
-
-        </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnContinue"
+            style="@style/Widget.Paws.Button"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/app_spacing"
+            android:padding="@dimen/padding_buttons"
+            android:text="@string/app_btn_continue" />
 
     </LinearLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
-        style="@style/Widget.MaterialComponents.BottomNavigationView.Colored"
+        style="@style/Widget.Paws.BottomNavigationView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/height_navbar"
         android:layout_gravity="bottom"
-        android:background="@color/color_primary"
+        android:background="@color/color_primary_light"
         app:itemIconTint="@color/bottom_navigation_colors"
         app:itemTextColor="@color/bottom_navigation_colors"
         app:menu="@menu/bottom_navigation_menu" />

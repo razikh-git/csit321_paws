@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="color_white1">#F9F9F9</color>
-    <color name="color_white2">#FFFDFDFD</color>
-    <color name="color_white3">#C8C8C8</color>
 
-    <color name="color_background">@color/color_white1</color>
-    <color name="color_tile">@color/color_white2</color>
-    <color name="color_dark">#8D8D8D</color>
-    <color name="color_primary">#7FDDE9</color>
-    <color name="color_secondary">#39BED1</color>
-    <color name="color_error">#E982C2</color>
+    <!-- Mixed-purpose colors. -->
+    <color name="color_white_light">#FFFDFDFD</color>
+    <color name="color_white_dark">#F9F9F9</color>
+    <color name="color_grey">#8D8D8D</color>
 
-    <color name="color_on_primary">@color/color_white2</color>
-    <color name="color_on_secondary">@color/color_white2</color>
-    <color name="color_greyed_out">@color/color_white3</color>
+    <!-- Element colors. -->
+    <color name="color_background">@color/color_white_dark</color>
+    <color name="color_card">@color/color_white_light</color>
+
+    <color name="color_primary_light">#7FDDE9</color>
+    <color name="color_primary_dark">#39BED1</color>
+    <color name="color_error_light">#FAACD8</color>
+    <color name="color_error_dark">#E982C2</color>
+    <color name="color_facebook">#3B5998</color>
+
+    <!-- Font colors. -->
+    <color name="color_on_primary_light">@color/color_white_light</color>
+    <color name="color_on_primary_dark">@color/color_white_light</color>
+
 </resources>

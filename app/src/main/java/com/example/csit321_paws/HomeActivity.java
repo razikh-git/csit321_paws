@@ -3,13 +3,16 @@ package com.example.csit321_paws;
 import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,6 +20,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +31,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class HomeActivity   extends
                                 PermissionActivity
@@ -149,7 +158,7 @@ public class HomeActivity   extends
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_NETWORK)) {
             // Generate URL and request queue.
             RequestQueue queue = Volley.newRequestQueue(this);
-            String url = getResources().getString(R.string.app_url_owmapi_root)
+            String url = getResources().getString(R.string.app_url_owm_api_root)
                     + "data/2.5/"
                     + "weather"
                     + "?lat=" + mLat + "&lon=" + mLon
@@ -196,11 +205,65 @@ public class HomeActivity   extends
     // Initialise weather conditions fields.
     private void initWeatherData() {
         try {
-            TextView text;
             String str;
             Double dbl;
 
+            JSONObject weatherObj = (JSONObject)mWeatherJSON.getJSONArray("weather").get(0);
+
             // Fill in header data.
+
+            // Weather icon
+            str = getResources().getString(R.string.app_url_owm_root)
+                    + "img/"
+                    + "wn/"
+                    + weatherObj.getString("icon")
+                    + ".png";
+            ImageLoader.getInstance().displayImage(str, (ImageView) findViewById(R.id.imgWeatherIcon),
+                    null, new ImageLoadingListener() {
+                        @Override
+                        public void onLoadingStarted(String imageUri, View view) {
+                            // Display existing circular progress bar.
+                        }
+
+                        @Override
+                        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                            // Hide progress bar.
+                            findViewById(R.id.barWeatherIcon).setVisibility(GONE);
+
+                            // Display error icon.
+                            view.setVisibility(VISIBLE);
+                            ((ImageView)view).setColorFilter(ContextCompat.getColor(
+                                    view.getContext(), R.color.color_on_primary_light));
+                            ((ImageView)view).setImageDrawable(getDrawable(R.drawable.ic_cloud_off));
+                        }
+
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            // Hide progress bar.
+                            findViewById(R.id.barWeatherIcon).setVisibility(GONE);
+
+                            // Display weather icon.
+                            view.setVisibility(VISIBLE);
+                            findViewById(R.id.imgWeatherIcon).setVisibility(VISIBLE);
+                            ((ImageView)view).setImageBitmap(loadedImage);
+                        }
+
+                        @Override
+                        public void onLoadingCancelled(String imageUri, View view) {
+                            // Hide progress bar.
+                            findViewById(R.id.barWeatherIcon).setVisibility(GONE);
+
+                            // Display error icon.
+                            view.setVisibility(VISIBLE);
+                            ((ImageView)view).setColorFilter(ContextCompat.getColor(
+                                    view.getContext(), R.color.color_on_primary_light));
+                            ((ImageView)view).setImageDrawable(getDrawable(R.drawable.ic_cloud_off));
+                        }
+            });
+
+            // Weather description
+            ((TextView)findViewById(R.id.txtWeatherDescription)).setText(
+                    weatherObj.getString("description"));
 
             // City name
             ((TextView)findViewById(R.id.txtCity)).setText(
@@ -216,9 +279,9 @@ public class HomeActivity   extends
 
             // Temperature (current)
             if (mSharedPref.getString("units", "metric") != "metric")
-                str = " F";
+                str = "°F";
             else
-                str = " C";
+                str = "°C";
             ((TextView)findViewById(R.id.txtTempCurrent)).setText(
                     String.valueOf(
                             Math.round(mWeatherJSON.getJSONObject("main").getDouble("temp")))
@@ -226,8 +289,8 @@ public class HomeActivity   extends
 
             // Wind (speed)
             dbl = mWeatherJSON.getJSONObject("wind").getDouble("speed");
-            if (mSharedPref.getString("units", "metric") != "metric") {
-                str = "km/h";
+            if (mSharedPref.getString("units", "metric").equals("metric")) {
+                str = " km/h";
                 dbl *= MS_TO_MPH;
             }
             else {
@@ -240,54 +303,52 @@ public class HomeActivity   extends
                     + str));
 
             // Wind (bearing)
-            str = "North";
+            str = "north";
             dbl = mWeatherJSON.getJSONObject("wind").getDouble("deg");
             if (dbl < 135)
-                str = "West";
+                str = "west";
             else if (dbl < 225)
-                str = "South";
+                str = "south";
             else if (dbl < 315)
-                str = "East";
+                str = "east";
             ((TextView)findViewById(R.id.txtWindBearing)).setText(str);
 
             // Weather type
-            JSONObject weatherObj = (JSONObject)mWeatherJSON.getJSONArray("weather").get(0);
             str = weatherObj.getString("main");
             switch (str) {
-                case "Clear": {
-
-                }
-                case "Clouds": {
-
-                }
-                case "Rain": {
-
-                }
-                case "Drizzle": {
-
-                }
-                case "Thunderstorm": {
-
-                }
-                case "Snow" : {
-
-                }
+                case "Clear":
+                    ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
+                            mWeatherJSON.getJSONObject("main").getString("humidity")
+                            + "%");
+                    ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
+                            "humidity");
+                    break;
+                case "Clouds":
+                    ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
+                            mWeatherJSON.getJSONObject("clouds").getString("all")
+                            + "%");
+                    ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
+                            "coverage");
+                    break;
+                case "Thunderstorm":
+                case "Drizzle":
+                case "Rain":
+                    ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
+                            mWeatherJSON.getJSONObject("rain").getString("3h")
+                            + "mm");
+                    ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
+                            "last 3 hrs");
+                    break;
+                case "Snow" :
+                    ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
+                            mWeatherJSON.getJSONObject("snow").getString("3h")
+                            + "mm");
+                    ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
+                            "last 3 hrs");
+                    break;
             }
 
-            ((TextView)findViewById(R.id.txtPrecipType)).setText(str);
-            str = getResources().getString(R.string.app_url_owmapi_root)
-                    + "img/"
-                    + "wn/"
-                    + weatherObj.getString("icon")
-                    + ".png";
-            /*
-            DownloadImageTask imageTask = new DownloadImageTask();
-            imageTask.execute(str);
-            imageTask.onPostExecute(drawable);
-            ((ImageView)findViewById(R.id.imgWeatherIcon)).setImageDrawable(
-                    drawable)
-            ;
-            */
+
             // Fill in footer data.
 
             // Time generated

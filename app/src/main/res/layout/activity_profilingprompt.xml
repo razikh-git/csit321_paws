@@ -21,9 +21,9 @@
             android:id="@+id/imgLogoCombo"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_marginLeft="@dimen/app_gutter"
-            android:layout_marginTop="@dimen/app_gutter"
-            android:layout_marginRight="@dimen/app_gutter"
+            android:layout_marginStart="@dimen/app_gutter"
+            android:layout_marginTop="@dimen/app_spacing"
+            android:layout_marginEnd="@dimen/app_gutter"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/logo_combo" />
@@ -31,10 +31,10 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardInfo"
             android:layout_width="match_parent"
-            android:layout_height="260dp"
-            android:layout_marginLeft="@dimen/app_gutter"
+            android:layout_height="350dp"
+            android:layout_marginStart="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter" >
+            android:layout_marginEnd="@dimen/app_gutter" >
 
             <ScrollView
                 android:id="@+id/scrlInfo"
@@ -42,13 +42,13 @@
                 android:layout_height="wrap_content"
                 android:clipToPadding="true"
                 android:padding="@dimen/app_padding"
-                android:scrollbarThumbVertical="@color/color_primary" >
+                android:scrollbarThumbVertical="@color/color_primary_light" >
 
                 <TextView
                     android:id="@+id/txtInfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+                    android:textAppearance="@style/TextAppearance.Paws.Small" />
 
             </ScrollView>
 
@@ -58,9 +58,9 @@
             android:id="@+id/cardPrompt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/app_gutter"
+            android:layout_marginStart="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter" >
+            android:layout_marginEnd="@dimen/app_gutter" >
 
             <TextView
                 android:id="@+id/txtPrompt"
@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@string/pp_prompt"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:textAppearance="@style/TextAppearance.Paws.Large"
                 android:textAlignment="center"
                 android:padding="@dimen/app_padding" />
 
@@ -78,15 +78,15 @@
             android:id="@+id/layButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/app_gutter"
+            android:layout_marginStart="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter"
+            android:layout_marginEnd="@dimen/app_gutter"
             android:gravity="center"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDecline"
-                style="@style/PawsTextButton"
+                style="@style/Widget.Paws.Button.TextButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/app_spacing"
@@ -95,7 +95,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAccept"
-                style="@style/PawsButton"
+                style="@style/Widget.Paws.Button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/app_spacing"

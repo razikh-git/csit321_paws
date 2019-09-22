@@ -5,9 +5,28 @@
     <dimen name="app_spacing">20dp</dimen>
     <dimen name="app_gutter">40dp</dimen>
     <dimen name="app_padding">15dp</dimen>
-    <dimen name="btn_padding">8dp</dimen>
-    <dimen name="btn_text_size">16dp</dimen>
-    <dimen name="header_height">50dp</dimen>
-    <dimen name="app_stroke_width">2dp</dimen>
 
+    <dimen name="height_headers">50dp</dimen>
+    <dimen name="height_navbar">50dp</dimen>
+    <dimen name="height_header_survey">100dp</dimen>
+
+    <!-- Element and style dimensions. -->
+    <dimen name="padding_buttons">8dp</dimen>
+    <dimen name="padding_weathericon">4dp</dimen>
+
+    <dimen name="margin_fab">16dp</dimen>
+    <dimen name="margin_text">16dp</dimen>
+
+    <dimen name="width_stroke">2dp</dimen>
+
+    <dimen name="dimen_icon_huge">64dp</dimen>
+    <dimen name="dimen_icon_large">48dp</dimen>
+    <dimen name="dimen_icon_medium">36dp</dimen>
+    <dimen name="dimen_icon_small">24dp</dimen>
+
+    <dimen name="text_size_huge">30dp</dimen>
+    <dimen name="text_size_large">20dp</dimen>
+    <dimen name="text_size_medium">16dp</dimen>
+    <dimen name="text_size_small">14dp</dimen>
+    <dimen name="text_size_button">16dp</dimen>
 </resources>

@@ -1,44 +1,82 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="mainAppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="mainAppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
 
-        <!-- AppCompat attributes. -->
-        <item name="colorPrimary">@color/color_primary</item>
-        <item name="colorSecondary">@color/color_secondary</item>
+        <!-- Custom attributes. -->
+        <item name="colorPrimary">@color/color_primary_light</item>
+        <item name="colorSecondary">@color/color_primary_dark</item>
+        <item name="colorError">@color/color_error_dark</item>
+        <item name="colorOnPrimary">@color/color_on_primary_light</item>
+        <item name="colorOnSecondary">@color/color_on_primary_dark</item>
+
+        <!-- Native attributes. -->
         <item name="android:colorBackground">@color/color_background</item>
-        <item name="colorError">@color/color_error</item>
+        <item name="android:statusBarColor">@color/color_primary_dark</item>
 
-        <!-- Material attributes. -->
-        <item name="colorOnPrimary">@color/color_on_primary</item>
-        <item name="colorOnSecondary">@color/color_on_secondary</item>
     </style>
 
     <!-- Custom preloader splash screen. -->
     <style name="splashTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+
+        <!-- Native attributes. -->
         <item name="android:colorBackground">@color/color_background</item>
         <item name="android:windowBackground">@drawable/splash_drawable</item>
+        <item name="android:statusBarColor">@color/color_primary_dark</item>
+    </style>
+
+    <!-- Custom material text. -->
+    <style name="TextAppearance.Paws.Huge" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_size_huge</item>
+    </style>
+    <style name="TextAppearance.Paws.Large" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_size_large</item>
+    </style>
+    <style name="TextAppearance.Paws.Medium" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_size_medium</item>
+    </style>
+    <style name="TextAppearance.Paws.Small" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_size_small</item>
+    </style>
+    <style name="TextAppearance.Paws.Caption" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">@color/color_grey</item>
+    </style>
+    <style name="TextAppearance.Paws.Icon" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_size_small</item>
     </style>
 
     <!-- Custom material buttons. -->
-    <style name="PawsTextAppearanceButton" parent="TextAppearance.MaterialComponents.Button">
-        <item name="android:textSize">@dimen/btn_text_size</item>
+    <style name="TextAppearance.Paws.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">@dimen/text_size_button</item>
     </style>
-
-    <style name="PawsButton" parent="Widget.MaterialComponents.Button">
-        <item name="android:textAppearance">@style/PawsTextAppearanceButton</item>
+    <style name="Widget.Paws.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textAppearance">@style/TextAppearance.Paws.Button</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:padding">@dimen/btn_padding</item>
+        <item name="android:padding">@dimen/padding_buttons</item>
+        <item name="android:clipToPadding">false</item>
+    </style>
+    <style name="Widget.Paws.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAppearance">@style/TextAppearance.Paws.Button</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">@dimen/padding_buttons</item>
         <item name="android:clipToPadding">false</item>
     </style>
 
-    <style name="PawsTextButton" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textAppearance">@style/PawsTextAppearanceButton</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:padding">@dimen/btn_padding</item>
-        <item name="android:clipToPadding">false</item>
+    <!-- Custom progress bars. -->
+    <style name="Widget.Paws.ProgressBar.Circular" parent="Widget.AppCompat.ProgressBar">
+        <item name="android:progressTint">@color/color_on_primary_light</item>
+        <item name="android:indeterminateTint">@color/color_on_primary_light</item>
     </style>
 
+    <!-- Custom bottom navigation bar. -->
+    <style name="Widget.Paws.BottomNavigationView" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="android:textAppearance">@style/TextAppearance.Paws.Icon</item>
+        <item name="android:background">@color/color_primary_light</item>
+        <item name="android:textColor">@color/color_on_primary_light</item>
+    </style>
+
+    <!-- Custom app theming. -->
     <style name="mainAppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
