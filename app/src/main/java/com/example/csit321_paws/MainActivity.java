@@ -21,16 +21,19 @@ public class MainActivity extends AppCompatActivity {
 
         // Handle first-time launches.
         if (sharedPref.contains("app_init")) {
-            boolean is_init = sharedPref.getBoolean("app_init", false);
-            if (is_init)
+            if (sharedPref.getBoolean("app_init", false)) {
                 // Proceed straight to the home screen.
                 enterHome();
+            } else {
+                // Initialise all preferences.
+                sharedEditor.putString("units", "metric");
+                sharedEditor.putString("lang", getResources().getConfiguration().locale.getDisplayLanguage());
+            }
         }
 
-        // Pass first-time flag.
+        // Pass first-time flag after initialisation.
         sharedEditor.putBoolean("app_init", true);
-        //sharedEditor.apply();
-        // TODO : remove comment to allow skipping the profiling prompt
+        //sharedEditor.apply(); // TODO : remove comment to allow skipping the profiling prompt
 
         // Display a prompt for the user to begin profiling.
         enterProfilingPrompt();

@@ -1,20 +1,23 @@
 package com.example.csit321_paws;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
 import java.io.InputStream;
 
-public class SurveyEntryActivity extends AppCompatActivity {
+public class SurveyEntryActivity extends BottomNavBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +43,13 @@ public class SurveyEntryActivity extends AppCompatActivity {
             @Override public void onClick(View view) { onClickReturn(view); }
         });
 
+        // Bottom navigation bar functionality.
+        BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
+        nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         // Initialise file data.
-        //sharedEditor.
+
+        // . . .
 
         // Initialise info screen contents.
         TextView txt = findViewById(R.id.txtInfo);
@@ -90,7 +98,7 @@ public class SurveyEntryActivity extends AppCompatActivity {
         }
     }
 
-    public void onClickDetails(View view){
+    public void onClickDetails(View view) {
         // Redirect to post-completion details summary screen.
         //if (asdf) {
         //  Intent intent = new Intent(this, SurveyDetailsActivity.class);
@@ -98,13 +106,13 @@ public class SurveyEntryActivity extends AppCompatActivity {
         //}
     }
 
-    public void onClickContinue(View view){
+    public void onClickContinue(View view) {
         // Redirect to live survey screen.
         //Intent intent = new Intent(this, SurveyActivity.class);
         //startActivity(intent);
     }
 
-    public void onClickReturn(View view){
+    public void onClickReturn(View view) {
         // Redirect to previous screen.
         this.finish();
     }

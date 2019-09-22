@@ -65,7 +65,7 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardWeatherLocation"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/app_spacing">
 
             <TextView
@@ -73,15 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/app_padding"
-                android:layout_gravity="left"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
-
-            <TextView
-                android:id="@+id/txtCountry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/app_padding"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
             <TextView
@@ -89,7 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/app_padding"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
         </com.google.android.material.card.MaterialCardView>
@@ -106,6 +98,47 @@
                 android:layout_height="match_parent"
                 android:padding="@dimen/app_padding"
                 android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imgWeatherIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+
+                <LinearLayout
+                    android:id="@+id/layWeatherTitles"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txtTempHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:text="@string/home_weather_temp"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+
+                    <TextView
+                        android:id="@+id/txtWindHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:text="@string/home_weather_wind"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+
+                    <TextView
+                        android:id="@+id/txtPrecipType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:text="--"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/layWeatherDataColumns"
@@ -124,20 +157,12 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/txtTempHeader"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="@string/home_weather_temp"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
-
-                        <TextView
                             android:id="@+id/txtTempCurrent"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:text="--"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
                     </LinearLayout>
 
@@ -150,12 +175,20 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/txtWindHeader"
+                            android:id="@+id/txtWindSpeed"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="@string/home_weather_wind"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                            android:text="--"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
+
+                        <TextView
+                            android:id="@+id/txtWindBearing"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="--"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
                     </LinearLayout>
 
@@ -168,12 +201,12 @@
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/txtPrecipHeader"
+                            android:id="@+id/txtPrecipVolume"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="@string/home_weather_precip"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                            android:text="--"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
                     </LinearLayout>
 
@@ -190,7 +223,7 @@
                         android:id="@+id/txtFooterLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left"
+                        android:layout_weight="1"
                         android:text="@string/home_weather_footer"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
@@ -198,16 +231,8 @@
                         android:id="@+id/txtFooterTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_weight="1"
                         android:text="--:--:--"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
-
-                    <TextView
-                        android:id="@+id/txtFooterDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:text="--/--/--"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2" />
 
                 </LinearLayout>

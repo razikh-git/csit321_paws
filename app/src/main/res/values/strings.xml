@@ -5,6 +5,10 @@
     <string name="app_txt_placeholder">placeholder</string>
     <string name="app_txt_fallback">Unable to load information at this time.</string>
 
+    <string name="app_nav_home">HOME</string>
+    <string name="app_nav_maps">MAPS</string>
+    <string name="app_nav_weather">WEATHER</string>
+
     <string name="app_btn_continue">continue</string>
     <string name="app_btn_return">return</string>
     <string name="app_btn_perm_grant">accept</string>
@@ -20,11 +24,10 @@
     <string name="app_msg_request_internet">Internet access is needed to gather weather data from public-access stations.</string>
     <string name="app_msg_request_network_state">Network connectivity is needed to balance GPS and WiFi usage.</string>
 
-    <string name="app_default_loc_lon">151.25</string>
-    <string name="app_default_loc_lat">-33.75</string>
+    <string name="app_default_loc_lon">150.89</string>
+    <string name="app_default_loc_lat">-34.43</string>
 
-    <string name="app_url_protocol_secure">https://</string>
-    <string name="app_url_owmapi_root">api.openweathermap.org/data/2.5/</string>
+    <string name="app_url_owmapi_root">https://api.openweathermap.org/</string>
 
     <string name="owm_default_api_key">442dabf9a4b790d1198c03fbd0d31550</string>
 
@@ -36,17 +39,23 @@
     <string name="pm_card_survey">Complete a short survey</string>
     <string name="pm_card_facebook">Use Facebook integration</string>
     <string name="se_title">Survey</string>
+
     <string name="home_warning">Survey incomplete</string>
     <string name="home_weather_footer">Last updated:</string>
     <string name="home_weather_temp">Temperature</string>
     <string name="home_weather_wind">Wind</string>
     <string name="home_weather_precip">Precipitation</string>
+    <string name="home_precip_none">Clear</string>
+    <string name="home_precip_rain">Rain</string>
+    <string name="home_precip_snow">Snow</string>
+
     <string name="file_survey_questions">paws_survey_questions</string>
     <string name="file_survey_results">paws_survey_results</string>
     <string name="file_facebook_results">paws_fb_results</string>
 
     <string name="pref_survey_completed">pref_survey_completed</string>
     <string name="title_activity_scrolling">ScrollingActivity</string>
+
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

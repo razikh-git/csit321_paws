@@ -3,14 +3,13 @@ package com.example.csit321_paws;
 import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
-
-import androidx.appcompat.widget.Toolbar;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -18,8 +17,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +36,9 @@ public class HomeActivity   extends
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
     private static final String[] REQUEST_PERMISSIONS_NETWORK = {
             Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE};
+
+    private static final Double MS_TO_KMH = 3.6d;
+    private static final Double MS_TO_MPH = 2.237d;
 
     private SharedPreferences mSharedPref;
     private SharedPreferences.Editor mSharedEditor;
@@ -136,23 +136,27 @@ public class HomeActivity   extends
         mLon = getResources().getString(R.string.app_default_loc_lon);
 
         // Use data from locational tracking if possible.
-        /*
+/*
         if (loc != null) {
-            text = findViewById(R.id.txtTimestampTop);
-            text.setText(DateFormat.format("HH:mm:ss", loc.getTime()).toString());
-
-            text = findViewById(R.id.txtTimestampBottom);
-            text.setText(DateFormat.format("dd-MM-yyyy", loc.getTime()).toString());
+            ((TextView)findViewById(R.id.txtTimestampTop)).setText(
+                DateFormat.format("HH:mm:ss", loc.getTime()).toString());
+            ((TextView)findViewById(R.id.txtTimestampBottom)).setText(
+                DateFormat.format("dd-MM-yyyy", loc.getTime()).toString());
         }
-        */
+*/
 
         // Generate URL and request OWM data.
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_NETWORK)) {
             // Generate URL and request queue.
             RequestQueue queue = Volley.newRequestQueue(this);
-            String url = getResources().getString(R.string.app_url_protocol_secure)
-                    + getResources().getString(R.string.app_url_owmapi_root)
-                    + "weather" + "?lat=" + mLat + "&lon=" + mLon
+            String url = getResources().getString(R.string.app_url_owmapi_root)
+                    + "data/2.5/"
+                    + "weather"
+                    + "?lat=" + mLat + "&lon=" + mLon
+                    + "&units=" + mSharedPref.getString("units", "metric")
+                    + "&lang=" + mSharedPref.getString("lang",
+                    getResources().getConfiguration().locale.getDisplayLanguage())
+                    + "&mode=" + "json"
                     + "&appid=" + getResources().getString(R.string.owm_default_api_key);
 
             // Generate and post the request.
@@ -193,26 +197,107 @@ public class HomeActivity   extends
     private void initWeatherData() {
         try {
             TextView text;
+            String str;
+            Double dbl;
 
-            text = findViewById(R.id.txtFooterTime);
-            text.setText(DateFormat.format("HH:mm:ss",
-                    Long.parseLong(mWeatherJSON.getString("dt"))).toString());
+            // Fill in header data.
 
-            text = findViewById(R.id.txtFooterDate);
-            text.setText(DateFormat.format("dd-MM-yyyy",
-                    Long.parseLong(mWeatherJSON.getString("dt"))).toString());
-
-            text = findViewById(R.id.txtCity);
-            text.setText(mWeatherJSON.getString("name")
+            // City name
+            ((TextView)findViewById(R.id.txtCity)).setText(
+                    mWeatherJSON.getString("name")
+                    + " (" + mWeatherJSON.getJSONObject("sys").getString("country") + ") "
                     + " (" + mLon + " " + mLat + ")");
+            // Timezone GMT+n
+            ((TextView)findViewById(R.id.txtTimezone)).setText(
+                    "GMT" + TimeUnit.HOURS.convert(
+                    mWeatherJSON.getInt("timezone"), TimeUnit.SECONDS));
 
-            text = findViewById(R.id.txtCountry);
-            text.setText("(" + mWeatherJSON.getJSONObject("sys").getString("country") + ")");
+            // Fill in body data.
 
-            text = findViewById(R.id.txtTimezone);
-            text.setText("GMT" + TimeUnit.HOURS.convert(
-                    Integer.parseInt(mWeatherJSON.getString("timezone")), TimeUnit.SECONDS));
+            // Temperature (current)
+            if (mSharedPref.getString("units", "metric") != "metric")
+                str = " F";
+            else
+                str = " C";
+            ((TextView)findViewById(R.id.txtTempCurrent)).setText(
+                    String.valueOf(
+                            Math.round(mWeatherJSON.getJSONObject("main").getDouble("temp")))
+                    + str);
 
+            // Wind (speed)
+            dbl = mWeatherJSON.getJSONObject("wind").getDouble("speed");
+            if (mSharedPref.getString("units", "metric") != "metric") {
+                str = "km/h";
+                dbl *= MS_TO_MPH;
+            }
+            else {
+                str = " mph";
+                dbl *= MS_TO_KMH;
+            }
+            ((TextView)findViewById(R.id.txtWindSpeed)).setText(
+                    String.valueOf(
+                            Math.round(dbl)
+                    + str));
+
+            // Wind (bearing)
+            str = "North";
+            dbl = mWeatherJSON.getJSONObject("wind").getDouble("deg");
+            if (dbl < 135)
+                str = "West";
+            else if (dbl < 225)
+                str = "South";
+            else if (dbl < 315)
+                str = "East";
+            ((TextView)findViewById(R.id.txtWindBearing)).setText(str);
+
+            // Weather type
+            JSONObject weatherObj = (JSONObject)mWeatherJSON.getJSONArray("weather").get(0);
+            str = weatherObj.getString("main");
+            switch (str) {
+                case "Clear": {
+
+                }
+                case "Clouds": {
+
+                }
+                case "Rain": {
+
+                }
+                case "Drizzle": {
+
+                }
+                case "Thunderstorm": {
+
+                }
+                case "Snow" : {
+
+                }
+            }
+
+            ((TextView)findViewById(R.id.txtPrecipType)).setText(str);
+            str = getResources().getString(R.string.app_url_owmapi_root)
+                    + "img/"
+                    + "wn/"
+                    + weatherObj.getString("icon")
+                    + ".png";
+            /*
+            DownloadImageTask imageTask = new DownloadImageTask();
+            imageTask.execute(str);
+            imageTask.onPostExecute(drawable);
+            ((ImageView)findViewById(R.id.imgWeatherIcon)).setImageDrawable(
+                    drawable)
+            ;
+            */
+            // Fill in footer data.
+
+            // Time generated
+            ((TextView)(findViewById(R.id.txtFooterTime))).setText(
+                    DateFormat.format("HH:mm:ss",
+                    mWeatherJSON.getLong("dt")).toString() + " GMT");
+/*          // Date generated (currently sits at epoch)
+            ((TextView)findViewById(R.id.txtFooterDate)).setText(DateFormat.format("dd-MM-yyyy",
+                    mWeatherJSON.getLong("dt"))).toString());
+*/
         } catch (Exception e) {
             e.printStackTrace();
         }

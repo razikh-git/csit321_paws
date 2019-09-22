@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navHome"
+        android:title="@string/app_nav_home"
+        android:icon="@drawable/ic_home"
+        />
+
+    <item
+        android:id="@+id/navMaps"
+        android:title="@string/app_nav_maps"
+        android:icon="@drawable/ic_map"
+        />
+
+    <item
+        android:id="@+id/navWeather"
+        android:title="@string/app_nav_weather"
+        android:icon="@drawable/ic_satellite"
+        />
+
+</menu>
