@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/color_background"
     tools:context=".SurveyQuestionActivity">
 
     <LinearLayout
         android:id="@+id/layQuestion"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/height_navbars"
         android:clipChildren="false"
         android:orientation="vertical"
         tools:layout_editor_absoluteX="2dp"
@@ -19,12 +21,13 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardHeader"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/height_header_survey" >
+            android:layout_height="@dimen/height_banners_static"
+            app:cardElevation="@dimen/elevation_banners">
 
             <LinearLayout
                 android:id="@+id/layHeader"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_icon_large"
+                android:layout_height="@dimen/dimen_icon_huge"
                 android:layout_gravity="center"
                 android:orientation="horizontal">
 
@@ -35,26 +38,31 @@
                     android:layout_marginStart="@dimen/app_spacing"
                     android:layout_marginEnd="@dimen/app_spacing"
                     android:adjustViewBounds="true"
-                    android:scaleType="fitCenter"
                     android:gravity="center"
-                    app:srcCompat="@drawable/logo2" />
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/logo" />
 
                 <LinearLayout
                     android:id="@+id/layHeaderRight"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_gravity="fill_vertical"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/txtHeaderTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Paws.Large" />
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textAppearance="@style/TextAppearance.Paws.Title" />
 
                     <TextView
                         android:id="@+id/txtHeaderSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
                         android:text="@string/sq_subtitle"
                         android:textAppearance="@style/TextAppearance.Paws.Caption" />
 
@@ -68,20 +76,24 @@
             android:id="@+id/layQuestionBody"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/app_gutter"
-            android:layout_marginEnd="@dimen/app_gutter"
+            android:layout_marginStart="@dimen/app_spacing"
+            android:layout_marginEnd="@dimen/app_spacing"
+            android:padding="@dimen/app_spacing"
+            android:clipChildren="false"
             android:orientation="horizontal">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardProgressView"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:padding="@dimen/app_padding" >
+                android:layout_width="75dp"
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:id="@+id/layProgressContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:paddingTop="@dimen/padding_survey_progress"
+                    android:paddingBottom="@dimen/padding_survey_progress"
+                    android:paddingLeft="@dimen/padding_survey_progress"
                     android:orientation="vertical">
 
                 </LinearLayout>
@@ -92,40 +104,122 @@
                 android:id="@+id/layQuestionContent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/app_gutter"
-                android:layout_marginEnd="@dimen/app_gutter"
-                android:orientation="horizontal">
+                android:layout_marginStart="@dimen/app_spacing"
+                android:orientation="vertical">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardQuestion"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content" >
+                    android:layout_width="match_parent"
+                    android:layout_height="90dp"
+                    android:gravity="center">
 
                     <TextView
                         android:id="@+id/txtQuestion"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingLeft="@dimen/text_spacing"
+                        android:paddingRight="@dimen/text_spacing"
                         android:textAppearance="@style/TextAppearance.Paws.Large" />
 
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardAnswers"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content" >
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/app_spacing" >
 
-                    <TextView
-                        android:id="@+id/txtAnswer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Paws.Caption"
-                        android:text="@string/sq_answer"/>
+                    <LinearLayout
+                        android:id="@+id/layAnswersContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="@dimen/app_padding"
+                        android:orientation="vertical">
 
-                    <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        <TextView
+                            android:id="@+id/txtAnswer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="@dimen/app_padding_half"
+                            android:text="@string/sq_answer"
+                            android:textAppearance="@style/TextAppearance.Paws.Caption" />
 
-                    </com.google.android.material.radiobutton.MaterialRadioButton>
+                        <LinearLayout
+                            android:id="@+id/layAnswers"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAnswer1"
+                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sq_answer1"
+                                app:icon="@drawable/ic_radiobutton_unchecked" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAnswer2"
+                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sq_answer2"
+                                app:icon="@drawable/ic_radiobutton_unchecked" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAnswer3"
+                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sq_answer3"
+                                app:icon="@drawable/ic_radiobutton_unchecked" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAnswer4"
+                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sq_answer4"
+                                android:textColor="@color/color_black"
+                                android:textSize="@dimen/text_size_small"
+                                app:icon="@drawable/ic_radiobutton_unchecked" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAnswer5"
+                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sq_answer5"
+                                app:icon="@drawable/ic_radiobutton_unchecked" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAnswer6"
+                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sq_answer6"
+                                app:icon="@drawable/ic_radiobutton_unchecked" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAnswer7"
+                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/sq_answer7"
+                                app:icon="@drawable/ic_radiobutton_unchecked" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -135,4 +229,15 @@
 
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        style="@style/Widget.Paws.BottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_navbars"
+        android:layout_gravity="bottom"
+        android:background="@color/color_primary_light"
+        app:itemIconTint="@color/bottom_navigation_colors"
+        app:itemTextColor="@color/bottom_navigation_colors"
+        app:menu="@menu/survey_question_navigation_menu" />
+
+</FrameLayout>

@@ -6,4 +6,6 @@ interface RequestCode {
     int PERMISSION_LOCATION_COARSE = 2;
     int PERMISSION_INTERNET = 3;
     int PERMISSION_NETWORK_STATE = 4;
+
+    int SURVEY_CONTINUE = 0;
 }

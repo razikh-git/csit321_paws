@@ -17,7 +17,7 @@ public class ProfilingPromptActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profilingprompt);
+        setContentView(R.layout.activity_profiling_prompt);
 
         // Button functionality.
         findViewById(R.id.btnDecline).setOnClickListener(new View.OnClickListener() {

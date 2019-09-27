@@ -9,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/mainAppTheme">
-        <activity android:name=".SurveyQuestionActivity"></activity>
+        <activity android:name=".SurveyCompleteActivity"></activity>
+        <activity android:name=".SurveyQuestionActivity" />
         <activity android:name=".WeatherActivity" />
         <activity android:name=".FacebookEntryActivity" />
         <activity android:name=".SurveyEntryActivity" />
@@ -32,10 +33,10 @@
     </application>
 
     <uses-feature android:name="android.hardware.location.gps" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

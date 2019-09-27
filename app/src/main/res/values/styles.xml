@@ -6,7 +6,7 @@
         <!-- Custom attributes. -->
         <item name="colorPrimary">@color/color_primary_light</item>
         <item name="colorSecondary">@color/color_primary_dark</item>
-        <item name="colorError">@color/color_error_dark</item>
+        <item name="colorError">@color/color_error</item>
         <item name="colorOnPrimary">@color/color_on_primary_light</item>
         <item name="colorOnSecondary">@color/color_on_primary_dark</item>
 
@@ -26,41 +26,70 @@
     </style>
 
     <!-- Custom material text. -->
-    <style name="TextAppearance.Paws.Huge" parent="TextAppearance.MaterialComponents.Body1">
+    <style name="TextAppearance.Paws.Immense" parent="TextAppearance.Paws.Small">
+        <item name="android:textSize">@dimen/text_size_immense</item>
+    </style>
+    <style name="TextAppearance.Paws.Huge" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_huge</item>
     </style>
-    <style name="TextAppearance.Paws.Large" parent="TextAppearance.MaterialComponents.Body1">
+    <style name="TextAppearance.Paws.Large" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_large</item>
     </style>
-    <style name="TextAppearance.Paws.Medium" parent="TextAppearance.MaterialComponents.Body1">
+    <style name="TextAppearance.Paws.Medium" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_medium</item>
     </style>
     <style name="TextAppearance.Paws.Small" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textColor">@color/color_black</item>
     </style>
-    <style name="TextAppearance.Paws.Caption" parent="TextAppearance.MaterialComponents.Body1">
+    <style name="TextAppearance.Paws.Button.List" parent="TextAppearance.Paws.Medium">
+        <item name="android:textColor">@color/color_black</item>
+    </style>
+    <style name="TextAppearance.Paws.Button.Large" parent="TextAppearance.Paws.Button.Small">
+        <item name="android:textSize">@dimen/text_size_button_large</item>
+    </style>
+    <style name="TextAppearance.Paws.Button.Medium" parent="TextAppearance.Paws.Button.Small">
+        <item name="android:textSize">@dimen/text_size_button_medium</item>
+    </style>
+    <style name="TextAppearance.Paws.Button.Small" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">@dimen/text_size_button_small</item>
+        <item name="android:textColor">@color/color_on_primary_light</item>
+    </style>
+    <style name="TextAppearance.Paws.Title" parent="TextAppearance.Paws.Small">
+        <item name="android:textSize">@dimen/text_size_title</item>
+    </style>
+    <style name="TextAppearance.Paws.Caption" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:textColor">@color/color_grey</item>
     </style>
-    <style name="TextAppearance.Paws.Icon" parent="TextAppearance.MaterialComponents.Body1">
+    <style name="TextAppearance.Paws.Icon" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_small</item>
     </style>
 
     <!-- Custom material buttons. -->
-    <style name="TextAppearance.Paws.Button" parent="TextAppearance.MaterialComponents.Button">
-        <item name="android:textSize">@dimen/text_size_button</item>
-    </style>
     <style name="Widget.Paws.Button" parent="Widget.MaterialComponents.Button">
-        <item name="android:textAppearance">@style/TextAppearance.Paws.Button</item>
+        <item name="android:textAppearance">@style/TextAppearance.Paws.Button.Small</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">@dimen/padding_buttons</item>
         <item name="android:clipToPadding">false</item>
     </style>
     <style name="Widget.Paws.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textAppearance">@style/TextAppearance.Paws.Button</item>
+        <item name="android:textAppearance">@style/TextAppearance.Paws.Button.Small</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">@dimen/padding_buttons</item>
         <item name="android:clipToPadding">false</item>
+    </style>
+    <style name="Widget.Paws.Button.TextButton.List" parent="Widget.Paws.Button.TextButton">
+        <item name="android:textAppearance">@style/TextAppearance.Paws.Button.List</item>
+    </style>
+    <style name="Widget.Paws.Button.TextButton.List.Icon" parent="Widget.Paws.Button.TextButton">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Paws.Button.List</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/color_black</item>
+        <item name="iconTint">@color/color_grey</item>
+        <item name="iconPadding">@dimen/text_spacing</item>
     </style>
 
     <!-- Custom progress bars. -->

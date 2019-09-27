@@ -9,9 +9,10 @@
     tools:context=".ProfilingMenuActivity">
 
     <LinearLayout
-        android:id="@+id/layProfilingMenuMenu"
+        android:id="@+id/layProfilingMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/height_navbars"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -56,7 +57,7 @@
                 android:orientation="vertical">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSurvey"
+                    android:id="@+id/btnSurveys"
                     style="@style/Widget.Paws.Button"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -99,7 +100,7 @@
         android:id="@+id/bottomNavigation"
         style="@style/Widget.Paws.BottomNavigationView"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/height_navbar"
+        android:layout_height="@dimen/height_navbars"
         android:layout_gravity="bottom"
         android:background="@color/color_primary_light"
         app:itemIconTint="@color/bottom_navigation_colors"

@@ -22,7 +22,7 @@
             android:id="@+id/splashImage"
             android:layout_width="179dp"
             android:layout_height="212dp"
-            app:srcCompat="@drawable/logo2" />
+            app:srcCompat="@drawable/logo" />
 
         <TextView
             android:id="@+id/splashText"

@@ -15,19 +15,15 @@ public class ProfilingMenuActivity extends BottomNavBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profilingmenu);
+        setContentView(R.layout.activity_profiling_menu);
 
         // Bottom navigation bar functionality.
         BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         // Button functionality.
-        findViewById(R.id.btnSurvey).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) { onClickSurvey(view); }
-        });
-        findViewById(R.id.btnFacebook).setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) { onClickFacebook(view); }
-        });
+        findViewById(R.id.btnSurveys).setOnClickListener((view) -> onClickSurvey(view));
+        findViewById(R.id.btnFacebook).setOnClickListener((view) -> onClickFacebook(view));
 
         // TODO : integrate binary files to allow for contextual highlighting of survey cards
 
@@ -47,14 +43,14 @@ public class ProfilingMenuActivity extends BottomNavBarActivity {
     }
 
     public void onClickSurvey(View view){
-        // Redirect to survey intro screen.
+        // Redirect to Survey Entry screen.
         Intent intent = new Intent(this, SurveyEntryActivity.class);
         startActivity(intent);
     }
 
     public void onClickFacebook(View view){
-        // Redirect to facebook intro screen.
-        //Intent intent = new Intent(this, ProfilingMenuActivity.class);
-        //startActivity(intent);
+        // Redirect to Facebook Entry screen.
+        Intent intent = new Intent(this, FacebookEntryActivity.class);
+        startActivity(intent);
     }
 }

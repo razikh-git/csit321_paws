@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navReturn"
+        android:title="@string/app_nav_return"
+        android:icon="@drawable/ic_save"
+        />
+
+</menu>

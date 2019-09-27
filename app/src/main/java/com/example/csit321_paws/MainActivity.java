@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -27,32 +28,31 @@ public class MainActivity extends AppCompatActivity {
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
 
-        // Setup shared preferences.
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        // Load global preferences.
+        SharedPreferences sharedPref = this.getSharedPreferences(
+                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Handle first-time launches.
-        if (sharedPref.contains("app_init")) {
-            if (sharedPref.getBoolean("app_init", false)) {
-                // Proceed straight to the home screen.
-                enterHome();
-            } else {
-                // Initialise all preferences.
-                sharedEditor.putBoolean("profile_init", false);
-                sharedEditor.putBoolean("facebook_init", false);
-                sharedEditor.putInt("profile_last_question", 0);
-                sharedEditor.putLong("profile_time_completed", 0);
-                sharedEditor.putString("units", "metric");
-                sharedEditor.putString("lang", getResources().getConfiguration().locale.getDisplayLanguage());
-            }
+        if (sharedPref.getBoolean("app_init", false)) {
+            Log.println(Log.DEBUG, "snowpaws_main",
+                    "app_init : true ? " + sharedPref.getBoolean("app_init", false));
+            // Proceed straight to the home screen.
+            enterHome();
+        } else {
+            Log.println(Log.DEBUG, "snowpaws_main",
+                    "app_init : false ? " + sharedPref.getBoolean("app_init", false));
+            // Initialise all preferences.
+            sharedEditor.putInt("survey_last_question", 1);
+            sharedEditor.putLong("profile_time_completed", 0);
+            sharedEditor.putString("units", "metric");
+            sharedEditor.putBoolean("facebook_init", false);
+            sharedEditor.putBoolean("app_init", true);
+            sharedEditor.apply();
+
+            // Display a prompt for the user to begin profiling.
+            enterProfilingPrompt();
         }
-
-        // Pass first-time flag after initialisation.
-        //sharedEditor.putBoolean("app_init", true); // TODO : remove comment to allow skipping the profiling prompt
-        sharedEditor.apply();
-
-        // Display a prompt for the user to begin profiling.
-        enterProfilingPrompt();
     }
 
     private void enterProfilingPrompt() {

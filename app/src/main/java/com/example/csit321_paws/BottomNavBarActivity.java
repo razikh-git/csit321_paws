@@ -18,15 +18,18 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navHome:
                     onClickHome();
-                    break;
+                    return true;
                 case R.id.navMaps:
                     onClickMaps();
-                    break;
+                    return true;
                 case R.id.navWeather:
                     onClickWeather();
-                    break;
+                    return true;
+                case R.id.navReturn:
+                    onClickReturn();
+                    return true;
             }
-            return true;
+            return false;
         }
     };
 
@@ -39,8 +42,9 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
 
     public void onClickMaps() {
         // Redirect to maps screen.
-
-        // . . .
+        this.finish();
+        //Intent intent = new Intent(this, MapsActivity.class);
+        //startActivity(intent);
     }
 
     public void onClickWeather() {
@@ -48,5 +52,10 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
         this.finish();
         Intent intent = new Intent(this, WeatherActivity.class);
         startActivity(intent);
+    }
+
+    public void onClickReturn() {
+        // Drop out of the current screen.
+        this.finish();
     }
 }

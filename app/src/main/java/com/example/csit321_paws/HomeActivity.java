@@ -2,6 +2,7 @@ package com.example.csit321_paws;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -16,8 +17,6 @@ import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -62,7 +61,7 @@ public class HomeActivity   extends
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // ScrollingActivity code
+        // consider this for sticky incomplete survey banner
 
         /*
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -78,32 +77,52 @@ public class HomeActivity   extends
         });
         */
 
-        mSharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        // Load global preferences.
+        mSharedPref = this.getSharedPreferences(
+                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         mSharedEditor = mSharedPref.edit();
 
-        initActivity();
-    }
+        // Iitialise vanity and interactive interface elements.
+        initStringMaps();
+        initButtons();
 
-    private boolean initActivity() {
+        // Location management.
         Location loc = null;
         mLocHandler = new LocationHandler(this);
 
-        Log.println(Log.DEBUG, "snowpaws", "HomeActivity.initActivity()");
-
         // Fetch location data and set all fields.
-        initStringMaps();
         //mLocHandler.beginLocationUpdates();
         initInterface(loc);
 
-        return false;
+    }
+
+    private boolean initButtons() {
+        // Button functionality.
+        try {
+            findViewById(R.id.layWeatherDataContainer).setOnClickListener((view) -> onClickWeather(view));
+            findViewById(R.id.cardWarningBanner).setOnClickListener((view) -> onClickSurveys(view));
+            findViewById(R.id.cardSurveys).setOnClickListener((view) -> onClickSurveys(view));
+            findViewById(R.id.cardMaps).setOnClickListener((view) -> onClickMaps(view));
+            findViewById(R.id.cardSettings).setOnClickListener((view) -> onClickSettings(view));
+            findViewById(R.id.cardHelp).setOnClickListener((view) -> onClickHelp(view));
+            findViewById(R.id.cardProfile).setOnClickListener((view) -> onClickProfile(view));
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // TODO : store last-known location in binary, allow for out-of-service use of old data
 
-    public boolean initInterface(Location loc) {
+    private boolean initInterface(Location loc) {
 
-        Log.println(Log.DEBUG, "snowpaws", "HomeActivity.initInterface()");
+        // Initialise the warning banner.
+        if (mSharedPref.getInt("survey_last_question", 1)
+                < getResources().getInteger(R.integer.survey_question_count))
+            findViewById(R.id.cardWarningBanner).setVisibility(VISIBLE);
 
+        // Attempt to initialise location elements.
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_LOCATION)) {
 
             Log.println(Log.DEBUG, "snowpaws", "HomeActivity.initInterface.hasPermssions TRUE");
@@ -137,7 +156,7 @@ public class HomeActivity   extends
         return false;
     }
 
-    public boolean initLocationData(Location loc) {
+    private boolean initLocationData(Location loc) {
 
         Log.println(Log.DEBUG, "snowpaws", "HomeActivity.initInterface.initLocationData()");
 
@@ -163,36 +182,27 @@ public class HomeActivity   extends
                     + "weather"
                     + "?lat=" + mLat + "&lon=" + mLon
                     + "&units=" + mSharedPref.getString("units", "metric")
-                    + "&lang=" + mSharedPref.getString("lang",
-                    getResources().getConfiguration().locale.getDisplayLanguage())
+                    + "&lang=" + getResources().getConfiguration().locale.getDisplayLanguage()
                     + "&mode=" + "json"
                     + "&appid=" + getResources().getString(R.string.owm_default_api_key);
 
             // Generate and post the request.
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
+                    (response) -> {
+                        Log.println(Log.DEBUG, "snowpaws", "stringRequest.onResponse");
 
-                            Log.println(Log.DEBUG, "snowpaws", "stringRequest.onResponse");
-
-                            // Set JSON dict and view fields from response.
-                            try {
-                                mWeatherJSON = new JSONObject(response);
-                                initWeatherData();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                        // Set JSON dict and view fields from response.
+                        try {
+                            mWeatherJSON = new JSONObject(response);
+                            initWeatherData();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
+                    }, (error) -> {
+                        Log.println(Log.DEBUG, "snowpaws", "stringRequest.onErrorResponse");
 
-                            Log.println(Log.DEBUG, "snowpaws", "stringRequest.onErrorResponse");
-
-                            // olive oil didn't work
-                            error.printStackTrace();
-                        }
+                        // olive oil didn't work
+                        error.printStackTrace();
                     }
             );
 
@@ -267,21 +277,25 @@ public class HomeActivity   extends
 
             // City name
             ((TextView)findViewById(R.id.txtCity)).setText(
-                    mWeatherJSON.getString("name")
-                    + " (" + mWeatherJSON.getJSONObject("sys").getString("country") + ") "
-                    + " (" + mLon + " " + mLat + ")");
-            // Timezone GMT+n
+                    mWeatherJSON.getString("name"));
+            // Country code
+            ((TextView)findViewById(R.id.txtCountry)).setText(
+                    mWeatherJSON.getJSONObject("sys").getString("country"));
+            // Timezone GMT +/- n
             ((TextView)findViewById(R.id.txtTimezone)).setText(
                     "GMT" + TimeUnit.HOURS.convert(
-                    mWeatherJSON.getInt("timezone"), TimeUnit.SECONDS));
+                            mWeatherJSON.getInt("timezone"), TimeUnit.SECONDS));
+            // GPS Coordinates
+            ((TextView)findViewById(R.id.txtCoordinates)).setText(
+                    mLon + "  " + mLat);
 
             // Fill in body data.
 
             // Temperature (current)
-            if (mSharedPref.getString("units", "metric") != "metric")
-                str = "°F";
-            else
+            if (mSharedPref.getString("units", "metric").equals("metric"))
                 str = "°C";
+            else
+                str = "°F";
             ((TextView)findViewById(R.id.txtTempCurrent)).setText(
                     String.valueOf(
                             Math.round(mWeatherJSON.getJSONObject("main").getDouble("temp")))
@@ -418,6 +432,42 @@ public class HomeActivity   extends
             return false;
         }
         return true;
+    }
+
+    private void onClickWeather(View view) {
+        // Redirect to Weather Activity
+        Intent intent = new Intent(this, WeatherActivity.class);
+        startActivity(intent);
+    }
+
+    private void onClickMaps(View view) {
+        // Redirect to Mapping Activity
+        //Intent intent = new Intent(this, MapsActivity.class);
+        //startActivity(intent);
+    }
+
+    private void onClickSurveys(View view) {
+        // Redirect to Profiling Launchpad Activity
+        Intent intent = new Intent(this, ProfilingMenuActivity.class);
+        startActivity(intent);
+    }
+
+    private void onClickProfile(View view) {
+        // Redirect to Profile Details Activity
+        //Intent intent = new Intent(this, ProfileDetailsActivity.class);
+        //startActivity(intent);
+    }
+
+    private void onClickSettings(View view) {
+        // Redirect to Settings Activity
+        //Intent intent = new Intent(this, SettingsActivity.class);
+        //startActivity(intent);
+    }
+
+    private void onClickHelp(View view) {
+        // Redirect to Help Page Activity
+        //Intent intent = new Intent(this, HelpPageActivity.class);
+        //startActivity(intent);
     }
 
     @Override

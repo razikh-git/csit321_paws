@@ -6,12 +6,12 @@ import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class WeatherActivity extends BottomNavBarActivity {
+public class MapsActivity extends BottomNavBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_weather);
+        setContentView(R.layout.activity_maps);
 
         // Load global preferences.
         SharedPreferences sharedPref = this.getSharedPreferences(

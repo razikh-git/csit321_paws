@@ -5,28 +5,41 @@
     <dimen name="app_spacing">20dp</dimen>
     <dimen name="app_gutter">40dp</dimen>
     <dimen name="app_padding">15dp</dimen>
+    <dimen name="app_padding_half">8dp</dimen>
 
     <dimen name="height_headers">50dp</dimen>
-    <dimen name="height_navbar">50dp</dimen>
-    <dimen name="height_header_survey">100dp</dimen>
+    <dimen name="height_navbars">50dp</dimen>
+    <dimen name="height_home_cards">70dp</dimen>
+    <dimen name="height_banners_static">90dp</dimen>
+    <dimen name="height_banners_contextual">70dp</dimen>
+
+    <dimen name="elevation_banners">5dp</dimen>
 
     <!-- Element and style dimensions. -->
+    <dimen name="height_buttons_small">48dp</dimen>
+
     <dimen name="padding_buttons">8dp</dimen>
     <dimen name="padding_weathericon">4dp</dimen>
+    <dimen name="padding_survey_progress">12dp</dimen>
 
-    <dimen name="margin_fab">16dp</dimen>
-    <dimen name="margin_text">16dp</dimen>
+    <dimen name="text_spacing">16dp</dimen>
 
     <dimen name="width_stroke">2dp</dimen>
 
+    <dimen name="dimen_icon_immense">128dp</dimen>
     <dimen name="dimen_icon_huge">64dp</dimen>
     <dimen name="dimen_icon_large">48dp</dimen>
     <dimen name="dimen_icon_medium">36dp</dimen>
     <dimen name="dimen_icon_small">24dp</dimen>
+    <dimen name="dimen_icon_survey_progress">23dp</dimen>
 
-    <dimen name="text_size_huge">30dp</dimen>
-    <dimen name="text_size_large">20dp</dimen>
-    <dimen name="text_size_medium">16dp</dimen>
-    <dimen name="text_size_small">14dp</dimen>
-    <dimen name="text_size_button">16dp</dimen>
+    <dimen name="text_size_immense">48sp</dimen>
+    <dimen name="text_size_huge">30sp</dimen>
+    <dimen name="text_size_large">20sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    <dimen name="text_size_small">14sp</dimen>
+    <dimen name="text_size_title">24sp</dimen>
+    <dimen name="text_size_button_large">28sp</dimen>
+    <dimen name="text_size_button_medium">22sp</dimen>
+    <dimen name="text_size_button_small">16sp</dimen>
 </resources>

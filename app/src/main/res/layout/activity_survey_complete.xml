@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SurveyCompleteActivity">
+
+    <LinearLayout
+        android:id="@+id/laySurveyComplete"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:orientation="vertical"
+        android:gravity="center"
+        tools:layout_editor_absoluteX="2dp"
+        tools:layout_editor_absoluteY="2dp">
+
+        <ImageView
+            android:id="@+id/imgCompleteIcon"
+            android:layout_width="@dimen/dimen_icon_immense"
+            android:layout_height="@dimen/dimen_icon_immense"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:tint="@color/color_primary_light"
+            app:srcCompat="@drawable/ic_checkbox_checked" />
+
+        <TextView
+            android:id="@+id/txtComplete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/sq_done"
+            android:textColor="@color/color_primary_dark"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.Paws.Immense" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
