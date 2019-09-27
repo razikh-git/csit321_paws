@@ -16,7 +16,7 @@
     <dimen name="elevation_banners">5dp</dimen>
 
     <!-- Element and style dimensions. -->
-    <dimen name="height_buttons_small">48dp</dimen>
+    <dimen name="height_buttons_small">50dp</dimen>
 
     <dimen name="padding_buttons">8dp</dimen>
     <dimen name="padding_weathericon">4dp</dimen>

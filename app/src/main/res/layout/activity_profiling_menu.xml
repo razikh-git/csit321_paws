@@ -60,7 +60,7 @@
                     android:id="@+id/btnSurveys"
                     style="@style/Widget.Paws.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="@dimen/height_buttons_small"
                     android:text="@string/pm_btn_survey" />
 
                 <TextView
@@ -77,7 +77,7 @@
                     android:id="@+id/btnFacebook"
                     style="@style/Widget.Paws.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="@dimen/height_buttons_small"
                     android:text="@string/pm_btn_facebook" />
 
                 <TextView
