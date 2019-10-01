@@ -43,7 +43,7 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
     public void onClickMaps() {
         // Redirect to maps screen.
         this.finish();
-        //Intent intent = new Intent(this, MapsActivity.class);
+        //Intent intent = new Intent(this, MappingActivity.class);
         //startActivity(intent);
     }
 

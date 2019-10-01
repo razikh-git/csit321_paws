@@ -118,6 +118,7 @@
     <string name="se_in_progress">Survey not yet complete.</string>
     <string name="se_results_label">last completed survey</string>
     <string name="se_fallback">No existing profile found.</string>
+    <string name="se_snack_result">All profile data has been reset.</string>
 
     <!-- Survey Question Activity. -->
     <string name="sq_title">Question</string>
@@ -131,5 +132,17 @@
     <string name="sq_answer6">Inaccurate</string>
     <string name="sq_answer7">Very inaccurate</string>
     <string name="sq_done">Done!</string>
+
+    <!-- Weather Activity. -->
+    <string name="wa_today">Today</string>
+
+    <!-- Mapping Activity. -->
+    <string name="ma_wind">Wind</string>
+    <string name="ma_precip">Precip</string>
+    <string name="ma_risk">Risk</string>
+    <string name="title_activity_maps">Map</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

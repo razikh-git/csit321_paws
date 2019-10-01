@@ -20,6 +20,7 @@ import androidx.core.widget.TextViewCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.InputStream;
 
@@ -205,6 +206,8 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
     }
 
     public void onClickReset(View view) {
+        // Prompt confirmation with a popout.
+
         // TODO : remove and reimplement debug functionality
         mSharedEditor.putBoolean("app_init", false);
         mSharedEditor.putBoolean("facebook_init", false);
@@ -215,6 +218,8 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
         mSharedEditor.putInt("survey_last_question", 1);
         mSharedEditor.putLong("profile_time_completed", 0);
         mSharedEditor.apply();
+
+        Snackbar snackbar = Snackbar.make(view, R.string.se_snack_result, Snackbar.LENGTH_SHORT);
 
         // Reinitialise the interface.
         initInterface();

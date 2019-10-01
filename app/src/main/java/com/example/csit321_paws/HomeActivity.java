@@ -53,8 +53,8 @@ public class HomeActivity   extends
     private LocationHandler mLocHandler;
     private JSONObject mWeatherJSON;
 
-    private String mLat;
-    private String mLon;
+    private double mLat;
+    private double mLon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +82,7 @@ public class HomeActivity   extends
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         mSharedEditor = mSharedPref.edit();
 
-        // Iitialise vanity and interactive interface elements.
+        // Initialise vanity and interactive interface elements.
         initStringMaps();
         initButtons();
 
@@ -158,10 +158,10 @@ public class HomeActivity   extends
 
     private boolean initLocationData(Location loc) {
 
-        Log.println(Log.DEBUG, "snowpaws", "HomeActivity.initInterface.initLocationData()");
+        Log.println(Log.DEBUG, "snowpaws_home", "HomeActivity.initInterface.initLocationData()");
 
-        mLat = getResources().getString(R.string.app_default_loc_lat);
-        mLon = getResources().getString(R.string.app_default_loc_lon);
+        mLat = Double.parseDouble(getResources().getString(R.string.app_default_loc_lat));
+        mLon = Double.parseDouble(getResources().getString(R.string.app_default_loc_lon));
 
         // Use data from locational tracking if possible.
 /*
@@ -173,40 +173,71 @@ public class HomeActivity   extends
         }
 */
 
+        Log.println(Log.DEBUG, "snowpaws_home", "Loaded lat/long presets.");
+
         // Generate URL and request OWM data.
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_NETWORK)) {
-            // Generate URL and request queue.
-            RequestQueue queue = Volley.newRequestQueue(this);
-            String url = getResources().getString(R.string.app_url_owm_api_root)
-                    + "data/2.5/"
-                    + "weather"
-                    + "?lat=" + mLat + "&lon=" + mLon
-                    + "&units=" + mSharedPref.getString("units", "metric")
-                    + "&lang=" + getResources().getConfiguration().locale.getDisplayLanguage()
-                    + "&mode=" + "json"
-                    + "&appid=" + getResources().getString(R.string.owm_default_api_key);
-
-            // Generate and post the request.
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    (response) -> {
-                        Log.println(Log.DEBUG, "snowpaws", "stringRequest.onResponse");
-
-                        // Set JSON dict and view fields from response.
-                        try {
-                            mWeatherJSON = new JSONObject(response);
-                            initWeatherData();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }, (error) -> {
-                        Log.println(Log.DEBUG, "snowpaws", "stringRequest.onErrorResponse");
-
-                        // olive oil didn't work
-                        error.printStackTrace();
+            try {
+                // Decide whether to update current weather data.
+                JSONObject lastWeather = new JSONObject(
+                        mSharedPref.getString("last_weather_json", "{}"));
+                if (lastWeather.toString().equals("{}")) {
+                    Log.println(Log.DEBUG, "snowpaws_home",
+                            "Last weather data does not exist.");
+                } else {
+                    Log.println(Log.DEBUG, "snowpaws_home",
+                            "Checking data recency.");
+                    // Don't request new data if the current data was received in the last 3 hours.
+                    long timestamp = lastWeather.getLong("dt");
+                    if (System.currentTimeMillis() - timestamp < 36000000) {
+                        Log.println(Log.DEBUG, "snowpaws_home",
+                                "Will not get new weather data. LastWeather data too recent:\n"
+                                        + (System.currentTimeMillis() - timestamp));
+                        return true;
                     }
-            );
+                    Log.println(Log.DEBUG, "snowpaws_home",
+                            "Last weather data exists and is outdated.");
+                }
 
-            queue.add(stringRequest);
+                // Generate URL and request queue.
+                RequestQueue queue = Volley.newRequestQueue(this);
+                String url = getResources().getString(R.string.app_url_owm_api_root)
+                        + "data/2.5/"
+                        + "weather"
+                        + "?lat=" + mLat + "&lon=" + mLon
+                        + "&units=" + mSharedPref.getString("units", "metric")
+                        + "&lang=" + getResources().getConfiguration().locale.getDisplayLanguage()
+                        + "&mode=" + "json"
+                        + "&appid=" + getResources().getString(R.string.owm_default_api_key);
+
+                // Generate and post the request.
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        (response) -> {
+                            Log.println(Log.DEBUG, "snowpaws", "stringRequest.onResponse");
+
+                            try {
+                                // Set JSON dict and view fields from response.
+                                mWeatherJSON = new JSONObject(response);
+                                initWeatherData();
+
+                                // Save the weather data to local data.
+                                mSharedEditor.putString("last_weather_json", response);
+                                mSharedEditor.apply();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }, (error) -> {
+                            Log.println(Log.DEBUG, "snowpaws", "stringRequest.onErrorResponse");
+
+                            // olive oil didn't work
+                            error.printStackTrace();
+                        }
+                );
+
+                queue.add(stringRequest);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         return false;
@@ -286,8 +317,10 @@ public class HomeActivity   extends
                     "GMT" + TimeUnit.HOURS.convert(
                             mWeatherJSON.getInt("timezone"), TimeUnit.SECONDS));
             // GPS Coordinates
+            char bearingLon = mLon > 0 ? 'E' : 'W';
+            char bearingLat = mLat > 0 ? 'N' : 'S';
             ((TextView)findViewById(R.id.txtCoordinates)).setText(
-                    mLon + "  " + mLat);
+                    Math.abs(mLon) + " " + bearingLon + "  " + Math.abs(mLat) + " " + bearingLat);
 
             // Fill in body data.
 
@@ -441,9 +474,9 @@ public class HomeActivity   extends
     }
 
     private void onClickMaps(View view) {
-        // Redirect to Mapping Activity
-        //Intent intent = new Intent(this, MapsActivity.class);
-        //startActivity(intent);
+        // Redirect to Maps Activity
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 
     private void onClickSurveys(View view) {
