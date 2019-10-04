@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class PermissionActivity extends AppCompatActivity {
+public abstract class PermissionActivity extends BottomNavBarActivity {
 
     // Map of request codes and associated permission codes.
     protected Map<String, Integer> mCodeMap;

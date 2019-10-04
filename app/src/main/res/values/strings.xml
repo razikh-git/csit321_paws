@@ -5,31 +5,31 @@
     <!--                              -->
 
     <!-- App settings keys. -->
-    <string name="app_global_preferences">paws_global_preferences</string>
+    <string name="app_global_preferences" translatable="false">paws_global_preferences</string>
 
     <!-- Emulated device lat/lon. -->
-    <string name="app_default_loc_lon">150.89</string>
-    <string name="app_default_loc_lat">-34.43</string>
+    <string name="app_default_loc_lng" translatable="false">150.89</string>
+    <string name="app_default_loc_lat" translatable="false">-34.43</string>
 
     <!-- Open Weather Maps. -->
-    <string name="app_url_owm_root">https://openweathermap.org/</string>
-    <string name="app_url_owm_api_root">https://api.openweathermap.org/</string>
+    <string name="app_url_owm_root" translatable="false">https://openweathermap.org/</string>
+    <string name="app_url_owm_api_root" translatable="false">https://api.openweathermap.org/</string>
 
-    <string name="owm_default_api_key">442dabf9a4b790d1198c03fbd0d31550</string>
+    <string name="owm_default_api_key" translatable="false">442dabf9a4b790d1198c03fbd0d31550</string>
 
     <!-- Survey data. -->
-    <string name="intent_survey_result">intent_survey_result</string>
+    <string name="intent_survey_result" translatable="false">intent_survey_result</string>
 
-    <string name="file_survey_questions">paws_survey_questions</string>
-    <string name="file_survey_results">paws_survey_results</string>
-    <string name="file_facebook_results">paws_fb_results</string>
+    <string name="file_survey_questions" translatable="false">paws_survey_questions</string>
+    <string name="file_survey_results" translatable="false">paws_survey_results</string>
+    <string name="file_facebook_results" translatable="false">paws_fb_results</string>
 
     <!--                              -->
     <!--        Vanity strings        -->
     <!--                              -->
 
     <!-- Generic app strings. -->
-    <string name="app_name">PAWS</string>
+    <string name="app_name" translatable="false">PAWS</string>
     <string name="app_detail">CSIT321\nPAWS\nPrivate prototype</string>
 
     <!-- Generic button strings. -->
@@ -135,6 +135,9 @@
 
     <!-- Weather Activity. -->
     <string name="wa_today">Today</string>
+    <string name="wa_weekly">Forecast</string>
+    <string name="wa_sunrise">Sunrise</string>
+    <string name="wa_sunset">Sunset</string>
 
     <!-- Mapping Activity. -->
     <string name="ma_wind">Wind</string>

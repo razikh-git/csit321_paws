@@ -42,6 +42,9 @@
         <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:textColor">@color/color_black</item>
     </style>
+    <style name="TextAppearance.Paws.Tiny" parent="TextAppearance.Paws.Small">
+        <item name="android:textSize">@dimen/text_size_tiny</item>
+    </style>
     <style name="TextAppearance.Paws.Button.List" parent="TextAppearance.Paws.Medium">
         <item name="android:textColor">@color/color_black</item>
     </style>

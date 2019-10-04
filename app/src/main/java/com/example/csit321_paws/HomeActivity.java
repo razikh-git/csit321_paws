@@ -4,7 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -29,7 +29,6 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -45,16 +44,16 @@ public class HomeActivity   extends
     private static final String[] REQUEST_PERMISSIONS_NETWORK = {
             Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE};
 
+
     private static final Double MS_TO_KMH = 3.6d;
     private static final Double MS_TO_MPH = 2.237d;
 
     private SharedPreferences mSharedPref;
     private SharedPreferences.Editor mSharedEditor;
     private LocationHandler mLocHandler;
-    private JSONObject mWeatherJSON;
 
     private double mLat;
-    private double mLon;
+    private double mLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +78,7 @@ public class HomeActivity   extends
 
         // Load global preferences.
         mSharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         mSharedEditor = mSharedPref.edit();
 
         // Initialise vanity and interactive interface elements.
@@ -160,8 +159,8 @@ public class HomeActivity   extends
 
         Log.println(Log.DEBUG, "snowpaws_home", "HomeActivity.initInterface.initLocationData()");
 
-        mLat = Double.parseDouble(getResources().getString(R.string.app_default_loc_lat));
-        mLon = Double.parseDouble(getResources().getString(R.string.app_default_loc_lon));
+        mLat = Double.parseDouble(getString(R.string.app_default_loc_lat));
+        mLng = Double.parseDouble(getString(R.string.app_default_loc_lng));
 
         // Use data from locational tracking if possible.
 /*
@@ -175,95 +174,53 @@ public class HomeActivity   extends
 
         Log.println(Log.DEBUG, "snowpaws_home", "Loaded lat/long presets.");
 
-        // Generate URL and request OWM data.
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_NETWORK)) {
+            PAWSAPI.updateLatestWeatherForecast(this, mLat, mLng);
+            JSONObject weatherJSON = null;
             try {
-                // Decide whether to update current weather data.
-                JSONObject lastWeather = new JSONObject(
-                        mSharedPref.getString("last_weather_json", "{}"));
-                if (lastWeather.toString().equals("{}")) {
-                    Log.println(Log.DEBUG, "snowpaws_home",
-                            "Last weather data does not exist.");
-                } else {
-                    Log.println(Log.DEBUG, "snowpaws_home",
-                            "Checking data recency.");
-                    // Don't request new data if the current data was received in the last 3 hours.
-                    long timestamp = lastWeather.getLong("dt");
-                    if (System.currentTimeMillis() - timestamp < 36000000) {
-                        Log.println(Log.DEBUG, "snowpaws_home",
-                                "Will not get new weather data. LastWeather data too recent:\n"
-                                        + (System.currentTimeMillis() - timestamp));
-                        return true;
-                    }
-                    Log.println(Log.DEBUG, "snowpaws_home",
-                            "Last weather data exists and is outdated.");
-                }
-
-                // Generate URL and request queue.
-                RequestQueue queue = Volley.newRequestQueue(this);
-                String url = getResources().getString(R.string.app_url_owm_api_root)
-                        + "data/2.5/"
-                        + "weather"
-                        + "?lat=" + mLat + "&lon=" + mLon
-                        + "&units=" + mSharedPref.getString("units", "metric")
-                        + "&lang=" + getResources().getConfiguration().locale.getDisplayLanguage()
-                        + "&mode=" + "json"
-                        + "&appid=" + getResources().getString(R.string.owm_default_api_key);
-
-                // Generate and post the request.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        (response) -> {
-                            Log.println(Log.DEBUG, "snowpaws", "stringRequest.onResponse");
-
-                            try {
-                                // Set JSON dict and view fields from response.
-                                mWeatherJSON = new JSONObject(response);
-                                initWeatherData();
-
-                                // Save the weather data to local data.
-                                mSharedEditor.putString("last_weather_json", response);
-                                mSharedEditor.apply();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }, (error) -> {
-                            Log.println(Log.DEBUG, "snowpaws", "stringRequest.onErrorResponse");
-
-                            // olive oil didn't work
-                            error.printStackTrace();
-                        }
-                );
-
-                queue.add(stringRequest);
+                weatherJSON = new JSONObject(mSharedPref.getString("last_weather_json", "{}"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            return initWeatherData(weatherJSON);
         }
 
         return false;
     }
 
     // Initialise weather conditions fields.
-    private void initWeatherData() {
+    private boolean initWeatherData(JSONObject weatherForecastJSON) {
         try {
+            int index = 0;
             String str;
             Double dbl;
 
-            JSONObject weatherObj = (JSONObject)mWeatherJSON.getJSONArray("weather").get(0);
+            JSONObject weatherCurrentJSON = null;
+
+            try {
+                // Current weather object
+                weatherCurrentJSON = (JSONObject)(weatherForecastJSON.getJSONArray("list")
+                        .getJSONObject(index)
+                        .getJSONArray("weather").get(0));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return false;
+            }
 
             // Fill in header data.
 
+            /*
             // Weather icon
-            str = getResources().getString(R.string.app_url_owm_root)
+            str = getString(R.string.app_url_owm_root)
                     + "img/"
                     + "wn/"
-                    + weatherObj.getString("icon")
+                    + weatherCurrentJSON.getString("icon")
                     + ".png";
             ImageLoader.getInstance().displayImage(str, (ImageView) findViewById(R.id.imgWeatherIcon),
                     null, new ImageLoadingListener() {
                         @Override
                         public void onLoadingStarted(String imageUri, View view) {
-                            // Display existing circular progress bar.
+                            // Display already-visible circular progress bar.
                         }
 
                         @Override
@@ -301,41 +258,63 @@ public class HomeActivity   extends
                             ((ImageView)view).setImageDrawable(getDrawable(R.drawable.ic_cloud_off));
                         }
             });
+            */
+
+            // Set icon for weather type.
+            Drawable drawable = PAWSAPI.getWeatherDrawable(this, weatherCurrentJSON.getString("icon"));
+
+            // Hide progress bar.
+            findViewById(R.id.barWeatherIcon).setVisibility(GONE);
+
+            ImageView img = findViewById(R.id.imgWeatherIcon);
+            if (drawable != null) {
+                // Display weather icon.
+                img.setVisibility(VISIBLE);
+                img.setImageDrawable(drawable);
+            } else {
+                // Display error icon.
+                img.setVisibility(VISIBLE);
+                img.setColorFilter(ContextCompat.getColor(
+                        this, R.color.color_on_primary_light));
+                img.setImageDrawable(getDrawable(R.drawable.ic_cloud_off));
+            }
 
             // Weather description
             ((TextView)findViewById(R.id.txtWeatherDescription)).setText(
-                    weatherObj.getString("description"));
+                    weatherCurrentJSON.getString("description"));
 
             // City name
             ((TextView)findViewById(R.id.txtCity)).setText(
-                    mWeatherJSON.getString("name"));
+                    weatherForecastJSON.getJSONObject("city").getString("name"));
             // Country code
             ((TextView)findViewById(R.id.txtCountry)).setText(
-                    mWeatherJSON.getJSONObject("sys").getString("country"));
+                    weatherForecastJSON.getJSONObject("city").getString("country"));
             // Timezone GMT +/- n
+            /*
             ((TextView)findViewById(R.id.txtTimezone)).setText(
                     "GMT" + TimeUnit.HOURS.convert(
                             mWeatherJSON.getInt("timezone"), TimeUnit.SECONDS));
+             */
             // GPS Coordinates
-            char bearingLon = mLon > 0 ? 'E' : 'W';
+            char bearingLng = mLng > 0 ? 'E' : 'W';
             char bearingLat = mLat > 0 ? 'N' : 'S';
             ((TextView)findViewById(R.id.txtCoordinates)).setText(
-                    Math.abs(mLon) + " " + bearingLon + "  " + Math.abs(mLat) + " " + bearingLat);
+                    Math.abs(mLng) + " " + bearingLng + "  " + Math.abs(mLat) + " " + bearingLat);
 
             // Fill in body data.
 
             // Temperature (current)
-            if (mSharedPref.getString("units", "metric").equals("metric"))
-                str = "°C";
-            else
-                str = "°F";
+            str = mSharedPref.getString("units", "metric").equals("metric") ?
+                "°C" : "°F";
             ((TextView)findViewById(R.id.txtTempCurrent)).setText(
                     String.valueOf(
-                            Math.round(mWeatherJSON.getJSONObject("main").getDouble("temp")))
+                            Math.round(weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                    .getJSONObject("main").getDouble("temp")))
                     + str);
 
             // Wind (speed)
-            dbl = mWeatherJSON.getJSONObject("wind").getDouble("speed");
+            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                    .getJSONObject("wind").getDouble("speed");
             if (mSharedPref.getString("units", "metric").equals("metric")) {
                 str = " km/h";
                 dbl *= MS_TO_MPH;
@@ -351,7 +330,8 @@ public class HomeActivity   extends
 
             // Wind (bearing)
             str = "north";
-            dbl = mWeatherJSON.getJSONObject("wind").getDouble("deg");
+            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                    .getJSONObject("wind").getDouble("deg");
             if (dbl < 135)
                 str = "west";
             else if (dbl < 225)
@@ -361,18 +341,20 @@ public class HomeActivity   extends
             ((TextView)findViewById(R.id.txtWindBearing)).setText(str);
 
             // Weather type
-            str = weatherObj.getString("main");
+            str = weatherCurrentJSON.getString("main");
             switch (str) {
                 case "Clear":
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            mWeatherJSON.getJSONObject("main").getString("humidity")
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                    .getJSONObject("main").getString("humidity")
                             + "%");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
                             "humidity");
                     break;
                 case "Clouds":
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            mWeatherJSON.getJSONObject("clouds").getString("all")
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                    .getJSONObject("clouds").getString("all")
                             + "%");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
                             "coverage");
@@ -381,14 +363,16 @@ public class HomeActivity   extends
                 case "Drizzle":
                 case "Rain":
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            mWeatherJSON.getJSONObject("rain").getString("3h")
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                    .getJSONObject("rain").getString("3h")
                             + "mm");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
                             "last 3 hrs");
                     break;
                 case "Snow" :
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            mWeatherJSON.getJSONObject("snow").getString("3h")
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                    .getJSONObject("snow").getString("3h")
                             + "mm");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
                             "last 3 hrs");
@@ -400,16 +384,19 @@ public class HomeActivity   extends
 
             // Time generated
             ((TextView)(findViewById(R.id.txtFooterTime))).setText(
-                    DateFormat.format("HH:mm:ss",
-                    mWeatherJSON.getLong("dt")).toString() + " GMT");
+                    DateFormat.format("HH:mm dd.MM.yyyy",
+                    weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                            .getLong("dt") * 1000).toString());
 /*          // Date generated (currently sits at epoch)
             ((TextView)findViewById(R.id.txtFooterDate)).setText(DateFormat.format("dd-MM-yyyy",
                     mWeatherJSON.getLong("dt"))).toString());
 */
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
 
+        return true;
     }
 
     private boolean initStringMaps() {
@@ -434,14 +421,14 @@ public class HomeActivity   extends
             mTitleMap = new HashMap<>();
             // Location
             mTitleMap.put(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    getResources().getString(R.string.app_title_request_loc_coarse));
+                    getString(R.string.app_title_request_loc_coarse));
             mTitleMap.put(Manifest.permission.ACCESS_FINE_LOCATION,
-                    getResources().getString(R.string.app_title_request_loc_fine));
+                    getString(R.string.app_title_request_loc_fine));
             // Network
             mTitleMap.put(Manifest.permission.INTERNET,
-                    getResources().getString(R.string.app_title_request_internet));
+                    getString(R.string.app_title_request_internet));
             mTitleMap.put(Manifest.permission.ACCESS_NETWORK_STATE,
-                    getResources().getString(R.string.app_title_request_network_state));
+                    getString(R.string.app_title_request_network_state));
             // Render immutable
             mTitleMap = Collections.unmodifiableMap(mTitleMap);
 
@@ -449,14 +436,14 @@ public class HomeActivity   extends
             mMessageMap = new HashMap<>();
             // Location
             mMessageMap.put(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    getResources().getString(R.string.app_msg_request_loc_coarse));
+                    getString(R.string.app_msg_request_loc_coarse));
             mMessageMap.put(Manifest.permission.ACCESS_FINE_LOCATION,
-                    getResources().getString(R.string.app_msg_request_loc_fine));
+                    getString(R.string.app_msg_request_loc_fine));
             // Network
             mMessageMap.put(Manifest.permission.INTERNET,
-                    getResources().getString(R.string.app_msg_request_internet));
+                    getString(R.string.app_msg_request_internet));
             mMessageMap.put(Manifest.permission.ACCESS_NETWORK_STATE,
-                    getResources().getString(R.string.app_msg_request_network_state));
+                    getString(R.string.app_msg_request_network_state));
             // Render immutable
             mMessageMap = Collections.unmodifiableMap(mMessageMap);
 

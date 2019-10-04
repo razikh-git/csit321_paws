@@ -109,18 +109,12 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         for (int i = 0; i < count; ++i) {
             // Generate layout parameters.
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.width = Math.round(getResources().getDimension(R.dimen.dimen_icon_survey_progress));
-            params.height = Math.round(getResources().getDimension(R.dimen.dimen_icon_survey_progress));
-            params.weight = 1;
+                    Math.round(getResources().getDimension(R.dimen.dimen_icon_survey_progress)),
+                    Math.round(getResources().getDimension(R.dimen.dimen_icon_survey_progress)),
+                    1);
 
-            if (i % 2 == 0)
-                params.gravity = Constraints.LayoutParams.LEFT;
-
-            else
-                params.gravity = Constraints.LayoutParams.RIGHT;
-
+            // Alternate the gravity of icons to achieve a waterfall pattern.
+            params.gravity = i % 2 == 0 ? Constraints.LayoutParams.LEFT : Constraints.LayoutParams.RIGHT;
 
             // Apply parameters to the icon.
             ImageView img = new ImageView(this);

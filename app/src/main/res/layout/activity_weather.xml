@@ -2,9 +2,230 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WeatherActivity">
+    tools:context=".WeatherActivity"
+    tools:showIn="@layout/activity_weather" >
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:background="@color/color_primary_light"
+        android:fitsSystemWindows="true" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/app_gutter"
+            android:clipChildren="false"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="2dp"
+            tools:layout_editor_absoluteY="2dp" >
+
+            <!-- Today's notable weather. -->
+
+            <TextView
+                android:id="@+id/txtWeatherCity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/app_gutter"
+                android:textAppearance="@style/TextAppearance.Paws.Huge"
+                android:textAlignment="center"
+                android:text="Wollongong"
+                android:textColor="@color/color_on_primary_light" />
+
+            <TextView
+                android:id="@+id/txtWeatherDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/text_spacing"
+                android:textAppearance="@style/TextAppearance.Paws.Medium"
+                android:textAlignment="center"
+                android:text="Clear skies"
+                android:textColor="@color/color_on_primary_light" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/app_spacing"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/imgWeatherIcon"
+                    android:layout_width="@dimen/dimen_icon_huge"
+                    android:layout_height="@dimen/dimen_icon_huge"
+                    android:layout_marginEnd="@dimen/app_spacing"
+                    android:src="@drawable/w01" />
+
+                <TextView
+                    android:id="@+id/txtTempCurrent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Paws.Immense"
+                    android:textAlignment="center"
+                    android:text="20°C"
+                    android:textColor="@color/color_on_primary_light" />
+
+            </LinearLayout>
+
+            <!-- Today's Weather card. -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Paws.Medium"
+                android:textAlignment="center"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:text="@string/wa_today"
+                android:textColor="@color/color_on_primary_light" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/text_spacing"
+                app:cardCornerRadius="0dp" >
+
+                <HorizontalScrollView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/layWeatherToday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/app_padding"
+                        android:gravity="center"
+                        android:orientation="horizontal" >
+
+                        <!-- Populated at runtime by 8 data samples spaced in 3-hour intervals. -->
+
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Sunrise/Sunset card. -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/app_gutter"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:layout_marginEnd="@dimen/app_gutter">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/app_padding">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/dimen_icon_medium"
+                        android:layout_marginEnd="@dimen/text_spacing"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_sunset" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/wa_sunrise"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                            <TextView
+                                android:id="@+id/txtSunrise"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/text_spacing"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/wa_sunset"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                            <TextView
+                                android:id="@+id/txtSunset"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 5-day Forecast card. -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Paws.Medium"
+                android:textAlignment="center"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:text="@string/wa_weekly"
+                android:textColor="@color/color_on_primary_light" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/app_spacing"
+                app:cardCornerRadius="0dp" >
+
+                <LinearLayout
+                    android:id="@+id/layWeatherWeekly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/app_padding"
+                    android:orientation="horizontal" >
+
+                    <!-- Populated at runtime with notable data for each day. -->
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/height_navbars" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
