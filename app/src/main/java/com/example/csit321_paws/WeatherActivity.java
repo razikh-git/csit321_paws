@@ -2,9 +2,10 @@ package com.example.csit321_paws;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.format.DateFormat;
-import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.constraintlayout.widget.Constraints;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -21,6 +23,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+
+import static com.example.csit321_paws.PAWSAPI.MS_TO_KMH;
+import static com.example.csit321_paws.PAWSAPI.MS_TO_MPH;
 
 public class WeatherActivity extends BottomNavBarActivity {
 
@@ -35,18 +41,23 @@ public class WeatherActivity extends BottomNavBarActivity {
         // Load global preferences.
          mSharedPref = this.getSharedPreferences(
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
-         mSharedEditor = mSharedPref.edit();
 
         // Bottom navigation bar functionality.
         BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        // . . .
-
+        // Initialise all weather data.
         initWeatherDisplay();
     }
 
     private boolean initWeatherDisplay() {
+        String str;
+        Double dbl;
+        Long lon;
+
+        final int index = 8;
+        final int pad = Math.round(getResources().getDimension(R.dimen.text_spacing));
+
         double lat = Double.parseDouble(getResources().getString(R.string.app_default_loc_lat));
         double lng = Double.parseDouble(getResources().getString(R.string.app_default_loc_lng));
 
@@ -54,13 +65,16 @@ public class WeatherActivity extends BottomNavBarActivity {
             PAWSAPI.updateLatestWeatherForecast(this, lat, lng);
             JSONObject weatherForecastJSON = new JSONObject(mSharedPref.getString("last_weather_json", "{}"));
 
-            String str;
-            Double dbl;
-            Long lon;
-
             // Weather title
-            str = weatherForecastJSON.getJSONObject("city").getString("name");
+            str = weatherForecastJSON.getJSONObject("city")
+                    .getString("name");
             ((TextView)findViewById(R.id.txtWeatherCity)).setText(str);
+
+            // Weather description
+            str = weatherForecastJSON.getJSONArray("list").getJSONObject(0)
+                    .getJSONArray("weather").getJSONObject(0)
+                    .getString("description");
+            ((TextView)findViewById(R.id.txtWeatherDescription)).setText(str);
 
             // Weather icon
             str = weatherForecastJSON.getJSONArray("list").getJSONObject(0)
@@ -75,10 +89,11 @@ public class WeatherActivity extends BottomNavBarActivity {
                     .getString("temp");
             str += mSharedPref.getString("units", "metric").equals("metric") ?
                     "°C" : "°F";
+            ((TextView)findViewById(R.id.txtTempCurrent)).setText(str);
 
             // Populate today's weather.
             LinearLayout layParent = findViewById(R.id.layWeatherToday);
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < index + 1; i++) {
                 // Create a new LinearLayout child.
                 LinearLayout.LayoutParams params;
                 LinearLayout layout = new LinearLayout(this);
@@ -91,7 +106,21 @@ public class WeatherActivity extends BottomNavBarActivity {
                 TextView txt;
                 ImageView img;
 
-                int pad = Math.round(getResources().getDimension(R.dimen.text_spacing));
+                // Write the time of the forecast sample.
+                str = DateFormat.format("h a", weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                        .getLong("dt") * 1000).toString();
+                txt = new TextView(this);
+                params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.gravity = Gravity.CENTER;
+                txt.setLayoutParams(params);
+                txt.setText(str);
+                txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
+                txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_dark));
+                txt.setPadding(pad, 0, pad, 0);
+                layout.addView(txt);
 
                 // Create a weather icon.
                 str = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
@@ -115,6 +144,7 @@ public class WeatherActivity extends BottomNavBarActivity {
                         // Rainy weather, measurements as periodic volume in millimetres.
                         dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
                                 .getJSONObject("rain").getDouble("3h");
+                        // TODO rain in inches
                         str = new DecimalFormat("#").format(dbl) + "mm";
 
                     } else {
@@ -125,7 +155,7 @@ public class WeatherActivity extends BottomNavBarActivity {
                     // Cloudy weather, measurements in percentage coverage.
                     dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
                             .getJSONObject("clouds").getDouble("all");
-                    str = new DecimalFormat("#").format(dbl) + "%";
+                    str = 10 * Math.round(dbl / 10) + "%";
                 }
 
                 txt = new TextView(this);
@@ -154,7 +184,7 @@ public class WeatherActivity extends BottomNavBarActivity {
                 txt.setLayoutParams(params);
                 txt.setText(str);
                 txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                txt.setTextAppearance(this, R.style.TextAppearance_Paws_Small);
+                txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
                 txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_dark));
                 txt.setPadding(pad, 0, pad, 0);
                 layout.addView(txt);
@@ -164,34 +194,54 @@ public class WeatherActivity extends BottomNavBarActivity {
             }
 
             // Populate the 5-day forecast.
-            double tempHigh = weatherForecastJSON.getJSONArray("list").getJSONObject(8)
+            double tempHigh = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                             .getJSONObject("main")
                             .getDouble("temp");
             double tempLow = tempHigh;
-            String icon = weatherForecastJSON.getJSONArray("list").getJSONObject(8)
+            String icon = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                     .getJSONArray("weather").getJSONObject(0)
                     .getString("icon");
-            int id = weatherForecastJSON.getJSONArray("list").getJSONObject(8)
+            String icon2 = icon;
+            int id = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                     .getJSONArray("weather").getJSONObject(0)
                     .getInt("id");
+            int id2 = id;
+
+            // TODO change the setup to include ALL HOURS FROM THE MORNING OF THE NEXT DAY ONWARDS
+            // todo rather than the current setup; which continues from 12hrs after the current time
 
             layParent = findViewById(R.id.layWeatherWeekly);
-            for (int i = 8; i < 40; i++) {
-                // TODO resolve first element obviously being wrong
-                if (i % 8 == 0) {
-                    // Create a new LinearLayout child.
+            for (int i = index + 1; i < 40; ++i) {
+                Log.println(Log.DEBUG, "snowpaws_weather",
+                        "Starting element " + i + ", day " + i / 8 + ".");
+                if ((i + 1) % 8 == 0) {
+                    Log.println(Log.DEBUG, "snowpaws_weather",
+                            "Adding daily weather data for day " + i / 8 + ".");
+
                     LinearLayout.LayoutParams params;
+
+                    // Create a vertical divider between children.
+                    if (i / 8 > 1) {
+                        View view = new View(this);
+                        params = new LinearLayout.LayoutParams(
+                                1,
+                                LinearLayout.LayoutParams.MATCH_PARENT);
+                        view.setLayoutParams(params);
+                        view.setBackgroundColor(ContextCompat.getColor(
+                                this, R.color.color_grey));
+                        layParent.addView(view);
+                    }
+
+                    // Create a new LinearLayout child.
                     LinearLayout layout = new LinearLayout(this);
                     params = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            250,
                             LinearLayout.LayoutParams.WRAP_CONTENT);
                     layout.setLayoutParams(params);
                     layout.setOrientation(LinearLayout.VERTICAL);
 
                     TextView txt;
                     ImageView img;
-
-                    int pad = Math.round(getResources().getDimension(R.dimen.text_spacing));
 
                     // Write the day's title.
                     lon = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
@@ -205,63 +255,202 @@ public class WeatherActivity extends BottomNavBarActivity {
                     txt.setLayoutParams(params);
                     txt.setText(str);
                     txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                    txt.setTextAppearance(this, R.style.TextAppearance_Paws_Small);
+                    txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
                     txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
-                    txt.setPadding(pad, 0, pad, 0);
+                    txt.setPadding(pad, pad / 3, pad, pad);
                     layout.addView(txt);
 
                     // TODO customise the icon based on importance (ie. ID > 100)
                     // todo it doesnt work probably
 
-                    // Create a weather icon.
-                    img = new ImageView(this);
-                    img.setImageDrawable(PAWSAPI.getWeatherDrawable(this, icon));
-                    params = new LinearLayout.LayoutParams(
-                            Math.round(getResources().getDimension(R.dimen.dimen_icon_medium)),
-                            Math.round(getResources().getDimension(R.dimen.dimen_icon_medium)));
-                    params.gravity = Gravity.CENTER;
-                    img.setLayoutParams(params);
-                    layout.addView(img);
-
-                    // Create a new layout child for temperatures.
+                    // Create a new layout child for weather icons.
                     LinearLayout layTemp = new LinearLayout(this);
                     params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT);
-                    layout.setLayoutParams(params);
-                    layout.setOrientation(LinearLayout.VERTICAL);
+                    layTemp.setLayoutParams(params);
+                    layTemp.setOrientation(LinearLayout.HORIZONTAL);
+
+                    // Create primary weather icon.
+                    img = new ImageView(this);
+                    img.setImageDrawable(PAWSAPI.getWeatherDrawable(this, icon));
+                    params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            Math.round(getResources().getDimension(R.dimen.dimen_icon_medium)),
+                            1);
+                    img.setLayoutParams(params);
+                    layTemp.addView(img);
+
+                    // Create secondary weather icon.
+                    img = new ImageView(this);
+                    img.setImageDrawable(PAWSAPI.getWeatherDrawable(this, icon2));
+                    params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            Math.round(getResources().getDimension(R.dimen.dimen_icon_medium)),
+                            1);
+                    img.setLayoutParams(params);
+                    layTemp.addView(img);
+
+                    // Add the icon layout to the child.
+                    layout.addView(layTemp);
+
+                    // Create a new layout child for the daily temperature range.
+                    layTemp = new LinearLayout(this);
+                    params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    layTemp.setLayoutParams(params);
+                    layTemp.setOrientation(LinearLayout.HORIZONTAL);
 
                     // Add the predicted high temperature.
                     str = new DecimalFormat("#").format(tempHigh) + "°";
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT);
-                    params.gravity = Gravity.CENTER;
+                            1);
                     txt.setLayoutParams(params);
                     txt.setText(str);
                     txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                    txt.setTextAppearance(this, R.style.TextAppearance_Paws_Small);
+                    txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
                     txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_dark));
-                    txt.setPadding(pad, 0, pad, 0);
-                    layout.addView(txt);
+                    layTemp.addView(txt);
 
                     // Add the predicted low temperature.
                     str = new DecimalFormat("#").format(tempLow) + "°";
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT,
+                            1);
+                    txt.setLayoutParams(params);
+                    txt.setText(str);
+                    txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
+                    txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
+                    layTemp.addView(txt);
+
+                    // Add the temperature layout to the child.
+                    layout.addView(layTemp);
+
+                    // Create a wind bearing icon.
+                    dbl = 0d;
+                    for (int j = i - 8; j < i; j++)
+                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(j)
+                                .getJSONObject("wind")
+                                .getDouble("deg");
+                    dbl /= 8;
+                    img = new ImageView(this);
+                    img.setImageDrawable(getDrawable(R.drawable.ic_navigation));
+                    img.setColorFilter(ContextCompat.getColor(this, R.color.color_grey));
+                    img.setRotation(dbl.floatValue());
+                    params = new LinearLayout.LayoutParams(
+                            Math.round(getResources().getDimension(R.dimen.dimen_icon_small)),
+                            Math.round(getResources().getDimension(R.dimen.dimen_icon_small)));
+                    params.gravity = Gravity.CENTER;
+                    params.topMargin = pad;
+                    params.bottomMargin = pad;
+                    img.setLayoutParams(params);
+                    layout.addView(img);
+
+                    // Add the predicted average wind speed.
+                    dbl = 0d;
+                    for (int j = i - 7; j < i; j++)
+                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(j)
+                                .getJSONObject("wind")
+                                .getDouble("speed");
+                    dbl /= 8;
+                    if (mSharedPref.getString("units", "metric").equals("metric"))
+                        str = new DecimalFormat("#").format((dbl * MS_TO_MPH))
+                                + " km/h";
+                    else
+                        str = new DecimalFormat("#").format((dbl * MS_TO_KMH))
+                                + " mph";
+                    txt = new TextView(this);
+                    params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT);
                     params.gravity = Gravity.CENTER;
                     txt.setLayoutParams(params);
                     txt.setText(str);
                     txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                     txt.setTextAppearance(this, R.style.TextAppearance_Paws_Small);
-                    txt.setTextColor(ContextCompat.getColor(this, R.color.color_grey));
+                    txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
                     txt.setPadding(pad, 0, pad, 0);
                     layout.addView(txt);
 
-                    // Add the child to the hierarchy.
+                    // Add any precipitation for the lowest-tier weather effects for the day.
+                    str = "";
+                    if (id < 800) {
+                        if (id > 100) {
+                            // Rainy weather, measurements as daily total volume in millimetres.
+                            dbl = 0d;
+                            for (int j = i - 7; j < i; j++) {
+                                if (weatherForecastJSON.getJSONArray("list").getJSONObject(j)
+                                        .has("rain")) {
+                                    if (weatherForecastJSON.getJSONArray("list").getJSONObject(j)
+                                            .getJSONObject("rain").has("3h")) {
+                                        Log.println(Log.DEBUG, "snowpaws_weather",
+                                                "Sampling rain/3h from element " + j + ". ("
+                                                        + weatherForecastJSON.getJSONArray("list").getJSONObject(j).getJSONObject("rain").getDouble("3h") + ")");
+                                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(j)
+                                                .getJSONObject("rain").getDouble("3h");
+                                    }
+
+                                }
+                            }
+                            // TODO rain in inches
+                            if (dbl > 0d)
+                                str = new DecimalFormat("#.##").format(dbl) + "mm";
+
+                        } else {
+                            // Clear weather, no notable measurements.
+                        }
+                    } else {
+                        // Cloudy weather, measurements in percentage coverage.
+                        dbl = 0d;
+                        for (int j = i - 7; j < i; j++) {
+                            Log.println(Log.DEBUG, "snowpaws_weather",
+                                    "Sampling clouds/all from element " + j + ". ("
+                                            + weatherForecastJSON.getJSONArray("list").getJSONObject(j).getJSONObject("clouds").getInt("all") + ")");
+                            dbl += Double.parseDouble(weatherForecastJSON.getJSONArray("list").getJSONObject(j)
+                                    .getJSONObject("clouds").getString("all"));
+                        }
+                        dbl /= 8;
+                        str = 10 * Math.round(dbl / 10) + "%";
+                    }
+
+                    if (!(str.equals(""))) {
+                        Log.println(Log.DEBUG, "snowpaws_weather",
+                                "Adding additional weather data (" + str + ") for day " + i / 8);
+
+                        // Create a weather icon.
+                        img = new ImageView(this);
+                        img.setImageDrawable(PAWSAPI.getWeatherDrawable(this, icon));
+                        params = new LinearLayout.LayoutParams(
+                                Math.round(getResources().getDimension(R.dimen.dimen_icon_medium)),
+                                Math.round(getResources().getDimension(R.dimen.dimen_icon_medium)));
+                        params.gravity = Gravity.CENTER;
+                        params.topMargin = pad;
+                        img.setLayoutParams(params);
+                        layout.addView(img);
+
+                        // Add the additional information.
+                        txt = new TextView(this);
+                        params = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT);
+                        params.gravity = Gravity.CENTER;
+                        txt.setLayoutParams(params);
+                        txt.setText(str);
+                        txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                        txt.setTextAppearance(this, R.style.TextAppearance_Paws_Tiny);
+                        txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
+                        txt.setPadding(pad, 0, pad, 0);
+                        layout.addView(txt);
+                    }
+
+                    // Add the daily weather child to the hierarchy.
                     layParent.addView(layout);
 
                     // After each 24-hour cluster of samples, publish the data as a new day.
@@ -270,29 +459,34 @@ public class WeatherActivity extends BottomNavBarActivity {
                             .getDouble("temp");
                     tempHigh = temp;
                     tempLow = temp;
+                }
 
-                } else {
-                    // Compare temperatures sampled every 3 hours to identify highs and lows for the day.
-                    double temp = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                            .getJSONObject("main").getDouble("temp");
+                // Compare temperatures sampled every 3 hours to identify highs and lows for the day.
+                double temp = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                        .getJSONObject("main")
+                        .getDouble("temp");
 
-                    if (tempHigh < temp)
-                        tempHigh = temp;
-                    else if (tempLow > temp)
-                        tempLow = temp;
+                if (tempHigh < temp)
+                    tempHigh = temp;
+                if (tempLow > temp)
+                    tempLow = temp;
 
-                    // Compare weather IDs to bring notable weather events to attention.
-                    // Note:
-                    // Cloud > Clear = 800 > Atmospherics > Snow > Rain > Drizzle > Thunderstorm
-                    int id2 = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                // Compare weather IDs to bring notable weather events to attention.
+                // Note:
+                // Cloud > Clear = 800 > Atmospherics > Snow > Rain > Drizzle > Thunderstorm
+                int idTemp = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                        .getJSONArray("weather").getJSONObject(0)
+                        .getInt("id");
+                if (idTemp < id) {
+                    id = idTemp;
+                    icon = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
                             .getJSONArray("weather").getJSONObject(0)
-                            .getInt("id");
-                    if (id2 < id) {
-                        id = id2;
-                        icon = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                                .getJSONArray("weather").getJSONObject(0)
-                                .getString("icon");
-                    }
+                            .getString("icon");
+                } else if (idTemp < id2) {
+                    id2 = idTemp;
+                    icon = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                            .getJSONArray("weather").getJSONObject(0)
+                            .getString("icon");
                 }
             }
 

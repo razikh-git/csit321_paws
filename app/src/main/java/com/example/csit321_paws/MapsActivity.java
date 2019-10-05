@@ -1,30 +1,104 @@
 package com.example.csit321_paws;
 
-import androidx.fragment.app.FragmentActivity;
-
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends BottomNavBarActivity implements OnMapReadyCallback {
 
+    SharedPreferences mSharedPref;
+    SharedPreferences.Editor mSharedEditor;
+
+    private static final String BUNDLE_KEY = "MapViewBundleKey";
+
+    private MapView mMapView;
     private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
+        // Load global preferences.
+        mSharedPref = this.getSharedPreferences(
+                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+        mSharedEditor = mSharedPref.edit();
+
+        // Bottom navigation bar functionality.
+        BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
+        nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        // Load saved state.
+        Bundle bundle = null;
+        if (savedInstanceState != null) {
+            bundle = savedInstanceState.getBundle(BUNDLE_KEY);
+        }
+
+        // Prepare the map.
+        mMapView = findViewById(R.id.mapView);
+        mMapView.onCreate(bundle);
+        mMapView.getMapAsync(this);
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Bundle bundle = outState.getBundle(BUNDLE_KEY);
+        if (bundle != null) {
+            bundle = new Bundle();
+            outState.putBundle(BUNDLE_KEY, bundle);
+        }
+
+        mMapView.onSaveInstanceState(bundle);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mMapView.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mMapView.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mMapView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
 
     /**
      * Manipulates the map once available.

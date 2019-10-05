@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -44,7 +45,7 @@ public class ResetFragment extends Fragment {
      * @return A new instance of fragment ResetFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ResetFragment newInstance(String param1, String param2) {
+    private static ResetFragment newInstance(String param1, String param2) {
         ResetFragment fragment = new ResetFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
@@ -77,7 +78,7 @@ public class ResetFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;

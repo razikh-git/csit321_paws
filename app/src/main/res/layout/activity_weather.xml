@@ -33,7 +33,6 @@
                 android:layout_marginTop="@dimen/app_gutter"
                 android:textAppearance="@style/TextAppearance.Paws.Huge"
                 android:textAlignment="center"
-                android:text="Wollongong"
                 android:textColor="@color/color_on_primary_light" />
 
             <TextView
@@ -43,7 +42,6 @@
                 android:layout_marginBottom="@dimen/text_spacing"
                 android:textAppearance="@style/TextAppearance.Paws.Medium"
                 android:textAlignment="center"
-                android:text="Clear skies"
                 android:textColor="@color/color_on_primary_light" />
 
             <LinearLayout
@@ -67,7 +65,6 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.Paws.Immense"
                     android:textAlignment="center"
-                    android:text="20°C"
                     android:textColor="@color/color_on_primary_light" />
 
             </LinearLayout>
@@ -210,7 +207,9 @@
                     android:id="@+id/layWeatherWeekly"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:padding="@dimen/app_padding"
+                    android:paddingTop="@dimen/app_padding"
+                    android:paddingBottom="@dimen/app_padding"
+                    android:layout_gravity="center"
                     android:orientation="horizontal" >
 
                     <!-- Populated at runtime with notable data for each day. -->

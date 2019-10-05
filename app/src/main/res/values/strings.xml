@@ -15,8 +15,6 @@
     <string name="app_url_owm_root" translatable="false">https://openweathermap.org/</string>
     <string name="app_url_owm_api_root" translatable="false">https://api.openweathermap.org/</string>
 
-    <string name="owm_default_api_key" translatable="false">442dabf9a4b790d1198c03fbd0d31550</string>
-
     <!-- Survey data. -->
     <string name="intent_survey_result" translatable="false">intent_survey_result</string>
 

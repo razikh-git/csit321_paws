@@ -1,7 +1,6 @@
 package com.example.csit321_paws;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -12,9 +11,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public abstract class BottomNavBarActivity extends AppCompatActivity {
 
     protected BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            = ((item) -> {
             switch (item.getItemId()) {
                 case R.id.navHome:
                     onClickHome();
@@ -28,10 +25,10 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
                 case R.id.navReturn:
                     onClickReturn();
                     return true;
+                default:
+                    return false;
             }
-            return false;
-        }
-    };
+        });
 
     public void onClickHome() {
         // Redirect to home screen.
@@ -43,8 +40,8 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
     public void onClickMaps() {
         // Redirect to maps screen.
         this.finish();
-        //Intent intent = new Intent(this, MappingActivity.class);
-        //startActivity(intent);
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 
     public void onClickWeather() {

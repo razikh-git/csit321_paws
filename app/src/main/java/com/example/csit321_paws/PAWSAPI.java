@@ -13,10 +13,13 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public final class PAWSAPI {
+final class PAWSAPI {
     private PAWSAPI() {}
 
-    public static final void updateLatestWeatherForecast(Context ctx, double lat, double lng) {
+    static final Double MS_TO_KMH = 3.6d;
+    static final Double MS_TO_MPH = 2.237d;
+
+    static void updateLatestWeatherForecast(Context ctx, double lat, double lng) {
 
         // Generate URL and request OWM data.
         try {
@@ -59,7 +62,7 @@ public final class PAWSAPI {
                     + "?lat=" + lat + "&lon=" + lng + "&units=" + sharedPref.getString("units", "metric")
                     + "&lang=" + ctx.getResources().getConfiguration().locale.getDisplayLanguage()
                     + "&mode=" + "json"
-                    + "&appid=" + ctx.getResources().getString(R.string.owm_default_api_key);
+                    + "&appid=" + ctx.getResources().getString(R.string.open_weather_maps_key);
 
             // Generate and post the request.
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -84,87 +87,48 @@ public final class PAWSAPI {
         }
     }
 
-    public static Drawable getWeatherDrawable(Context ctx, String icon) {
-        Log.println(Log.DEBUG, "snowpaws_pawsapi", "getWeatherDrawable");
-        Drawable drawable = null;
+    static Drawable getWeatherDrawable(Context ctx, String icon) {
         switch (icon) {
-            case "01": {
-                drawable = ctx.getDrawable(R.drawable.w01);
-                break;
-            }
-            case "01d": {
-                drawable = ctx.getDrawable(R.drawable.w01d);
-                break;
-            }
-            case "01n": {
-                drawable = ctx.getDrawable(R.drawable.w01n);
-                break;
-            }
-            case "02d": {
-                drawable = ctx.getDrawable(R.drawable.w02d);
-                break;
-            }
-            case "02n": {
-                drawable = ctx.getDrawable(R.drawable.w02n);
-                break;
-            }
-            case "03d": {
-                drawable = ctx.getDrawable(R.drawable.w03d);
-                break;
-            }
-            case "03n": {
-                drawable = ctx.getDrawable(R.drawable.w03n);
-                break;
-            }
-            case "04d": {
-                drawable = ctx.getDrawable(R.drawable.w04d);
-                break;
-            }
-            case "04n": {
-                drawable = ctx.getDrawable(R.drawable.w04n);
-                break;
-            }
-            case "9d": {
-                drawable = ctx.getDrawable(R.drawable.w09d);
-                break;
-            }
-            case "09n": {
-                drawable = ctx.getDrawable(R.drawable.w09n);
-                break;
-            }
-            case "10d": {
-                drawable = ctx.getDrawable(R.drawable.w10d);
-                break;
-            }
-            case "10n": {
-                drawable = ctx.getDrawable(R.drawable.w10n);
-                break;
-            }
-            case "11d": {
-                drawable = ctx.getDrawable(R.drawable.w11d);
-                break;
-            }
-            case "11n": {
-                drawable = ctx.getDrawable(R.drawable.w11n);
-                break;
-            }
-            case "13d": {
-                drawable = ctx.getDrawable(R.drawable.w13d);
-                break;
-            }
-            case "13n": {
-                drawable = ctx.getDrawable(R.drawable.w13n);
-                break;
-            }
-            case "50d": {
-                drawable = ctx.getDrawable(R.drawable.w50d);
-                break;
-            }
-            case "50n": {
-                drawable = ctx.getDrawable(R.drawable.w50n);
-                break;
-            }
+            case "01":
+                return ctx.getDrawable(R.drawable.w01);
+            case "01d":
+                return ctx.getDrawable(R.drawable.w01d);
+            case "01n":
+                return ctx.getDrawable(R.drawable.w01n);
+            case "02d":
+                return ctx.getDrawable(R.drawable.w02d);
+            case "02n":
+                return ctx.getDrawable(R.drawable.w02n);
+            case "03d":
+                return ctx.getDrawable(R.drawable.w03d);
+            case "03n":
+                return ctx.getDrawable(R.drawable.w03n);
+            case "04d":
+                return ctx.getDrawable(R.drawable.w04d);
+            case "04n":
+                return ctx.getDrawable(R.drawable.w04n);
+            case "9d":
+                return ctx.getDrawable(R.drawable.w09d);
+            case "09n":
+                return ctx.getDrawable(R.drawable.w09n);
+            case "10d":
+                return ctx.getDrawable(R.drawable.w10d);
+            case "10n":
+                return ctx.getDrawable(R.drawable.w10n);
+            case "11d":
+                return ctx.getDrawable(R.drawable.w11d);
+            case "11n":
+                return ctx.getDrawable(R.drawable.w11n);
+            case "13d":
+                return ctx.getDrawable(R.drawable.w13d);
+            case "13n":
+                return ctx.getDrawable(R.drawable.w13n);
+            case "50d":
+                return ctx.getDrawable(R.drawable.w50d);
+            case "50n":
+                return ctx.getDrawable(R.drawable.w50n);
+            default:
+                return null;
         }
-        return drawable;
     }
 }

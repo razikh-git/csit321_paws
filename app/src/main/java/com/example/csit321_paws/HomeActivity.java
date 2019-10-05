@@ -44,10 +44,6 @@ public class HomeActivity   extends
     private static final String[] REQUEST_PERMISSIONS_NETWORK = {
             Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE};
 
-
-    private static final Double MS_TO_KMH = 3.6d;
-    private static final Double MS_TO_MPH = 2.237d;
-
     private SharedPreferences mSharedPref;
     private SharedPreferences.Editor mSharedEditor;
     private LocationHandler mLocHandler;
@@ -289,12 +285,6 @@ public class HomeActivity   extends
             // Country code
             ((TextView)findViewById(R.id.txtCountry)).setText(
                     weatherForecastJSON.getJSONObject("city").getString("country"));
-            // Timezone GMT +/- n
-            /*
-            ((TextView)findViewById(R.id.txtTimezone)).setText(
-                    "GMT" + TimeUnit.HOURS.convert(
-                            mWeatherJSON.getInt("timezone"), TimeUnit.SECONDS));
-             */
             // GPS Coordinates
             char bearingLng = mLng > 0 ? 'E' : 'W';
             char bearingLat = mLat > 0 ? 'N' : 'S';
@@ -317,11 +307,11 @@ public class HomeActivity   extends
                     .getJSONObject("wind").getDouble("speed");
             if (mSharedPref.getString("units", "metric").equals("metric")) {
                 str = " km/h";
-                dbl *= MS_TO_MPH;
+                dbl *= PAWSAPI.MS_TO_MPH;
             }
             else {
                 str = " mph";
-                dbl *= MS_TO_KMH;
+                dbl *= PAWSAPI.MS_TO_KMH;
             }
             ((TextView)findViewById(R.id.txtWindSpeed)).setText(
                     String.valueOf(
@@ -379,18 +369,11 @@ public class HomeActivity   extends
                     break;
             }
 
-
-            // Fill in footer data.
-
-            // Time generated
+            // Time of forecast
             ((TextView)(findViewById(R.id.txtFooterTime))).setText(
                     DateFormat.format("HH:mm dd.MM.yyyy",
                     weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                             .getLong("dt") * 1000).toString());
-/*          // Date generated (currently sits at epoch)
-            ((TextView)findViewById(R.id.txtFooterDate)).setText(DateFormat.format("dd-MM-yyyy",
-                    mWeatherJSON.getLong("dt"))).toString());
-*/
         } catch (Exception e) {
             e.printStackTrace();
             return false;
