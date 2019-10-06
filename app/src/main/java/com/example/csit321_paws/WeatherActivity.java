@@ -84,9 +84,10 @@ public class WeatherActivity extends BottomNavBarActivity {
                     PAWSAPI.getWeatherDrawable(this, str));
 
             // Current temperature
-            str = weatherForecastJSON.getJSONArray("list").getJSONObject(0)
+            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(0)
                     .getJSONObject("main")
-                    .getString("temp");
+                    .getDouble("temp");
+            str = new DecimalFormat("#").format(dbl);
             str += mSharedPref.getString("units", "metric").equals("metric") ?
                     "°C" : "°F";
             ((TextView)findViewById(R.id.txtTempCurrent)).setText(str);
@@ -228,7 +229,8 @@ public class WeatherActivity extends BottomNavBarActivity {
                                 LinearLayout.LayoutParams.MATCH_PARENT);
                         view.setLayoutParams(params);
                         view.setBackgroundColor(ContextCompat.getColor(
-                                this, R.color.color_grey));
+                                this, R.color.color_primary_light));
+                        view.setAlpha(0.75f);
                         layParent.addView(view);
                     }
 

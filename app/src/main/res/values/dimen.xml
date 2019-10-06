@@ -9,6 +9,7 @@
 
     <dimen name="height_headers">50dp</dimen>
     <dimen name="height_navbars">50dp</dimen>
+    <dimen name="height_sheets">76dp</dimen>
     <dimen name="height_home_cards">70dp</dimen>
     <dimen name="height_banners_static">90dp</dimen>
     <dimen name="height_banners_contextual">70dp</dimen>

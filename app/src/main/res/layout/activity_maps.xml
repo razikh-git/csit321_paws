@@ -1,24 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapsActivity" >
+    tools:context=".MapsActivity">
 
-    <LinearLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/height_navbars"
         android:orientation="vertical" >
 
         <com.google.android.gms.maps.MapView
-            xmlns:map="http://schemas.android.com/apk/res-auto"
             android:id="@+id/mapView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/height_sheets" />
 
-    </LinearLayout>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/sheetView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:behavior_peekHeight="@dimen/height_sheets"
+            app:cardCornerRadius="0dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/laySheetHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/color_primary_dark"
+                    android:orientation="vertical"
+                    android:padding="@dimen/app_padding">
+
+                    <TextView
+                        android:id="@+id/txtSheetTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_txt_placeholder"
+                        android:textAppearance="@style/TextAppearance.Paws.Large"
+                        android:textColor="@color/color_on_primary_dark" />
+
+                    <TextView
+                        android:id="@+id/txtSheetCoordinates"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_txt_placeholder"
+                        android:textAppearance="@style/TextAppearance.Paws.Small"
+                        android:textColor="@color/color_on_primary_dark" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/app_padding">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:text="@string/app_txt_placeholder"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.Paws.Small"
+                        android:textColor="@color/color_black" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         xmlns:app="http://schemas.android.com/apk/res-auto"

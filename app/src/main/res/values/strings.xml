@@ -143,7 +143,10 @@
     <string name="ma_risk">Risk</string>
     <string name="title_activity_maps">Map</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Fetch Address ServiceIntent. -->
+    <string name="sv_fa_service_unavailable">The service encountered a critical error.</string>
+    <string name="sv_fa_invalid_lat_lng">An invalid lat/long value pair was provided.</string>
+    <string name="sv_fa_no_address">No address was found for the given coordinates.</string>
+    <string name="sv_fa_geocoder_unavailable">The service geocoder was unavailable.</string>
 
 </resources>

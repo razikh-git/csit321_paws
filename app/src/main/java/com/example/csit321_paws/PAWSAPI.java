@@ -20,7 +20,6 @@ final class PAWSAPI {
     static final Double MS_TO_MPH = 2.237d;
 
     static void updateLatestWeatherForecast(Context ctx, double lat, double lng) {
-
         // Generate URL and request OWM data.
         try {
             SharedPreferences sharedPref = ctx.getSharedPreferences(
@@ -38,7 +37,8 @@ final class PAWSAPI {
                 Log.println(Log.DEBUG, "snowpaws_pawsapi",
                         "Checking data recency.");
                 // Don't request new data if the current data was received in the last 3 hours.
-                long timestamp = lastWeather.getJSONArray("list").getJSONObject(0).getLong("dt");
+                long timestamp = lastWeather.getJSONArray("list").getJSONObject(0)
+                        .getLong("dt") * 1000;
 
                 // TODO resolve this, data is always considered outdated
                 if (System.currentTimeMillis() - timestamp < 36000000) {
@@ -50,8 +50,10 @@ final class PAWSAPI {
                 Log.println(Log.DEBUG, "snowpaws_pawsapi",
                         "Last weather data exists and is outdated.");
                 // Use the coordinates from the last weather data.
-                lat = lastWeather.getJSONObject("city").getJSONObject("coord").getDouble("lat");
-                lng = lastWeather.getJSONObject("city").getJSONObject("coord").getDouble("lon");
+                lat = lastWeather.getJSONObject("city").getJSONObject("coord")
+                        .getDouble("lat");
+                lng = lastWeather.getJSONObject("city").getJSONObject("coord")
+                        .getDouble("lon");
             }
 
             // Generate URL and request queue.
@@ -59,7 +61,8 @@ final class PAWSAPI {
             String url = ctx.getResources().getString(R.string.app_url_owm_api_root)
                     + "data/2.5/"
                     + "forecast"
-                    + "?lat=" + lat + "&lon=" + lng + "&units=" + sharedPref.getString("units", "metric")
+                    + "?lat=" + lat + "&lon=" + lng
+                    + "&units=" + sharedPref.getString("units", "metric")
                     + "&lang=" + ctx.getResources().getConfiguration().locale.getDisplayLanguage()
                     + "&mode=" + "json"
                     + "&appid=" + ctx.getResources().getString(R.string.open_weather_maps_key);
@@ -75,7 +78,7 @@ final class PAWSAPI {
 
                     },
                     (error) -> {
-                        Log.println(Log.DEBUG, "snowpaws_pawsapi", "stringRequest.onErrorResponse");
+                        Log.println(Log.ERROR, "snowpaws_pawsapi", "stringRequest.onErrorResponse");
 
                         // olive oil didn't work
                         error.printStackTrace();

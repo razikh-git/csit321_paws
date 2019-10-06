@@ -16,15 +16,12 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
-    // TODO : preload data and assets in this activity
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.mainAppTheme);
         super.onCreate(savedInstanceState);
 
         // Initialise config for image downloader.
-        File cacheDir = StorageUtils.getCacheDirectory(this);
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
 
@@ -35,13 +32,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Handle first-time launches.
         if (sharedPref.getBoolean("app_init", false)) {
-            Log.println(Log.DEBUG, "snowpaws_main",
-                    "app_init : true ? " + sharedPref.getBoolean("app_init", false));
             // Proceed straight to the home screen.
             enterHome();
         } else {
-            Log.println(Log.DEBUG, "snowpaws_main",
-                    "app_init : false ? " + sharedPref.getBoolean("app_init", false));
             // Initialise all preferences.
             sharedEditor.putInt("survey_last_question", 1);
             sharedEditor.putLong("profile_time_completed", 0);
