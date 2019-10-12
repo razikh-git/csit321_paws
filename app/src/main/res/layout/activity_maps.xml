@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/height_navbars"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:elevation="1000dp">
 
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView"
@@ -19,8 +20,204 @@
             android:layout_height="match_parent"
             android:paddingBottom="@dimen/height_sheets" />
 
+        <!-- Floating Top Content Container. -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical">
+
+            <!-- Search Bar. -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSearch"
+                style="@style/Widget.MaterialComponents.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/app_spacing">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/app_padding_half">
+
+                    <ImageView
+                        android:id="@+id/imgSearch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/places_ic_search" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:hint="@string/ma_search_hint"
+                        app:boxStrokeWidth="0dp"
+                        app:endIconMode="clear_text">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPostalAddress"
+                            android:selectAllOnFocus="true"
+                            android:singleLine="true" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Map Type Popout Button. -->
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnMapTypePopout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:src="@drawable/ic_visibility"
+                android:visibility="visible" />
+
+            <!-- Map Type Popout Card. -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardMapType"
+                style="@style/Widget.MaterialComponents.CardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/app_padding">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ma_map_type"
+                        android:textAllCaps="true"
+                        android:textAppearance="@style/TextAppearance.Paws.Medium"
+                        android:textColor="@color/color_black" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <ImageButton
+                                android:id="@+id/btnMapTypeDefault"
+                                android:layout_width="@dimen/dimen_icon_huge"
+                                android:layout_height="@dimen/dimen_icon_huge"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="@dimen/text_spacing"
+                                android:layout_marginBottom="@dimen/text_spacing"
+                                android:adjustViewBounds="true"
+                                android:background="@drawable/rounded_rectangle"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/map_default" />
+
+                            <TextView
+                                android:id="@+id/txtMapTypeDefault"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/ma_default"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Small"
+                                android:textColor="@color/color_grey" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="@dimen/app_spacing"
+                            android:layout_height="match_parent" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <ImageButton
+                                android:id="@+id/btnMapTypeSatellite"
+                                android:layout_width="@dimen/dimen_icon_huge"
+                                android:layout_height="@dimen/dimen_icon_huge"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="@dimen/text_spacing"
+                                android:layout_marginBottom="@dimen/text_spacing"
+                                android:adjustViewBounds="true"
+                                android:background="@drawable/rounded_rectangle"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/map_satellite" />
+
+                            <TextView
+                                android:id="@+id/txtMapTypeSatellite"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/ma_satellite"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Small"
+                                android:textColor="@color/color_grey" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="@dimen/app_spacing"
+                            android:layout_height="match_parent" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <ImageButton
+                                android:id="@+id/btnMapTypeTerrain"
+                                android:layout_width="@dimen/dimen_icon_huge"
+                                android:layout_height="@dimen/dimen_icon_huge"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="@dimen/text_spacing"
+                                android:layout_marginBottom="@dimen/text_spacing"
+                                android:adjustViewBounds="true"
+                                android:background="@drawable/rounded_rectangle"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/map_terrain" />
+
+                            <TextView
+                                android:id="@+id/txtMapTypeTerrain"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/ma_terrain"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Small"
+                                android:textColor="@color/color_grey" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <!-- Expandable/Hideable Bottom Sheet. -->
+
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/sheetView"
+            style="@style/Widget.MaterialComponents.CardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:behavior_peekHeight="@dimen/height_sheets"
@@ -45,7 +242,6 @@
                         android:id="@+id/txtSheetTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/app_txt_placeholder"
                         android:textAppearance="@style/TextAppearance.Paws.Large"
                         android:textColor="@color/color_on_primary_dark" />
 
@@ -53,7 +249,6 @@
                         android:id="@+id/txtSheetCoordinates"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/app_txt_placeholder"
                         android:textAppearance="@style/TextAppearance.Paws.Small"
                         android:textColor="@color/color_on_primary_dark" />
 
@@ -63,15 +258,90 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/app_padding">
+                    android:padding="@dimen/app_padding" >
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:text="@string/app_txt_placeholder"
-                        android:textAlignment="center"
-                        android:textAppearance="@style/TextAppearance.Paws.Small"
-                        android:textColor="@color/color_black" />
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                                android:id="@+id/btnMapOverlayWind"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:adjustViewBounds="true"
+                                android:src="@drawable/ic_weather_windy" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="@dimen/app_padding_half"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Small"
+                                android:textColor="@color/color_primary_dark"
+                                android:text="@string/ma_wind" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                                android:id="@+id/btnMapOverlayPrecip"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:adjustViewBounds="true"
+                                android:src="@drawable/ic_weather_rainy_snowy" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="@dimen/app_padding_half"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Small"
+                                android:textColor="@color/color_primary_dark"
+                                android:text="@string/ma_precip" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                                android:id="@+id/btnMapOverlayRisk"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:adjustViewBounds="true"
+                                android:src="@drawable/logo" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="@dimen/app_padding_half"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Small"
+                                android:textColor="@color/color_primary_dark"
+                                android:text="@string/ma_risk" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -81,8 +351,9 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
+    <!-- Bottom Navbar. -->
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/bottomNavigation"
         style="@style/Widget.Paws.BottomNavigationView"
         android:layout_width="match_parent"

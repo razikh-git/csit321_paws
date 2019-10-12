@@ -58,7 +58,7 @@ final class PAWSAPI {
 
             // Generate URL and request queue.
             RequestQueue queue = Volley.newRequestQueue(ctx);
-            String url = ctx.getResources().getString(R.string.app_url_owm_api_root)
+            String url = ctx.getResources().getString(R.string.app_url_owm_weather_root)
                     + "data/2.5/"
                     + "forecast"
                     + "?lat=" + lat + "&lon=" + lng

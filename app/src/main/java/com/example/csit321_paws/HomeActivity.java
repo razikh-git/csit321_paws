@@ -26,6 +26,7 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -353,16 +354,18 @@ public class HomeActivity   extends
                 case "Drizzle":
                 case "Rain":
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
-                                    .getJSONObject("rain").getString("3h")
+                            new DecimalFormat("#.##").format(
+                                    weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                    .getJSONObject("rain").getDouble("3h"))
                             + "mm");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
                             "last 3 hrs");
                     break;
                 case "Snow" :
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
-                                    .getJSONObject("snow").getString("3h")
+                            new DecimalFormat("#.##").format(
+                                    weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                    .getJSONObject("snow").getString("3h"))
                             + "mm");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
                             "last 3 hrs");

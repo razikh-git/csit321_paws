@@ -12,8 +12,21 @@
     <string name="app_default_loc_lat" translatable="false">-34.43</string>
 
     <!-- Open Weather Maps. -->
-    <string name="app_url_owm_root" translatable="false">https://openweathermap.org/</string>
-    <string name="app_url_owm_api_root" translatable="false">https://api.openweathermap.org/</string>
+    <string name="app_url_owm_root" translatable="false">
+        https://openweathermap.org/
+    </string>
+    <string name="app_url_owm_weather_root" translatable="false">
+        https://api.openweathermap.org/
+    </string>
+    <string name="app_url_owm_map_root" translatable="false">
+        https://tile.openweathermap.org/map/
+    </string>
+
+    <string name="app_url_map_layer_cloud" translatable="false">clouds_new</string>
+    <string name="app_url_map_layer_precip" translatable="false">precipitation_new</string>
+    <string name="app_url_map_layer_pressure" translatable="false">pressure_new</string>
+    <string name="app_url_map_layer_wind" translatable="false">wind_new</string>
+    <string name="app_url_map_layer_temp" translatable="false">temp_new</string>
 
     <!-- Survey data. -->
     <string name="intent_survey_result" translatable="false">intent_survey_result</string>
@@ -139,9 +152,13 @@
 
     <!-- Mapping Activity. -->
     <string name="ma_wind">Wind</string>
-    <string name="ma_precip">Precip</string>
-    <string name="ma_risk">Risk</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="ma_precip">Precipitation</string>
+    <string name="ma_risk">Risk Analysis</string>
+    <string name="ma_search_hint">Search</string>
+    <string name="ma_map_type">Map Type</string>
+    <string name="ma_default">Default</string>
+    <string name="ma_satellite">Satellite</string>
+    <string name="ma_terrain">Terrain</string>
 
     <!-- Fetch Address ServiceIntent. -->
     <string name="sv_fa_service_unavailable">The service encountered a critical error.</string>
