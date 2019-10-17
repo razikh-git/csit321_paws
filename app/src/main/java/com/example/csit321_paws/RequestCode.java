@@ -8,4 +8,8 @@ interface RequestCode {
     int PERMISSION_NETWORK_STATE = 4;
 
     int SURVEY_CONTINUE = 0;
+
+    int REQUEST_WEATHER_BY_LOCATION = 0;
+    String PACKAGE_NAME = "com.example.csit321_paws";
+    String EXTRA_LATLNG = PACKAGE_NAME + ".extra.LOCATION";
 }

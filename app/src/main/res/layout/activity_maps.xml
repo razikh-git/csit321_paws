@@ -36,7 +36,9 @@
                 style="@style/Widget.MaterialComponents.CardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/app_spacing">
+                android:layout_marginTop="@dimen/app_spacing"
+                android:layout_marginStart="@dimen/app_spacing"
+                android:layout_marginEnd="@dimen/app_spacing">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -78,7 +80,48 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
+                android:layout_marginTop="@dimen/app_padding"
+                android:layout_marginEnd="@dimen/app_padding"
+                android:layout_marginBottom="@dimen/app_padding"
                 android:src="@drawable/ic_visibility"
+                android:visibility="visible" />
+
+            <!-- Map Polygon Draw Button. -->
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnMapPolyDraw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/app_padding"
+                android:layout_marginBottom="@dimen/app_padding"
+                android:src="@drawable/ic_draw"
+                android:visibility="visible" />
+
+            <!-- Map Polygon Erase Button. -->
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnMapPolyErase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/app_padding"
+                android:layout_marginBottom="@dimen/app_padding"
+                android:src="@drawable/ic_eraser"
+                android:tint="@color/color_on_primary_dark"
+                android:visibility="gone" />
+
+            <!-- Map Weather Redirect Button. -->
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnMapWeatherRedirect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="@dimen/app_padding"
+                android:layout_marginBottom="@dimen/app_padding"
+                android:src="@drawable/ic_satellite"
+                android:tint="@color/color_on_primary_dark"
                 android:visibility="visible" />
 
             <!-- Map Type Popout Card. -->
@@ -221,6 +264,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:behavior_peekHeight="@dimen/height_sheets"
+            app:behavior_hideable="false"
             app:cardCornerRadius="0dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 

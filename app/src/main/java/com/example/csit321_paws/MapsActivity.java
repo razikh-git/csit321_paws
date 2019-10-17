@@ -1,6 +1,7 @@
 package com.example.csit321_paws;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
@@ -22,8 +23,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Dash;
+import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
@@ -36,19 +44,22 @@ import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED;
-
-public class MapsActivity extends BottomNavBarActivity
-        implements  OnMapReadyCallback {
+public class MapsActivity
+        extends BottomNavBarActivity
+        implements OnMapReadyCallback
+{
 
     SharedPreferences mSharedPref;
     SharedPreferences.Editor mSharedEditor;
@@ -63,10 +74,13 @@ public class MapsActivity extends BottomNavBarActivity
 
     private static final int MAP_TILE_WIDTH = 256;
     private static final int BTN_STROKE_WIDTH = 5;
+    private static final int POLY_STROKE_WIDTH = 10;
+    private static final int POLY_SELECT_RANGE = 1000000;
 
     private AddressResultReceiver mResultReeceiver;
     private ArrayList<Address> mAddressResult;
     protected Location mLastLocation;
+    protected Location mMarkedLocation;
 
     // The entry points to the Places API.
     private GeoDataClient mGeoDataClient;
@@ -78,8 +92,13 @@ public class MapsActivity extends BottomNavBarActivity
     private MapView mMapView;
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
-    private TileOverlay mMapOverlay;
 
+    private boolean mIsPolyDrawing;
+
+    private Polyline mPolyLine;
+    private List<Polygon> mPolyList = new ArrayList<>();
+
+    private Map<String, TileOverlay> mTileOverlayMap;
     private Map<String, TileProvider> mTileProviderMap = new HashMap<>();
     private Map<String, TileOverlayOptions> mTileOverlayOptionsMap = new HashMap<>();
 
@@ -91,7 +110,6 @@ public class MapsActivity extends BottomNavBarActivity
         // Load global preferences.
         mSharedPref = this.getSharedPreferences(
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
-        mSharedEditor = mSharedPref.edit();
 
         // Load saved state.
         Bundle bundle = null;
@@ -124,6 +142,9 @@ public class MapsActivity extends BottomNavBarActivity
         // Button functionality.
         findViewById(R.id.laySheetHeader).setOnClickListener((view) -> {onSheetHeaderClick(view);});
         //findViewById(R.id.cardSearch).setOnClickListener((view) -> {onSearchClick(view);});
+        findViewById(R.id.btnMapPolyDraw).setOnClickListener((view) -> {onMapPolyDrawClick(view);});
+        findViewById(R.id.btnMapPolyErase).setOnClickListener((view) -> {onMapPolyEraseClick(view);});
+        findViewById(R.id.btnMapWeatherRedirect).setOnClickListener((view) -> {onMapWeatherRedirectClick(view);});
         findViewById(R.id.btnMapTypePopout).setOnClickListener((view) -> {onMapTypePopoutClick(view);});
         findViewById(R.id.btnMapTypeDefault).setOnClickListener((view) -> {onMapTypeButtonClick(view);});
         findViewById(R.id.btnMapTypeSatellite).setOnClickListener((view) -> {onMapTypeButtonClick(view);});
@@ -140,10 +161,93 @@ public class MapsActivity extends BottomNavBarActivity
         mMapView.getMapAsync(this);
     }
 
+    private void onMapWeatherRedirectClick(View view) {
+        // Redirect to weather screen with data from the current marker.
+        Intent intent = new Intent(this, WeatherActivity.class);
+        intent.putExtra(RequestCode.EXTRA_LATLNG,
+                new LatLng(mMarkedLocation.getLatitude(), mMarkedLocation.getLongitude()));
+        startActivityForResult(intent, RequestCode.REQUEST_WEATHER_BY_LOCATION);
+    }
+
+    private void onMapPolyDrawClick(View view) {
+
+        // TODO change colour scheme of buttons
+
+        if (mMap != null) {
+            if (mIsPolyDrawing) {
+                // Reset interface layout.
+                findViewById(R.id.btnMapPolyDraw).setBackgroundColor(
+                        ContextCompat.getColor(this, R.color.color_on_primary_dark));
+                findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
+                        getDrawable(R.drawable.ic_draw_selected));
+                findViewById(R.id.btnMapPolyErase).setVisibility(View.GONE);
+                findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.VISIBLE);
+                // Reset click event listeners.
+                mMap.setOnMapClickListener((latLng) -> {
+                    onMapDefaultClick(latLng);});
+                mMap.setOnMapLongClickListener((latLng) -> {
+                    onMapDefaultLongClick(latLng);});
+            } else {
+                // Show contextual interface.
+                findViewById(R.id.btnMapPolyDraw).setBackgroundColor(
+                        ContextCompat.getColor(this, R.color.color_primary_dark));
+                findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
+                        getDrawable(R.drawable.ic_draw));
+                findViewById(R.id.btnMapPolyErase).setVisibility(View.VISIBLE);
+                findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
+                // Use click event listeners for live drawing.
+                mMap.setOnMapClickListener((latLng) -> {
+                    onMapDrawingClick(latLng);});
+                mMap.setOnMapLongClickListener((latLng) -> {
+                    onMapDrawingLongClick(latLng);});
+            }
+        }
+
+        mIsPolyDrawing = !mIsPolyDrawing;
+    }
+
+    private void onMapPolyEraseClick(View view) {
+
+        // TODO : selective removal of polygons
+
+        // Clear all screen polygons and polylines
+        mPolyLine.setPoints(new ArrayList<>());
+        for (Polygon polygon : mPolyList) {
+            polygon.remove();
+        }
+        mPolyList.clear();
+    }
+
     private void onMapTypePopoutClick(View view) {
-        // Hide the FAB and show the map type picker popout.
-        findViewById(R.id.btnMapTypePopout).setVisibility(View.GONE);
-        findViewById(R.id.cardMapType).setVisibility(View.VISIBLE);
+        togglePopoutButton();
+    }
+
+    private void togglePopoutButton() {
+        if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
+            // Change button style.
+            ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
+                    ContextCompat.getColor(this, R.color.color_primary_dark));
+            ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setImageDrawable(
+                    getDrawable(R.drawable.ic_visibility));
+
+            // Reveal other FABs and hide the map type picker popout.
+            findViewById(R.id.btnMapPolyDraw).setVisibility(View.VISIBLE);
+            findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.VISIBLE);
+            findViewById(R.id.cardMapType).setVisibility(View.GONE);
+        } else {
+            // Change button style.
+            ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
+                    ContextCompat.getColor(this, R.color.color_on_primary_dark));
+            ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setImageDrawable(
+                    getDrawable(R.drawable.ic_visibility_selected));
+
+            // Hide other FABs and show the map type picker popout.
+            mIsPolyDrawing = true;
+            onMapPolyDrawClick(null);
+            findViewById(R.id.btnMapPolyDraw).setVisibility(View.GONE);
+            findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
+            findViewById(R.id.cardMapType).setVisibility(View.VISIBLE);
+        }
     }
 
     private void onMapTypeButtonClick(View view) {
@@ -151,7 +255,6 @@ public class MapsActivity extends BottomNavBarActivity
         int type;
         int idBtn;
         int idTxt;
-        String layer;
         switch (view.getId()) {
             case R.id.btnMapTypeDefault: {
                 idBtn = R.id.btnMapTypeDefault;
@@ -174,6 +277,9 @@ public class MapsActivity extends BottomNavBarActivity
             default:
                 return;
         }
+
+        if (mMap.getMapType() == type)
+            return;
 
         // Reset element styles.
         findViewById(R.id.btnMapTypeDefault).setPadding(0, 0, 0, 0);
@@ -217,50 +323,45 @@ public class MapsActivity extends BottomNavBarActivity
                 break;
             }
         }
-        // Replace the current OpenWeatherMaps overlay.
+        // Toggle the selected overlay.
         if (str != null) {
-
-            // TODO fix layer stacking, check does not hold
-
-            TileOverlay tileOverlay = mMap.addTileOverlay(mTileOverlayOptionsMap.get(str));
-            if (mMapOverlay != null) {
-                if (mMapOverlay.getId().equals(tileOverlay.getId())) {
-                    // Remove the overlay if the same button is pressed.
-                    mMapOverlay.remove();
-                    tileOverlay.remove();
-                    mMapOverlay = null;
-                    return;
-                }
-            }
-            // Update the overlay otherwise.
-            mMapOverlay = tileOverlay;
+            mTileOverlayMap.get(str).setVisible(!mTileOverlayMap.get(str).isVisible());
         }
     }
 
     private void onMapClick(LatLng latLng) {
-
         // Manage interface elements.
 
         if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
             // Hide the map type picker popout and show the popout button.
-            findViewById(R.id.cardMapType).setVisibility(View.GONE);
-            findViewById(R.id.btnMapTypePopout).setVisibility(View.VISIBLE);
-        } else {
+            togglePopoutButton();
+        }
 
-            BottomSheetBehavior sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.sheetView));
-            if (sheetBehavior.getState() != STATE_COLLAPSED) {
-                // Show the search bar and bottom sheet.
-                findViewById(R.id.cardSearch).setVisibility(View.VISIBLE);
-                sheetBehavior.setState(STATE_COLLAPSED);
-            } else {
-                // Hide the search bar and bottom sheet.
-                findViewById(R.id.cardSearch).setVisibility(View.GONE);
-                sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            }
+        // TODO ptOOD ::: p mmMake the hide functionality work with cardSearch.visible==false
+
+        BottomSheetBehavior sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.sheetView));
+        if (sheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
+            // Show the search bar and bottom sheet.
+            findViewById(R.id.cardSearch).setVisibility(View.VISIBLE);
+            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            // Adjust the map to fit.
+            mMapView.setPadding(0, 0, 0,
+                    (int)getResources().getDimension(R.dimen.height_sheets));
+        } else {
+            // Hide the search bar and bottom sheet.
+            findViewById(R.id.cardSearch).setVisibility(View.GONE);
+            // TODO : get hidden functionality working for fullscreen map view
+            //sheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            // Expand the map to fill.
+            mMapView.setPadding(0, 0, 0, 0);
         }
     }
 
-    private void onMapLongClick(LatLng latLng) {
+    private void onMapDefaultClick(LatLng latLng) {
+        onMapClick(latLng);
+    }
+
+    private void onMapDefaultLongClick(LatLng latLng) {
         // Remove old markers.
         mMap.clear();
 
@@ -275,16 +376,63 @@ public class MapsActivity extends BottomNavBarActivity
         startIntentService();
     }
 
+    private void onMapDrawingClick(LatLng latLng) {
+        //onMapClick(latLng);
+
+        List<LatLng> polyPoints = mPolyLine.getPoints();
+        for (LatLng point : polyPoints) {
+
+            // Identify whether the user closed the polygon.
+            float[] results = new float[1];
+            Location.distanceBetween(latLng.latitude, latLng.longitude,
+                    point.latitude, point.longitude,
+                    results);
+
+            double range = POLY_SELECT_RANGE / mCameraPosition.zoom;
+            if (results[0] < range) {
+                // Generate a new polygon from the points.
+                PolygonOptions polyOptions = new PolygonOptions();
+                polyOptions.strokeWidth(POLY_STROKE_WIDTH);
+
+                // TODO : add fill+stroke colour algorithmically by depth
+
+                for (LatLng p : polyPoints) {
+                    polyOptions.add(p);
+                }
+                mPolyList.add(mMap.addPolygon(polyOptions));
+
+                // Clear the polyline from the map.
+                mPolyLine.setPoints(new ArrayList<>());
+                return;
+            }
+        }
+
+        // Add another coordinate point to the polyline.
+        polyPoints.add(latLng);
+        mPolyLine.setPoints(polyPoints);
+    }
+
+    private void onMapDrawingLongClick(LatLng latLng) {
+        List<LatLng> polyPoints = mPolyLine.getPoints();
+        if (polyPoints.size() > 0) {
+            polyPoints.remove(polyPoints.size() - 1);
+            mPolyLine.setPoints(polyPoints);
+        }
+    }
+
     private void onSearchClick(View view) {
 
     }
 
     private void onSheetHeaderClick(View view) {
         BottomSheetBehavior sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.sheetView));
-        if (sheetBehavior.getState() != STATE_COLLAPSED)
-            sheetBehavior.setState(STATE_COLLAPSED);
+        if (sheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED)
+            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         else
             sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+    private void onCameraMove() {
+        mCameraPosition = mMap.getCameraPosition();
     }
 
     private void initSheet() {
@@ -326,6 +474,14 @@ public class MapsActivity extends BottomNavBarActivity
             }
         }
 
+        // Update the map:
+
+        // Add a marker in the current location and move the camera.
+        mMarkedLocation = mLastLocation;
+        LatLng pos = new LatLng(mLastLocation.getLongitude(), mLastLocation.getLatitude());
+        mMap.addMarker(new MarkerOptions().position(pos));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
+
         // Update the bottom sheet:
 
         // Set the location title
@@ -334,12 +490,12 @@ public class MapsActivity extends BottomNavBarActivity
         str = mAddressResult.get(0).getAddressLine(0).split(", ", 3)[1];
         ((TextView)findViewById(R.id.txtSheetTitle)).setText(str);
 
-        // Set the coordinates display
+        // Set the coordinates display.
         str = new DecimalFormat("#.##").format(mAddressResult.get(0).getLongitude());
         str += " " + new DecimalFormat("#.##").format(mAddressResult.get(0).getLatitude());
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
 
-        // Set the coordinates display
+        // Set the coordinates display.
         double lng = mAddressResult.get(0).getLongitude();
         double lat = mAddressResult.get(0).getLatitude();
         char bearingLng = lng > 0 ? 'E' : 'W';
@@ -374,9 +530,12 @@ public class MapsActivity extends BottomNavBarActivity
         mTileOverlayOptionsMap.put(
                 key, new TileOverlayOptions().visible(true).fadeIn(true)
                         .tileProvider(mTileProviderMap.get(key)));
+        mTileOverlayMap.put(
+                key, mMap.addTileOverlay(mTileOverlayOptionsMap.get(key)));
     }
 
     private void initTileOverlays() {
+        mTileOverlayMap = new HashMap<>();
         String str = "";
         try {
             // Wind layer
@@ -407,9 +566,15 @@ public class MapsActivity extends BottomNavBarActivity
 
         mMap = googleMap;
 
+        // Camera event listener.
+        mCameraPosition = mMap.getCameraPosition();
+        googleMap.setOnCameraMoveListener(() -> {onCameraMove();});
+
         // Initialise click event listeners.
-        googleMap.setOnMapClickListener((latLng) -> {onMapClick(latLng);});
-        googleMap.setOnMapLongClickListener((latLng) -> {onMapLongClick(latLng);});
+        googleMap.setOnMapClickListener((latLng) -> {
+            onMapDefaultClick(latLng);});
+        googleMap.setOnMapLongClickListener((latLng) -> {
+            onMapDefaultLongClick(latLng);});
 
         // Highlight elements for the default map type.
         int pad = BTN_STROKE_WIDTH;
@@ -418,21 +583,20 @@ public class MapsActivity extends BottomNavBarActivity
                 ContextCompat.getColor(this, R.color.color_primary_dark));
 
         // Set the map type.
-        mMap.setMapType(GoogleMap.MAP_TYPE_NONE);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        // Setup map polyline graphics.
+        PolylineOptions polyOptions = new PolylineOptions();
+        polyOptions.color(ContextCompat.getColor(this, R.color.color_primary_light));
+        polyOptions.pattern(Arrays.asList(
+                new Dash(30), new Gap(20)
+        ));
+        polyOptions.startCap(new RoundCap());
+        polyOptions.endCap(new RoundCap());
+        mPolyLine = mMap.addPolyline(polyOptions);
 
         // Setup map overlays.
         initTileOverlays();
-
-        // Add a marker in the current location and move the camera
-
-        // TODO that
-
-        // Add a marker in Sydney and move the camera
-        /*
-        LatLng pos = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(pos).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
-        */
     }
 
      class AddressResultReceiver extends ResultReceiver {
@@ -447,7 +611,7 @@ public class MapsActivity extends BottomNavBarActivity
                 return;
             }
             String error = resultData.getString(FetchAddressCode.RESULT_DATA_KEY);
-            if (error == "") {
+            if (error.equals("")) {
                 mAddressResult = resultData.getParcelableArrayList(FetchAddressCode.RESULT_ADDRESSLIST_KEY);
             } else {
                 // TODO Display an error message.

@@ -1,22 +1,126 @@
 {
-  "1": "I don't talk a lot.",
-  "2": "I like order.",
-  "3": "I have a vivid imagination.",
-  "4": "I sympathise with others' feelings.",
-  "5": "I get upset easily.",
-  "6": "I am the life of the party.",
-  "7": "I often forget to put things back in their proper place.",
-  "8": "I have difficulty understanding abstract ideas.",
-  "9": "I am not really interested in others.",
-  "10": "I am relaxed most of the time.",
-  "11": "I keep in the background.",
-  "12": "I make a mess of things.",
-  "13": "I do not have a good imagination.",
-  "14": "I am not interested in other peoples' problems.",
-  "15": "I seldom feel blue.",
-  "16": "I talk to a lot of different people at parties.",
-  "17": "I get chores done right away.",
-  "18": "I am not interested in abstract ideas.",
-  "19": "I feel others' emotions.",
-  "20": "I have frequent mood swings."
+    "factors": [
+        {
+            "name": "Extraversion",
+            "alpha": 0.77
+        },
+        {
+            "name": "Agreeableness",
+            "alpha": 0.70
+        },
+        {
+            "name": "Conscientiousness",
+            "alpha": 0.69
+        },
+        {
+            "name": "Neuroticism",
+            "alpha": 0.68
+        },
+        {
+            "name": "Imagination",
+            "alpha": 0.65
+        }
+    ],
+    "questions": [
+        {
+            "statement": "I don't talk a lot.",
+            "negative": true,
+            "factor": 1
+        },
+        {
+            "statement": "I like order.",
+            "negative": false,
+            "factor": 3
+        },
+        {
+            "statement": "I have a vivid imagination.",
+            "negative": false,
+            "factor": 5
+        },
+        {
+            "statement": "I sympathise with others' feelings.",
+            "negative": false,
+            "factor": 2
+        },
+        {
+            "statement": "I get upset easily.",
+            "negative": false,
+            "factor": 4
+        },
+        {
+            "statement": "I am the life of the party.",
+            "negative": true,
+            "factor": 1
+        },
+        {
+            "statement": "I often forget to put things back in their proper place.",
+            "negative": false,
+            "factor": 3
+        },
+        {
+            "statement": "I have difficulty understanding abstract ideas.",
+            "negative": true,
+            "factor": 5
+        },
+        {
+            "statement": "I am not really interested in others.",
+            "negative": true,
+            "factor": 2
+        },
+        {
+            "statement": "I am relaxed most of the time.",
+            "negative": true,
+            "factor": 4
+        },
+        {
+            "statement": "I keep in the background.",
+            "negative": true,
+            "factor": 1
+        },
+        {
+            "statement": "I make a mess of things.",
+            "negative": true,
+            "factor": 3
+        },
+        {
+            "statement": "I do not have a good imagination.",
+            "negative": true,
+            "factor": 5
+        },
+        {
+            "statement": "I am not interested in other peoples' problems.",
+            "negative": true,
+            "factor": 2
+        },
+        {
+            "statement": "I seldom feel blue.",
+            "negative": true,
+            "factor": 4
+        },
+        {
+            "statement": "I talk to a lot of different people at parties.",
+            "negative": false,
+            "factor": 1
+        },
+        {
+            "statement": "I get chores done right away.",
+            "negative": false,
+            "factor": 3
+        },
+        {
+            "statement": "I am not interested in abstract ideas.",
+            "negative": true,
+            "factor": 5
+        },
+        {
+            "statement": "I feel others' emotions.",
+            "negative": false,
+            "factor": 2
+        },
+        {
+            "statement": "I have frequent mood swings."
+            "negative": false,
+            "factor": 4
+        }
+    }
 }

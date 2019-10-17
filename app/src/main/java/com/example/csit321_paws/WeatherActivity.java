@@ -2,33 +2,32 @@ package com.example.csit321_paws;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 
 import static com.example.csit321_paws.PAWSAPI.MS_TO_KMH;
 import static com.example.csit321_paws.PAWSAPI.MS_TO_MPH;
 
-public class WeatherActivity extends BottomNavBarActivity {
+public class WeatherActivity
+        extends BottomNavBarActivity
+        implements WeatherHandler.WeatherForecastReceivedListener
+{
 
     SharedPreferences mSharedPref;
     SharedPreferences.Editor mSharedEditor;
@@ -47,23 +46,48 @@ public class WeatherActivity extends BottomNavBarActivity {
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         // Initialise all weather data.
-        initWeatherDisplay();
+        LatLng latLng = null;
+        try {
+            if (savedInstanceState == null) {
+                Bundle extras = getIntent().getExtras();
+                if (extras != null) {
+                    latLng = extras.getParcelable(RequestCode.EXTRA_LATLNG);
+                }
+            }
+            if (latLng == null) {
+                JSONObject lastWeather = new JSONObject(
+                        mSharedPref.getString("last_weather_json", "{}"));
+                latLng = new LatLng(lastWeather.getJSONObject("city").getJSONObject("coord")
+                        .getDouble("lat"),
+                        lastWeather.getJSONObject("city").getJSONObject("coord")
+                                .getDouble("lon"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (latLng != null) {
+            // Call and await an update to the weather JSON string in prefs.
+            WeatherHandler.updateLatestWeatherForecast(this, latLng);
+        } else {
+            // TODO toss errors
+        }
     }
 
-    private boolean initWeatherDisplay() {
+    public void onWeatherForecastReceived(LatLng latLng, String response) {
+        initWeatherDisplay(latLng, response);
+    }
+
+    private boolean initWeatherDisplay(LatLng latLng, String response) {
         String str;
         Double dbl;
-        Long lon;
+        long lon;
 
         final int index = 8;
         final int pad = Math.round(getResources().getDimension(R.dimen.text_spacing));
 
-        double lat = Double.parseDouble(getResources().getString(R.string.app_default_loc_lat));
-        double lng = Double.parseDouble(getResources().getString(R.string.app_default_loc_lng));
-
         try {
-            PAWSAPI.updateLatestWeatherForecast(this, lat, lng);
-            JSONObject weatherForecastJSON = new JSONObject(mSharedPref.getString("last_weather_json", "{}"));
+            // Fetch the latest weather forecast for the provided location.
+            JSONObject weatherForecastJSON = new JSONObject(response);
 
             // Weather title
             str = weatherForecastJSON.getJSONObject("city")
@@ -146,12 +170,12 @@ public class WeatherActivity extends BottomNavBarActivity {
                         dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
                                 .getJSONObject("rain").getDouble("3h");
                         // TODO rain in inches
-                        str = new DecimalFormat("#").format(dbl) + "mm";
+                        str = new DecimalFormat("#.##").format(dbl) + "mm";
 
-                    } else {
-                        // Clear weather, no notable measurements.
-                        str = "";
                     }
+                } else if (id == 800) {
+                    // Clear weather, no notable measurements.
+                    str = "";
                 } else {
                     // Cloudy weather, measurements in percentage coverage.
                     dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
@@ -212,7 +236,7 @@ public class WeatherActivity extends BottomNavBarActivity {
             // todo rather than the current setup; which continues from 12hrs after the current time
 
             layParent = findViewById(R.id.layWeatherWeekly);
-            for (int i = index + 1; i < 40; ++i) {
+            for (int i = index; i < 40; ++i) {
                 Log.println(Log.DEBUG, "snowpaws_weather",
                         "Starting element " + i + ", day " + i / 8 + ".");
                 if ((i + 1) % 8 == 0) {
@@ -246,7 +270,7 @@ public class WeatherActivity extends BottomNavBarActivity {
                     ImageView img;
 
                     // Write the day's title.
-                    lon = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                    lon = weatherForecastJSON.getJSONArray("list").getJSONObject(i - 8)
                             .getLong("dt") * 1000;
                     str = new DateFormat().format("E", lon).toString();
                     txt = new TextView(this);
@@ -402,12 +426,12 @@ public class WeatherActivity extends BottomNavBarActivity {
                                 }
                             }
                             // TODO rain in inches
-                            if (dbl > 0d)
+                            if (dbl > 0d) {
                                 str = new DecimalFormat("#.##").format(dbl) + "mm";
-
-                        } else {
-                            // Clear weather, no notable measurements.
+                            }
                         }
+                    } else if (id == 800) {
+                        // Clear skies, no notable measurements.
                     } else {
                         // Cloudy weather, measurements in percentage coverage.
                         dbl = 0d;

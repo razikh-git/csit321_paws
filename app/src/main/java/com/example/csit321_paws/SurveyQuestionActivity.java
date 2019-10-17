@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
@@ -23,6 +25,8 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
     SharedPreferences mSharedPref;
     SharedPreferences.Editor mSharedEditor;
+
+    private static final String TAG = "snowpaws_sq";
 
     private static final String TAG_PROGRESS = "progress";
     private int mIndex;
@@ -79,8 +83,10 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         if (mSurvey != null) {
             // Question title:
             try {
+                String txt = mSurvey.getJSONArray("questions").getJSONObject(index)
+                        .getString("statement");
                 ((TextView)findViewById(R.id.txtQuestion)).setText(
-                        mSurvey.getString(String.valueOf(index)));
+                        txt);
             } catch (Exception e) {
                 e.printStackTrace();
                 ((TextView)findViewById(R.id.txtQuestion)).setText(
@@ -138,7 +144,6 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         );
 
         // Load survey questionnaire data.
-        TextView txt = findViewById(R.id.txtInfo);
         try {
             Resources res = getResources();
             InputStream in = res.openRawResource(R.raw.paws_survey_json);
@@ -188,6 +193,15 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
             case R.id.btnAnswer7:
                 answer = 7;
                 break;
+        }
+
+        try {
+            if (mSurvey.getJSONArray("questions").getJSONObject(mIndex)
+                    .getBoolean("negative"))
+                answer *= -1;
+        } catch (JSONException e) {
+            Log.d(TAG, "onClickAnswer: You butchered your JSON!");
+            e.printStackTrace();
         }
 
         // Push changes to saved data.

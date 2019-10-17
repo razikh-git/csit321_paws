@@ -19,6 +19,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.model.LatLng;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
@@ -34,10 +35,12 @@ import java.util.HashMap;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class HomeActivity   extends
-                                PermissionActivity
-                            implements
-                                LocationHandler.LocationUpdateListener
+public class HomeActivity
+        extends
+            PermissionActivity
+        implements
+            LocationHandler.LocationUpdateListener,
+            WeatherHandler.WeatherForecastReceivedListener
 {
 
     private static final String[] REQUEST_PERMISSIONS_LOCATION = {
@@ -90,6 +93,10 @@ public class HomeActivity   extends
         //mLocHandler.beginLocationUpdates();
         initInterface(loc);
 
+    }
+
+    public void onWeatherForecastReceived(LatLng latLng, String response) {
+        initWeatherData(latLng, response);
     }
 
     private boolean initButtons() {
@@ -172,30 +179,25 @@ public class HomeActivity   extends
         Log.println(Log.DEBUG, "snowpaws_home", "Loaded lat/long presets.");
 
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_NETWORK)) {
-            PAWSAPI.updateLatestWeatherForecast(this, mLat, mLng);
-            JSONObject weatherJSON = null;
-            try {
-                weatherJSON = new JSONObject(mSharedPref.getString("last_weather_json", "{}"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return initWeatherData(weatherJSON);
+            WeatherHandler.updateLatestWeatherForecast(this, new LatLng(mLat, mLng));
         }
 
         return false;
     }
 
     // Initialise weather conditions fields.
-    private boolean initWeatherData(JSONObject weatherForecastJSON) {
+    private boolean initWeatherData(LatLng latLng, String response) {
         try {
             int index = 0;
             String str;
             Double dbl;
 
+            JSONObject weatherForecastJSON = null;
             JSONObject weatherCurrentJSON = null;
 
             try {
                 // Current weather object
+                weatherForecastJSON = new JSONObject(response);
                 weatherCurrentJSON = (JSONObject)(weatherForecastJSON.getJSONArray("list")
                         .getJSONObject(index)
                         .getJSONArray("weather").get(0));
