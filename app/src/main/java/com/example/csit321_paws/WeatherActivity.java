@@ -30,7 +30,8 @@ public class WeatherActivity
 {
 
     SharedPreferences mSharedPref;
-    SharedPreferences.Editor mSharedEditor;
+
+    WeatherHandler mWeatherHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +68,17 @@ public class WeatherActivity
         }
         if (latLng != null) {
             // Call and await an update to the weather JSON string in prefs.
-            WeatherHandler.updateLatestWeatherForecast(this, latLng);
+            mWeatherHandler = new WeatherHandler(this);
+            if (!mWeatherHandler.updateLatestWeatherForecast(this, latLng)) {
+                // Initialise weather displays with last best values if none are being updated.
+                initWeatherDisplay(latLng, mSharedPref.getString("last_weather_json", "{}"));
+            }
         } else {
             // TODO toss errors
         }
     }
 
+    @Override
     public void onWeatherForecastReceived(LatLng latLng, String response) {
         initWeatherDisplay(latLng, response);
     }
@@ -143,7 +149,7 @@ public class WeatherActivity
                 txt.setText(str);
                 txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
-                txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_dark));
+                txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_alt));
                 txt.setPadding(pad, 0, pad, 0);
                 layout.addView(txt);
 
@@ -210,7 +216,7 @@ public class WeatherActivity
                 txt.setText(str);
                 txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
-                txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_dark));
+                txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_alt));
                 txt.setPadding(pad, 0, pad, 0);
                 layout.addView(txt);
 
@@ -253,7 +259,7 @@ public class WeatherActivity
                                 LinearLayout.LayoutParams.MATCH_PARENT);
                         view.setLayoutParams(params);
                         view.setBackgroundColor(ContextCompat.getColor(
-                                this, R.color.color_primary_light));
+                                this, R.color.color_primary));
                         view.setAlpha(0.75f);
                         layParent.addView(view);
                     }
@@ -339,7 +345,7 @@ public class WeatherActivity
                     txt.setText(str);
                     txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                     txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
-                    txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_dark));
+                    txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_alt));
                     layTemp.addView(txt);
 
                     // Add the predicted low temperature.

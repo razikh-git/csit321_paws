@@ -113,7 +113,7 @@
                         android:backgroundTint="@color/color_facebook"
                         android:text="@string/fe_button"
                         app:icon="@drawable/facebook"
-                        app:iconTint="@color/color_on_primary_light"
+                        app:iconTint="@color/color_on_primary"
                         app:iconSize="@dimen/dimen_icon_small"/>
 
                     <TextView
@@ -250,7 +250,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_navbars"
         android:layout_gravity="bottom"
-        android:background="@color/color_primary_light"
+        android:background="@color/color_primary"
         app:itemIconTint="@color/bottom_navigation_colors"
         app:itemTextColor="@color/bottom_navigation_colors"
         app:menu="@menu/bottom_navigation_menu" />

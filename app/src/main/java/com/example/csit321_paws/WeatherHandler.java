@@ -13,44 +13,55 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WeatherHandler {
+class WeatherHandler {
+
+    private static final String TAG = "snowpaws_wh";
 
     // Interface to send updates to host activity
     public interface WeatherForecastReceivedListener {
         void onWeatherForecastReceived(LatLng latLng, String response);
     }
 
-    public static WeatherHandler.WeatherForecastReceivedListener mListener;
+    private WeatherForecastReceivedListener mListener;
 
-    static void updateLatestWeatherForecast(Context ctx, LatLng latLng) {
+    WeatherHandler(WeatherForecastReceivedListener listener) {
+        setWeatherForecastReceivedListener(listener);
+    }
+
+    private void setWeatherForecastReceivedListener(WeatherForecastReceivedListener listener) {
+        mListener = listener;
+    }
+
+    boolean updateLatestWeatherForecast(Context ctx, LatLng latLng) {
         // Generate URL and request OWM data.
         try {
             SharedPreferences sharedPref = ctx.getSharedPreferences(
                     ctx.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+
+            Log.d(TAG, "updateLatestWeatherForecast()");
 
             // Decide whether to update current weather data.
             JSONObject lastWeather = new JSONObject(
                     sharedPref.getString("last_weather_json", "{}"));
 
             if (lastWeather == null || lastWeather.toString().equals("{}") || lastWeather.length() == 0) {
-                Log.println(Log.DEBUG, "snowpaws_pawsapi",
+                Log.d(TAG,
                         "Last weather data does not exist.");
             } else {
-                Log.println(Log.DEBUG, "snowpaws_pawsapi",
-                        "Checking data recency.");
+                Log.d(TAG, "Checking data recency.");
                 // Don't request new data if the current data was received in the last 3 hours.
                 long timestamp = lastWeather.getJSONArray("list").getJSONObject(0)
                         .getLong("dt") * 1000;
 
                 // TODO resolve this, data is always considered outdated
                 if (System.currentTimeMillis() - timestamp < 36000000) {
-                    Log.println(Log.DEBUG, "snowpaws_pawsapi",
-                            "Will not get new weather data. LastWeather data too recent:\n"
-                                    + (System.currentTimeMillis() - timestamp));
-                    return;
+                    Log.d(TAG, "Timestamp comparison:\n"
+                            + "sys: " + System.currentTimeMillis() + "\nts:  " + timestamp);
+                    Log.d(TAG, "Will not get new weather data. LastWeather data too recent:\n"
+                            + (System.currentTimeMillis() - timestamp));
+                    return false;
                 }
-                Log.println(Log.DEBUG, "snowpaws_pawsapi",
-                        "Last weather data exists and is outdated.");
+                Log.d(TAG, "Last weather data exists and is outdated.");
                 // Use the coordinates from the last weather data.
                 latLng = new LatLng(lastWeather.getJSONObject("city").getJSONObject("coord")
                         .getDouble("lat"),
@@ -64,13 +75,16 @@ public class WeatherHandler {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
-    static void getWeatherForecast(Context ctx, LatLng latLng) {
+    private void getWeatherForecast(Context ctx, LatLng latLng) {
 
         SharedPreferences sharedPref = ctx.getSharedPreferences(
                 ctx.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
+
+        Log.d(TAG, "getWeatherForecast()");
 
         // Generate URL and request queue.
         RequestQueue queue = Volley.newRequestQueue(ctx);
@@ -86,7 +100,7 @@ public class WeatherHandler {
         // Generate and post the request.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 (response) -> {
-                    Log.println(Log.DEBUG, "snowpaws_pawsapi", "stringRequest.onResponse");
+                    Log.d(TAG, "stringRequest.onResponse");
 
                     mListener.onWeatherForecastReceived(latLng, response);
 
@@ -95,7 +109,7 @@ public class WeatherHandler {
                     sharedEditor.apply();
                 },
                 (error) -> {
-                    Log.println(Log.ERROR, "snowpaws_pawsapi", "stringRequest.onErrorResponse");
+                    Log.println(Log.ERROR, TAG, "stringRequest.onErrorResponse");
 
                     // olive oil didn't work
                     error.printStackTrace();

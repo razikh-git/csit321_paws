@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:clipToPadding="true"
                 android:padding="@dimen/app_padding"
-                android:scrollbarThumbVertical="@color/color_primary_light" >
+                android:scrollbarThumbVertical="@color/color_primary" >
 
                 <TextView
                     android:id="@+id/txtInfo"

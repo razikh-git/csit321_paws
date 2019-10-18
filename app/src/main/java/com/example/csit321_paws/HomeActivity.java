@@ -15,14 +15,7 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +35,7 @@ public class HomeActivity
             LocationHandler.LocationUpdateListener,
             WeatherHandler.WeatherForecastReceivedListener
 {
+    private static final String TAG = "snowpaws_home";
 
     private static final String[] REQUEST_PERMISSIONS_LOCATION = {
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
@@ -54,6 +48,8 @@ public class HomeActivity
 
     private double mLat;
     private double mLng;
+
+    WeatherHandler mWeatherHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +91,9 @@ public class HomeActivity
 
     }
 
+    @Override
     public void onWeatherForecastReceived(LatLng latLng, String response) {
-        initWeatherData(latLng, response);
+        initWeatherDisplay(latLng, response);
     }
 
     private boolean initButtons() {
@@ -106,9 +103,9 @@ public class HomeActivity
             findViewById(R.id.cardWarningBanner).setOnClickListener((view) -> onClickSurveys(view));
             findViewById(R.id.cardSurveys).setOnClickListener((view) -> onClickSurveys(view));
             findViewById(R.id.cardMaps).setOnClickListener((view) -> onClickMaps(view));
-            findViewById(R.id.cardSettings).setOnClickListener((view) -> onClickSettings(view));
-            findViewById(R.id.cardHelp).setOnClickListener((view) -> onClickHelp(view));
-            findViewById(R.id.cardProfile).setOnClickListener((view) -> onClickProfile(view));
+            findViewById(R.id.btnSettings).setOnClickListener((view) -> onClickSettings(view));
+            findViewById(R.id.btnProfile).setOnClickListener((view) -> onClickProfile(view));
+            findViewById(R.id.btnHelp).setOnClickListener((view) -> onClickHelp(view));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,10 +158,12 @@ public class HomeActivity
 
     private boolean initLocationData(Location loc) {
 
-        Log.println(Log.DEBUG, "snowpaws_home", "HomeActivity.initInterface.initLocationData()");
+        Log.println(Log.DEBUG, TAG, "HomeActivity.initInterface.initLocationData()");
 
         mLat = Double.parseDouble(getString(R.string.app_default_loc_lat));
         mLng = Double.parseDouble(getString(R.string.app_default_loc_lng));
+
+        LatLng latLng = new LatLng(mLat, mLng);
 
         // Use data from locational tracking if possible.
 /*
@@ -176,17 +175,26 @@ public class HomeActivity
         }
 */
 
-        Log.println(Log.DEBUG, "snowpaws_home", "Loaded lat/long presets.");
+        Log.println(Log.DEBUG, TAG, "Loaded lat/long presets.");
 
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_NETWORK)) {
-            WeatherHandler.updateLatestWeatherForecast(this, new LatLng(mLat, mLng));
+            if (latLng != null) {
+                // Call and await an update to the weather JSON string in prefs.
+                mWeatherHandler = new WeatherHandler(this);
+                if (!mWeatherHandler.updateLatestWeatherForecast(this, latLng)) {
+                    // Initialise weather displays with last best values if none are being updated.
+                    initWeatherDisplay(latLng, mSharedPref.getString("last_weather_json", "{}"));
+                }
+            } else {
+                // TODO toss errors
+            }
         }
 
         return false;
     }
 
     // Initialise weather conditions fields.
-    private boolean initWeatherData(LatLng latLng, String response) {
+    private boolean initWeatherDisplay(LatLng latLng, String response) {
         try {
             int index = 0;
             String str;
@@ -274,7 +282,7 @@ public class HomeActivity
                 // Display error icon.
                 img.setVisibility(VISIBLE);
                 img.setColorFilter(ContextCompat.getColor(
-                        this, R.color.color_on_primary_light));
+                        this, R.color.color_on_primary));
                 img.setImageDrawable(getDrawable(R.drawable.ic_cloud_off));
             }
 
@@ -460,21 +468,21 @@ public class HomeActivity
         startActivity(intent);
     }
 
-    private void onClickProfile(View view) {
-        // Redirect to Profile Details Activity
-        //Intent intent = new Intent(this, ProfileDetailsActivity.class);
-        //startActivity(intent);
+    private void onClickSettings(View view) {
+        // Redirect to App Settings Activity
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
-    private void onClickSettings(View view) {
-        // Redirect to Settings Activity
-        //Intent intent = new Intent(this, SettingsActivity.class);
+    private void onClickProfile(View view) {
+        // Redirect to Profile Details Activity
+        //Intent intent = new Intent(this, ProfileActivity.class);
         //startActivity(intent);
     }
 
     private void onClickHelp(View view) {
         // Redirect to Help Page Activity
-        //Intent intent = new Intent(this, HelpPageActivity.class);
+        //Intent intent = new Intent(this, HelpActivity.class);
         //startActivity(intent);
     }
 

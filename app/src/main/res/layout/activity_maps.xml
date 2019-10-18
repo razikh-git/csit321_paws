@@ -83,7 +83,7 @@
                 android:layout_marginTop="@dimen/app_padding"
                 android:layout_marginEnd="@dimen/app_padding"
                 android:layout_marginBottom="@dimen/app_padding"
-                android:src="@drawable/ic_visibility"
+                android:src="@drawable/ic_eye_settings"
                 android:visibility="visible" />
 
             <!-- Map Polygon Draw Button. -->
@@ -108,7 +108,7 @@
                 android:layout_marginEnd="@dimen/app_padding"
                 android:layout_marginBottom="@dimen/app_padding"
                 android:src="@drawable/ic_eraser"
-                android:tint="@color/color_on_primary_dark"
+                android:tint="@color/color_on_primary"
                 android:visibility="gone" />
 
             <!-- Map Weather Redirect Button. -->
@@ -121,7 +121,7 @@
                 android:layout_marginEnd="@dimen/app_padding"
                 android:layout_marginBottom="@dimen/app_padding"
                 android:src="@drawable/ic_satellite"
-                android:tint="@color/color_on_primary_dark"
+                android:tint="@color/color_on_primary"
                 android:visibility="visible" />
 
             <!-- Map Type Popout Card. -->
@@ -278,7 +278,7 @@
                     android:id="@+id/laySheetHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/color_primary_dark"
+                    android:background="@color/color_primary_alt"
                     android:orientation="vertical"
                     android:padding="@dimen/app_padding">
 
@@ -287,14 +287,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.Paws.Large"
-                        android:textColor="@color/color_on_primary_dark" />
+                        android:textColor="@color/color_on_primary" />
 
                     <TextView
                         android:id="@+id/txtSheetCoordinates"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.Paws.Small"
-                        android:textColor="@color/color_on_primary_dark" />
+                        android:textColor="@color/color_on_primary" />
 
                 </LinearLayout>
 
@@ -330,7 +330,7 @@
                                 android:layout_marginTop="@dimen/app_padding_half"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
-                                android:textColor="@color/color_primary_dark"
+                                android:textColor="@color/color_primary_alt"
                                 android:text="@string/ma_wind" />
 
                         </LinearLayout>
@@ -355,7 +355,7 @@
                                 android:layout_marginTop="@dimen/app_padding_half"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
-                                android:textColor="@color/color_primary_dark"
+                                android:textColor="@color/color_primary_alt"
                                 android:text="@string/ma_precip" />
 
                         </LinearLayout>
@@ -380,7 +380,7 @@
                                 android:layout_marginTop="@dimen/app_padding_half"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
-                                android:textColor="@color/color_primary_dark"
+                                android:textColor="@color/color_primary_alt"
                                 android:text="@string/ma_risk" />
 
                         </LinearLayout>
@@ -403,7 +403,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_navbars"
         android:layout_gravity="bottom"
-        android:background="@color/color_primary_light"
+        android:background="@color/color_primary"
         app:itemIconTint="@color/bottom_navigation_colors"
         app:itemTextColor="@color/bottom_navigation_colors"
         app:menu="@menu/bottom_navigation_menu" />

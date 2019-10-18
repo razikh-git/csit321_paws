@@ -118,9 +118,9 @@
             "factor": 2
         },
         {
-            "statement": "I have frequent mood swings."
+            "statement": "I have frequent mood swings.",
             "negative": false,
             "factor": 4
         }
-    }
+    ]
 }

@@ -169,7 +169,7 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
 
             // Change card style.
             ((MaterialCardView)findViewById(R.id.cardSurveyResults)).setStrokeColor(
-                    getResources().getColor(R.color.color_primary_light));
+                    getResources().getColor(R.color.color_primary));
 
             // Show full progress icon.
             findViewById(R.id.imgProgressIcon).setVisibility(VISIBLE);

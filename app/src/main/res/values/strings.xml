@@ -165,5 +165,21 @@
     <string name="sv_fa_invalid_lat_lng">An invalid lat/long value pair was provided.</string>
     <string name="sv_fa_no_address">No address was found for the given coordinates.</string>
     <string name="sv_fa_geocoder_unavailable">The service geocoder was unavailable.</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="pref_header_general">General</string>
+    <string name="pref_header_usage">Data and Battery Usage</string>
+
+    <!-- Messages Preferences -->
+    <string name="pref_title_units">Measurement units</string>
+    <string name="pref_title_time">Time format</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
 </resources>

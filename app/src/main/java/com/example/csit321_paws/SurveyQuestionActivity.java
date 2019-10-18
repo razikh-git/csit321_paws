@@ -57,7 +57,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
             ImageView img = findViewById(R.id.layProgressContainer)
                     .findViewWithTag(TAG_PROGRESS + mIndex);
             img.setImageDrawable(getDrawable(R.drawable.ic_checkbox_checked));
-            img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary_light));
+            img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary));
 
             // Update the header question index.
             ((TextView)findViewById(R.id.txtHeaderTitle)).setText(
@@ -66,7 +66,8 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
             // Display the next question.
             ((TextView)findViewById(R.id.txtQuestion)).setText(
-                    mSurvey.getString(String.valueOf(mIndex)));
+                    mSurvey.getJSONArray("questions").getJSONObject(mIndex).
+                            getString("statement"));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,7 +162,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
             ImageView img = findViewById(R.id.layProgressContainer)
                     .findViewWithTag(TAG_PROGRESS + i);
             img.setImageDrawable(getDrawable(R.drawable.ic_checkbox_checked));
-            img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary_light));
+            img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary));
         }
 
         // Initialise the next question.

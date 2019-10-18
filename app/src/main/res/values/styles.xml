@@ -1,28 +1,33 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="mainAppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="mainAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <!-- Custom attributes. -->
-        <item name="colorPrimary">@color/color_primary_light</item>
-        <item name="colorSecondary">@color/color_primary_dark</item>
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorSecondary">@color/color_primary_alt</item>
         <item name="colorError">@color/color_error</item>
-        <item name="colorOnPrimary">@color/color_on_primary_light</item>
-        <item name="colorOnSecondary">@color/color_on_primary_dark</item>
+        <item name="colorOnPrimary">@color/color_on_primary</item>
+        <item name="colorOnSecondary">@color/color_on_primary</item>
+        <item name="colorAccent">@color/color_accent</item>
+
+        <item name="editTextColor">@color/color_on_background</item>
+        <item name="colorOnBackground">@color/color_on_background</item>
+        <item name="actionMenuTextColor">@color/color_on_background</item>
 
         <!-- Native attributes. -->
         <item name="android:colorBackground">@color/color_background</item>
-        <item name="android:statusBarColor">@color/color_primary_dark</item>
+        <item name="android:statusBarColor">@color/color_primary_alt</item>
 
     </style>
 
     <!-- Custom preloader splash screen. -->
-    <style name="splashTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="splashTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <!-- Native attributes. -->
         <item name="android:colorBackground">@color/color_background</item>
         <item name="android:windowBackground">@drawable/splash_drawable</item>
-        <item name="android:statusBarColor">@color/color_primary_dark</item>
+        <item name="android:statusBarColor">@color/color_primary_alt</item>
     </style>
 
     <!-- Custom material text. -->
@@ -40,13 +45,13 @@
     </style>
     <style name="TextAppearance.Paws.Small" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textSize">@dimen/text_size_small</item>
-        <item name="android:textColor">@color/color_black</item>
+        <item name="android:textColor">@color/color_on_background</item>
     </style>
     <style name="TextAppearance.Paws.Tiny" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_tiny</item>
     </style>
     <style name="TextAppearance.Paws.Button.List" parent="TextAppearance.Paws.Medium">
-        <item name="android:textColor">@color/color_black</item>
+        <item name="android:textColor">@color/color_on_background</item>
     </style>
     <style name="TextAppearance.Paws.Button.Large" parent="TextAppearance.Paws.Button.Small">
         <item name="android:textSize">@dimen/text_size_button_large</item>
@@ -56,7 +61,7 @@
     </style>
     <style name="TextAppearance.Paws.Button.Small" parent="TextAppearance.MaterialComponents.Button">
         <item name="android:textSize">@dimen/text_size_button_small</item>
-        <item name="android:textColor">@color/color_on_primary_light</item>
+        <item name="android:textColor">@color/color_on_primary</item>
     </style>
     <style name="TextAppearance.Paws.Title" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_title</item>
@@ -84,7 +89,7 @@
     </style>
     <style name="Widget.Paws.Button.Facebook" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textAppearance">@style/TextAppearance.Paws.Button.Small</item>
-        <item name="android:textColor">@color/color_on_primary_light</item>
+        <item name="android:textColor">@color/color_on_primary</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textStyle">normal</item>
         <item name="android:padding">@dimen/padding_buttons</item>
@@ -98,22 +103,22 @@
         <item name="android:padding">0dp</item>
         <item name="android:textAppearance">@style/TextAppearance.Paws.Button.List</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/color_black</item>
+        <item name="android:textColor">@color/color_on_background</item>
         <item name="iconTint">@color/color_grey</item>
         <item name="iconPadding">@dimen/text_spacing</item>
     </style>
 
     <!-- Custom progress bars. -->
     <style name="Widget.Paws.ProgressBar.Circular" parent="Widget.AppCompat.ProgressBar">
-        <item name="android:progressTint">@color/color_on_primary_light</item>
-        <item name="android:indeterminateTint">@color/color_on_primary_light</item>
+        <item name="android:progressTint">@color/color_on_primary</item>
+        <item name="android:indeterminateTint">@color/color_on_primary</item>
     </style>
 
     <!-- Custom bottom navigation bar. -->
     <style name="Widget.Paws.BottomNavigationView" parent="@style/Widget.MaterialComponents.BottomNavigationView.Colored">
         <item name="android:textAppearance">@style/TextAppearance.Paws.Icon</item>
-        <item name="android:background">@color/color_primary_light</item>
-        <item name="android:textColor">@color/color_on_primary_light</item>
+        <item name="android:background">@color/color_primary</item>
+        <item name="android:textColor">@color/color_on_primary</item>
     </style>
 
     <!-- Custom app theming. -->
@@ -122,8 +127,8 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="mainAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="mainAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar" />
 
-    <style name="mainAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="mainAppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight" />
 
 </resources>

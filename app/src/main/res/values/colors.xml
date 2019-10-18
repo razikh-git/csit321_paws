@@ -2,22 +2,28 @@
 <resources>
 
     <!-- Mixed-purpose colors. -->
-    <color name="color_white_light">#FFFDFDFD</color>
-    <color name="color_white_dark">#F9F9F9</color>
+    <color name="color_white">#FFFDFDFD</color>
+    <color name="color_white_alt">#F9F9F9</color>
     <color name="color_grey">#8D8D8D</color>
     <color name="color_black">#434649</color>
 
     <!-- Element colors. -->
-    <color name="color_background">@color/color_white_dark</color>
-    <color name="color_card">@color/color_white_light</color>
+    <color name="color_background">@color/color_white_alt</color>
+    <color name="color_card">@color/color_white</color>
 
-    <color name="color_primary_light">#7FDDE9</color>
-    <color name="color_primary_dark">#39BED1</color>
+    <!-- TODO: separate color_primary/alt/secondary to retain accent value -->
+
+    <!-- Overrides -->
+    <color name="color_primary">#7FDDE9</color>
+    <color name="color_primary_alt">#39BED1</color>
     <color name="color_error">#F7915E</color>
+    <color name="color_accent">@color/color_primary</color>
+
     <color name="color_facebook">#3B5998</color>
 
     <!-- Font colors. -->
-    <color name="color_on_primary_light">@color/color_white_light</color>
-    <color name="color_on_primary_dark">@color/color_white_light</color>
+    <color name="color_on_primary">@color/color_white</color>
+    <color name="color_on_background">@color/color_black</color>
+    <color name="color_highlight">@color/color_accent</color>
 
 </resources>

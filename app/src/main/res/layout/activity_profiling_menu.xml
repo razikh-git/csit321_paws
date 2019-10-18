@@ -102,7 +102,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_navbars"
         android:layout_gravity="bottom"
-        android:background="@color/color_primary_light"
+        android:background="@color/color_primary"
         app:itemIconTint="@color/bottom_navigation_colors"
         app:itemTextColor="@color/bottom_navigation_colors"
         app:menu="@menu/bottom_navigation_menu" />

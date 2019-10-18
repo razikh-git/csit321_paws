@@ -22,7 +22,7 @@
             android:layout_height="@dimen/dimen_icon_immense"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:tint="@color/color_primary_light"
+            android:tint="@color/color_primary"
             app:srcCompat="@drawable/ic_checkbox_checked" />
 
         <TextView
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/sq_done"
-            android:textColor="@color/color_primary_dark"
+            android:textColor="@color/color_primary_alt"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.Paws.Immense" />
 
