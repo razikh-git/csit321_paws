@@ -57,10 +57,18 @@
     <string name="app_title_request_internet">Internet access</string>
     <string name="app_title_request_network_state">Network conditions</string>
 
-    <string name="app_msg_request_loc_coarse">Vague location tracking is needed to fetch local weather and maps data.</string>
-    <string name="app_msg_request_loc_fine">Precise location tracking is used when prompted to watch for your safety.</string>
-    <string name="app_msg_request_internet">Internet access is needed to gather weather data from public-access stations.</string>
-    <string name="app_msg_request_network_state">Network connectivity is needed to balance GPS and WiFi usage.</string>
+    <string name="app_msg_request_loc_coarse">
+        Vague location tracking is needed to fetch local weather and maps data.
+    </string>
+    <string name="app_msg_request_loc_fine">
+        Precise location tracking is used when prompted to watch for your safety.
+    </string>
+    <string name="app_msg_request_internet">
+        Internet access is needed to gather weather data from public-access stations.
+    </string>
+    <string name="app_msg_request_network_state">
+        Network connectivity is needed to balance GPS and WiFi usage.
+    </string>
 
     <!-- Generic text strings. -->
     <string name="app_txt_placeholder">placeholder</string>
@@ -92,6 +100,7 @@
     <string name="home_card_settings">Settings</string>
     <string name="home_card_help">Help</string>
 
+    <!-- TODO rewrite home footer info -->
     <string name="home_footer">
         "CSIT321 Project\n\n"
         "Prototype Activity\n\n"
@@ -120,7 +129,9 @@
     <string name="fe_subtitle">Apply Magic Sauce integration</string>
     <string name="fe_caption">Facebook integration</string>
     <string name="fe_button">Log in using Facebook</string>
-    <string name="fe_disclaimer">PAWS Facebook Integration will require permission to access your likes.</string>
+    <string name="fe_disclaimer">
+        PAWS Facebook Integration will require permission to access your likes.
+    </string>
     <string name="fe_fallback">No existing profile found.</string>
 
     <!-- Survey Entry Activity. -->
@@ -172,8 +183,10 @@
     <string name="pref_header_usage">Data and Battery Usage</string>
 
     <!-- Messages Preferences -->
-    <string name="pref_title_units">Measurement units</string>
+    <string name="pref_title_units">Units of measurement</string>
     <string name="pref_title_time">Time format</string>
+
+    <!-- TODO format and remove -->
 
     <!-- Sync Preferences -->
     <string name="sync_title">Sync email periodically</string>

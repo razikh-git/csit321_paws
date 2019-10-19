@@ -50,6 +50,7 @@
     <style name="TextAppearance.Paws.Tiny" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_tiny</item>
     </style>
+
     <style name="TextAppearance.Paws.Button.List" parent="TextAppearance.Paws.Medium">
         <item name="android:textColor">@color/color_on_background</item>
     </style>
@@ -63,12 +64,15 @@
         <item name="android:textSize">@dimen/text_size_button_small</item>
         <item name="android:textColor">@color/color_on_primary</item>
     </style>
+
     <style name="TextAppearance.Paws.Title" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_title</item>
+        <item name="android:fontFamily">@font/noto</item>
     </style>
     <style name="TextAppearance.Paws.Caption" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:textColor">@color/color_grey</item>
+        <item name="android:fontFamily">@font/noto</item>
     </style>
     <style name="TextAppearance.Paws.Icon" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_small</item>
