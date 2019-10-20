@@ -45,6 +45,7 @@
 
     <!-- Generic button strings. -->
     <string name="app_btn_start">start</string>
+    <string name="app_btn_submit">submit</string>
     <string name="app_btn_continue">continue</string>
     <string name="app_btn_return">return</string>
     <string name="app_btn_reset">reset</string>
@@ -124,15 +125,54 @@
         " weight results with your profile"
     </string>
 
-    <!-- Facebook Entry Activity. -->
-    <string name="fe_title">Facebook profiling</string>
-    <string name="fe_subtitle">Apply Magic Sauce integration</string>
-    <string name="fe_caption">Facebook integration</string>
-    <string name="fe_button">Log in using Facebook</string>
-    <string name="fe_disclaimer">
-        PAWS Facebook Integration will require permission to access your likes.
+    <!-- TODO: fill in description of 'this is designed to calibrate personalisation features' etc -->
+
+    <!-- Self-Analysis Activity. -->
+    <string name="sa_title">Self-Analysis</string>
+    <string name="sa_subtitle">Two-point quick-start form</string>
+    <string name="sa_description">
+
     </string>
-    <string name="fe_fallback">No existing profile found.</string>
+
+    <string name="sa_risk_title">
+        Which of these profiles best describes you?
+    </string>
+
+    <string name="sa_risk_low">
+        Introverted
+        Cautious
+        Aware
+    </string>
+    <string name="sa_risk_med">
+        Equivocal
+        Adventurous
+        Perceptive
+    </string>
+    <string name="sa_risk_high">
+        Extraverted
+        Sensation-Seeking
+        Focused
+    </string>
+    <string name="sa_risk_none">
+        I would like to opt out of personalisation features
+    </string>
+
+    <string name="sa_updates_title">
+        Which of these situations would we be most suited to notify you of?
+    </string>
+
+    <string name="sa_updates_low">
+        Any adverse and inclement weather
+    </string>
+    <string name="sa_updates_med">
+        Dangerous conditions relevant to me
+    </string>
+    <string name="sa_updates_high">
+        Imminent threat to my life or personal safety
+    </string>
+    <string name="sa_updates_none">
+        I would like to opt out of receiving any notifications
+    </string>
 
     <!-- Survey Entry Activity. -->
     <string name="se_title">Survey home</string>
@@ -154,6 +194,16 @@
     <string name="sq_answer6">Inaccurate</string>
     <string name="sq_answer7">Very inaccurate</string>
     <string name="sq_done">Done!</string>
+
+    <!-- Facebook Entry Activity. -->
+    <string name="fe_title">Facebook profiling</string>
+    <string name="fe_subtitle">Apply Magic Sauce integration</string>
+    <string name="fe_caption">Facebook integration</string>
+    <string name="fe_button">Log in using Facebook</string>
+    <string name="fe_disclaimer">
+        PAWS Facebook Integration will require permission to access your likes.
+    </string>
+    <string name="fe_fallback">No existing profile found.</string>
 
     <!-- Weather Activity. -->
     <string name="wa_today">Today</string>

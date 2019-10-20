@@ -256,11 +256,10 @@
                         android:id="@+id/layWeatherFooter"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:paddingStart="@dimen/app_padding"
                         android:paddingEnd="@dimen/app_padding"
-                        android:paddingBottom="@dimen/app_padding"
-                        android:gravity="center"
-                        android:orientation="horizontal" >
+                        android:paddingBottom="@dimen/app_padding">
 
                         <TextView
                             android:id="@+id/txtFooterLabel"

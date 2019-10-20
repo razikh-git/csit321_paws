@@ -18,6 +18,7 @@
 
     <!-- Element and style dimensions. -->
     <dimen name="height_buttons_small">50dp</dimen>
+    <dimen name="height_buttons_large">65dp</dimen>
 
     <dimen name="padding_buttons">8dp</dimen>
     <dimen name="padding_weathericon">4dp</dimen>
@@ -40,7 +41,7 @@
     <dimen name="text_size_medium">16sp</dimen>
     <dimen name="text_size_small">14sp</dimen>
     <dimen name="text_size_tiny">10sp</dimen>
-    <dimen name="text_size_title">26sp</dimen>
+    <dimen name="text_size_title">24sp</dimen>
     <dimen name="text_size_button_large">28sp</dimen>
     <dimen name="text_size_button_medium">22sp</dimen>
     <dimen name="text_size_button_small">16sp</dimen>

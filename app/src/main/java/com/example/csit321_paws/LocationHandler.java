@@ -58,7 +58,7 @@ public class LocationHandler {
         void onLocationUpdated(Location loc);
     }
 
-    protected LocationHandler(Activity activity) {
+    LocationHandler(Activity activity) {
         mContext = activity.getApplicationContext();
         mLocManager = (LocationManager)(mContext.getSystemService(Context.LOCATION_SERVICE));
         mLocationUpdateListener = (LocationUpdateListener) activity;
@@ -92,7 +92,7 @@ public class LocationHandler {
     // TODO : handle exceptional permission errors
 
     // Fetch location object.
-    protected Location getLocation() {
+    Location getLocation() {
         Log.println(Log.DEBUG, "snowpaws", "LocationHandler.getLocation()");
 
         try {

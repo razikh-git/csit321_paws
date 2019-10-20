@@ -56,7 +56,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
             // Fill the matching progress bubble.
             ImageView img = findViewById(R.id.layProgressContainer)
                     .findViewWithTag(TAG_PROGRESS + mIndex);
-            img.setImageDrawable(getDrawable(R.drawable.ic_checkbox_checked));
+            img.setImageDrawable(getDrawable(R.drawable.ic_radiobutton_checked));
             img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary));
 
             // Update the header question index.
@@ -128,7 +128,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
             String tag = TAG_PROGRESS + (i);
             img.setLayoutParams(params);
             img.setTag(tag);
-            img.setImageDrawable(getDrawable(R.drawable.ic_checkbox_unchecked));
+            img.setImageDrawable(getDrawable(R.drawable.ic_radiobutton_unchecked));
             img.setColorFilter(ContextCompat.getColor(this, R.color.color_grey));
             layout.addView(img);
         }
@@ -161,7 +161,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         for (int i = 0; i < mIndex; ++i) {
             ImageView img = findViewById(R.id.layProgressContainer)
                     .findViewWithTag(TAG_PROGRESS + i);
-            img.setImageDrawable(getDrawable(R.drawable.ic_checkbox_checked));
+            img.setImageDrawable(getDrawable(R.drawable.ic_radiobutton_checked));
             img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary));
         }
 

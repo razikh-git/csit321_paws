@@ -154,68 +154,67 @@
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAnswer1"
-                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                style="@style/Widget.Paws.Button"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/sq_answer1"
-                                app:icon="@drawable/ic_radiobutton_unchecked" />
+                                android:padding="0dp"
+                                android:text="@string/sq_answer1" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAnswer2"
-                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                style="@style/Widget.Paws.Button"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/sq_answer2"
-                                app:icon="@drawable/ic_radiobutton_unchecked" />
+                                android:padding="0dp"
+                                android:text="@string/sq_answer2" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAnswer3"
-                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                style="@style/Widget.Paws.Button"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/sq_answer3"
-                                app:icon="@drawable/ic_radiobutton_unchecked" />
+                                android:padding="0dp"
+                                android:text="@string/sq_answer3" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAnswer4"
-                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                style="@style/Widget.Paws.Button"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="@dimen/height_buttons_large"
                                 android:layout_weight="1"
+                                android:padding="0dp"
                                 android:text="@string/sq_answer4"
-                                android:textColor="@color/color_black"
-                                android:textSize="@dimen/text_size_small"
-                                app:icon="@drawable/ic_radiobutton_unchecked" />
+                                android:textSize="@dimen/text_size_small" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAnswer5"
-                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                style="@style/Widget.Paws.Button"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/sq_answer5"
-                                app:icon="@drawable/ic_radiobutton_unchecked" />
+                                android:padding="0dp"
+                                android:text="@string/sq_answer5" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAnswer6"
-                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                style="@style/Widget.Paws.Button"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/sq_answer6"
-                                app:icon="@drawable/ic_radiobutton_unchecked" />
+                                android:padding="0dp"
+                                android:text="@string/sq_answer6" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAnswer7"
-                                style="@style/Widget.Paws.Button.TextButton.List.Icon"
+                                style="@style/Widget.Paws.Button"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/sq_answer7"
-                                app:icon="@drawable/ic_radiobutton_unchecked" />
+                                android:padding="0dp"
+                                android:text="@string/sq_answer7" />
 
                         </LinearLayout>
 

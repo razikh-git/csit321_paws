@@ -28,6 +28,7 @@ public class WeatherActivity
         extends BottomNavBarActivity
         implements WeatherHandler.WeatherForecastReceivedListener
 {
+    private static final String TAG = "snowpaws_wa";
 
     SharedPreferences mSharedPref;
 
@@ -52,7 +53,10 @@ public class WeatherActivity
             if (savedInstanceState == null) {
                 Bundle extras = getIntent().getExtras();
                 if (extras != null) {
+                    Log.d(TAG, "WeatherActivity identified parcelable extras.");
                     latLng = extras.getParcelable(RequestCode.EXTRA_LATLNG);
+                } else {
+                    Log.d(TAG, "No parcelable extras were bundled in the call to WeatherActivity.");
                 }
             }
             if (latLng == null) {
@@ -243,12 +247,7 @@ public class WeatherActivity
 
             layParent = findViewById(R.id.layWeatherWeekly);
             for (int i = index; i < 40; ++i) {
-                Log.println(Log.DEBUG, "snowpaws_weather",
-                        "Starting element " + i + ", day " + i / 8 + ".");
                 if ((i + 1) % 8 == 0) {
-                    Log.println(Log.DEBUG, "snowpaws_weather",
-                            "Adding daily weather data for day " + i / 8 + ".");
-
                     LinearLayout.LayoutParams params;
 
                     // Create a vertical divider between children.

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -69,8 +70,9 @@ public class MapsActivity
     private static final String CAMERA_KEY = "MapCameraPositionKey";
     private static final String LOCATION_KEY = "MapLocationKey";
 
-    private String mTileOverlayURL;
-
+    private static final int DEFAULT_ZOOM = 5;
+    private static final int DASH_WIDTH = 30;
+    private static final int GAP_WIDTH = 20;
     private static final int MAP_TILE_WIDTH = 256;
     private static final int BTN_STROKE_WIDTH = 5;
     private static final int POLY_STROKE_WIDTH = 10;
@@ -79,7 +81,6 @@ public class MapsActivity
     private AddressResultReceiver mResultReeceiver;
     private ArrayList<Address> mAddressResult;
     protected Location mLastLocation;
-    protected Location mMarkedLocation;
 
     // The entry points to the Places API.
     private GeoDataClient mGeoDataClient;
@@ -93,9 +94,10 @@ public class MapsActivity
     private CameraPosition mCameraPosition;
 
     private boolean mIsPolyDrawing;
-
     private Polyline mPolyLine;
     private List<Polygon> mPolyList = new ArrayList<>();
+
+    private String mTileOverlayURL;
 
     private Map<String, TileOverlay> mTileOverlayMap;
     private Map<String, TileProvider> mTileProviderMap = new HashMap<>();
@@ -163,8 +165,10 @@ public class MapsActivity
     private void onMapWeatherRedirectClick(View view) {
         // Redirect to weather screen with data from the current marker.
         Intent intent = new Intent(this, WeatherActivity.class);
-        intent.putExtra(RequestCode.EXTRA_LATLNG,
-                new LatLng(mMarkedLocation.getLatitude(), mMarkedLocation.getLongitude()));
+        if (mLastLocation != null) {
+            intent.putExtra(RequestCode.EXTRA_LATLNG,
+                    new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+        }
         startActivityForResult(intent, RequestCode.REQUEST_WEATHER_BY_LOCATION);
     }
 
@@ -483,17 +487,13 @@ public class MapsActivity
             }
         }
 
-        // Update the map:
+        // Reposition the camera, and zoom in to a reasonably broad scope.
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), DEFAULT_ZOOM));
 
-        // Add a marker in the current location and move the camera.
-        //mMarkedLocation = mLastLocation;
-        //LatLng pos = new LatLng(mLastLocation.getLongitude(), mLastLocation.getLatitude());
-        //mMap.addMarker(new MarkerOptions().position(pos));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(pos));
-
-        // TODO : resolve camera moving to greenland
-
-        // Update the bottom sheet:
+        // Place a marker.
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
 
         // Set the location title
         // eg. 95 Iris St, Beacon Hill NSW 2100, Australia
@@ -604,7 +604,7 @@ public class MapsActivity
         PolylineOptions polyOptions = new PolylineOptions();
         polyOptions.color(ContextCompat.getColor(this, R.color.color_error));
         polyOptions.pattern(Arrays.asList(
-                new Dash(30), new Gap(20)
+                new Dash(DASH_WIDTH), new Gap(GAP_WIDTH)
         ));
         polyOptions.startCap(new RoundCap());
         polyOptions.endCap(new RoundCap());
