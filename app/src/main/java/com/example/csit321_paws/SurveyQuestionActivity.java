@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ActionMenuView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -223,6 +224,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
                     getResources().getString(R.string.intent_survey_result), ResultCode.RESULT_COMPLETE));
             finish();
             Intent intent = new Intent(this, SurveyCompleteActivity.class);
+            intent.putExtra(AnalysisEntryCode.EXTRA_KEY, AnalysisEntryCode.ENTRY_SURVEY);
             startActivity(intent);
         }
     }

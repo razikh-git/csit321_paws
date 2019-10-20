@@ -50,21 +50,19 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/txtHeaderTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="@string/se_title"
+                        android:text="@string/sa_title"
                         android:textAppearance="@style/TextAppearance.Paws.Title" />
 
                     <TextView
-                        android:id="@+id/txtHeaderSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="@string/se_subtitle"
+                        android:text="@string/sa_subtitle"
                         android:textAppearance="@style/TextAppearance.Paws.Caption" />
 
                 </LinearLayout>
@@ -98,16 +96,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/txtSurveyResultsLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/text_spacing"
-                android:visibility="gone"
-                android:text="@string/se_results_label"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Paws.Caption" />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmit"
                 style="@style/Widget.Paws.Button"
@@ -116,17 +104,8 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/app_spacing"
                 android:padding="@dimen/padding_buttons"
-                android:text="@string/app_btn_start" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnReset"
-                style="@style/Widget.Paws.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/height_buttons_small"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:padding="@dimen/padding_buttons"
-                android:text="@string/app_btn_reset" />
+                android:text="@string/app_btn_submit"
+                tools:enabled="false" />
 
         </LinearLayout>
 

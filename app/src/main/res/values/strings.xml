@@ -193,7 +193,16 @@
     <string name="sq_answer5">Quite inaccurate</string>
     <string name="sq_answer6">Inaccurate</string>
     <string name="sq_answer7">Very inaccurate</string>
-    <string name="sq_done">Done!</string>
+
+    <!-- Survey Completed Activity. -->
+    <string name="sc_title">
+        Personalisation complete
+    </string>
+    <string name="sc_description">
+        Your results have been recorded, and will be considered in this system\'s decision-making.\n\n
+
+        You may review your results from the Profiles page, or from any of the analysis entry pages.
+    </string>
 
     <!-- Facebook Entry Activity. -->
     <string name="fe_title">Facebook profiling</string>
