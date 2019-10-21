@@ -3,6 +3,7 @@
 
     <!-- Application layout dimensions. -->
     <dimen name="app_spacing">20dp</dimen>
+    <dimen name="app_spacing_half">10dp</dimen>
     <dimen name="app_gutter">40dp</dimen>
     <dimen name="app_padding">15dp</dimen>
     <dimen name="app_padding_half">8dp</dimen>
@@ -11,6 +12,7 @@
     <dimen name="height_navbars">50dp</dimen>
     <dimen name="height_sheets">76dp</dimen>
     <dimen name="height_home_cards">70dp</dimen>
+    <dimen name="height_weather_today_card">128dp</dimen>
     <dimen name="height_banners_static">90dp</dimen>
     <dimen name="height_banners_contextual">70dp</dimen>
 

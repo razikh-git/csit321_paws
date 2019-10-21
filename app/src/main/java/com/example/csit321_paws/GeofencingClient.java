@@ -10,6 +10,7 @@ import java.util.List;
 
 public class GeofencingClient {
 
+    /*
     private GeofencingClient geofencingClient;
     private List<Geofence> geofenceList;
 
@@ -33,4 +34,5 @@ public class GeofencingClient {
         builder.addGeofences(geofenceList);
         return builder.build();
     }
+    */
 }

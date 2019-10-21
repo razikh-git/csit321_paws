@@ -19,10 +19,11 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardInfo"
             android:layout_width="match_parent"
-            android:layout_height="260dp"
+            android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter">
+            android:layout_marginRight="@dimen/app_gutter"
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/txtInfo"
@@ -42,6 +43,7 @@
             android:layout_marginLeft="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
             android:layout_marginRight="@dimen/app_gutter"
+            android:layout_marginBottom="@dimen/app_spacing"
             android:gravity="center"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.Paws.Small">
@@ -57,19 +59,19 @@
                 android:orientation="vertical">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSurveys"
+                    android:id="@+id/btnSelfAnalysis"
                     style="@style/Widget.Paws.Button"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/height_buttons_small"
-                    android:text="@string/pm_btn_survey" />
+                    android:text="@string/pm_btn_selfanalysis" />
 
                 <TextView
-                    android:id="@+id/txtSurvey"
+                    android:id="@+id/txtSelfAnalysis"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:padding="@dimen/app_padding"
-                    android:text="@string/pm_card_survey"
+                    android:text="@string/pm_card_selfanalysis"
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.Paws.Small" />
 
@@ -79,6 +81,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/height_buttons_small"
                     android:text="@string/pm_btn_facebook" />
+
+                <TextView
+                    android:id="@+id/txtSurvey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="@dimen/app_padding"
+                    android:text="@string/pm_card_facebook"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSurveys"
+                    style="@style/Widget.Paws.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/height_buttons_small"
+                    android:text="@string/pm_btn_survey" />
 
                 <TextView
                     android:id="@+id/txtFacebook"

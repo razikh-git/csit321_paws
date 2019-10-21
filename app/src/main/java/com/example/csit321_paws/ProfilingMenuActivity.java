@@ -22,6 +22,7 @@ public class ProfilingMenuActivity extends BottomNavBarActivity {
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         // Button functionality.
+        findViewById(R.id.btnSelfAnalysis).setOnClickListener((view) -> onClickSelfAnalysis(view));
         findViewById(R.id.btnSurveys).setOnClickListener((view) -> onClickSurvey(view));
         findViewById(R.id.btnFacebook).setOnClickListener((view) -> onClickFacebook(view));
 
@@ -40,6 +41,12 @@ public class ProfilingMenuActivity extends BottomNavBarActivity {
             e.printStackTrace();
             txt.setText(R.string.app_txt_fallback);
         }
+    }
+
+    public void onClickSelfAnalysis(View view){
+        // Redirect to Self-Analysis screen.
+        Intent intent = new Intent(this, SelfAnalysisActivity.class);
+        startActivity(intent);
     }
 
     public void onClickSurvey(View view){

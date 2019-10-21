@@ -8,108 +8,348 @@
     android:background="@color/color_background"
     tools:context=".SelfAnalysisActivity">
 
-    <LinearLayout
-        android:id="@+id/laySurveyEntry"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/height_navbars"
-        android:clipChildren="false"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="2dp"
-        tools:layout_editor_absoluteY="2dp">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fitsSystemWindows="true" >
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardHeader"
+        <LinearLayout
+            android:id="@+id/laySurveyEntry"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/height_banners_static"
-            app:cardElevation="@dimen/elevation_banners">
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/height_navbars"
+            android:clipChildren="false"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="2dp"
+            tools:layout_editor_absoluteY="2dp">
 
-            <LinearLayout
-                android:id="@+id/layHeader"
+            <!-- Header Banner. -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardHeader"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_icon_huge"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/imgLogo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/app_spacing"
-                    android:layout_marginEnd="@dimen/app_spacing"
-                    android:adjustViewBounds="true"
-                    android:gravity="center"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/logo" />
+                android:layout_height="@dimen/height_banners_static"
+                app:cardElevation="@dimen/elevation_banners">
 
                 <LinearLayout
-                    android:id="@+id/layHeaderRight"
+                    android:id="@+id/layHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_icon_huge"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imgLogo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="@dimen/app_spacing"
+                        android:layout_marginEnd="@dimen/app_spacing"
+                        android:adjustViewBounds="true"
+                        android:gravity="center"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/logo" />
+
+                    <LinearLayout
+                        android:id="@+id/layHeaderRight"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="fill_vertical"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/sa_title"
+                            android:textAppearance="@style/TextAppearance.Paws.Title" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/sa_subtitle"
+                            android:textAppearance="@style/TextAppearance.Paws.Caption" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Two-Point Quick-Start Container. -->
+
+            <LinearLayout
+                android:id="@+id/laySurveyEntryBody"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:clipChildren="false"
+                android:orientation="vertical" >
+
+                <!-- Risk Self-Analysis Container. -->
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/app_spacing">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:paddingTop="@dimen/app_padding"
+                        android:paddingBottom="@dimen/app_padding">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardRiskLow"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                app:strokeColor="@color/color_grey"
+                                app:strokeWidth="@dimen/width_stroke">
+
+                                <TextView
+                                    android:id="@+id/txtRiskLow"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:padding="@dimen/app_padding"
+                                    android:scrollHorizontally="true"
+                                    android:text="@string/sa_risk_low"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardRiskMed"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                app:strokeColor="@color/color_grey"
+                                app:strokeWidth="@dimen/width_stroke">
+
+                                <TextView
+                                    android:id="@+id/txtRiskMed"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:maxLines="3"
+                                    android:padding="@dimen/app_padding"
+                                    android:scrollHorizontally="true"
+                                    android:text="@string/sa_risk_med"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardRiskHigh"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                app:strokeColor="@color/color_grey"
+                                app:strokeWidth="@dimen/width_stroke">
+
+                                <TextView
+                                    android:id="@+id/txtRiskHigh"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:ellipsize="end"
+                                    android:gravity="center"
+                                    android:maxLines="3"
+                                    android:padding="@dimen/app_padding"
+                                    android:scrollHorizontally="true"
+                                    android:text="@string/sa_risk_high"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/app_spacing"
+                            android:paddingLeft="@dimen/text_spacing"
+                            android:paddingRight="@dimen/text_spacing"
+                            android:scrollHorizontally="true"
+                            android:maxLines="3"
+                            android:text="@string/sa_risk_title"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Update Frequency Picker Container. -->
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingTop="@dimen/app_padding"
+                        android:paddingBottom="@dimen/app_padding"
+                        android:orientation="vertical" >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/cardUpdatesLow"
+                                style="@style/Widget.Paws.Button"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:maxLines="4"
+                                android:text="@string/sa_updates_low"
+                                android:textColor="@color/color_white"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.List"
+                                app:strokeColor="@color/color_grey"
+                                app:strokeWidth="@dimen/width_stroke" />
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/cardUpdatesMed"
+                                style="@style/Widget.Paws.Button"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:maxLines="4"
+                                android:text="@string/sa_updates_med"
+                                android:textColor="@color/color_on_background"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Block" />
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardUpdatesHigh"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:clickable="true"
+                                android:focusable="true"
+                                app:strokeColor="@color/color_grey"
+                                app:strokeWidth="@dimen/width_stroke">
+
+                                <TextView
+                                    android:id="@+id/txtUpdatesHigh"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:padding="@dimen/app_padding"
+                                    android:scrollHorizontally="true"
+                                    android:ellipsize="end"
+                                    android:maxLines="4"
+                                    android:text="@string/sa_updates_high"
+                                    android:textAlignment="center"
+                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/app_spacing"
+                            android:paddingLeft="@dimen/text_spacing"
+                            android:paddingRight="@dimen/text_spacing"
+                            android:text="@string/sa_updates_title"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="fill_vertical"
-                    android:orientation="vertical">
+                    android:layout_marginStart="@dimen/app_gutter"
+                    android:layout_marginTop="@dimen/app_spacing"
+                    android:layout_marginEnd="@dimen/app_gutter"
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="@string/sa_title"
-                        android:textAppearance="@style/TextAppearance.Paws.Title" />
+                    <!-- Opt-Out Button. -->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnOptOut"
+                        style="@style/Widget.Paws.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_buttons_small"
                         android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="@string/sa_subtitle"
-                        android:textAppearance="@style/TextAppearance.Paws.Caption" />
+                        android:text="@string/app_btn_optout"
+                        android:textColor="@color/color_grey" />
+
+                    <!-- Contextual Submit Button. -->
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSubmit"
+                        style="@style/Widget.Paws.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_buttons_small"
+                        android:layout_weight="1"
+                        android:text="@string/app_btn_submit"
+                        tools:enabled="false" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-        </com.google.android.material.card.MaterialCardView>
-
-        <LinearLayout
-            android:id="@+id/laySurveyEntryBody"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/app_spacing"
-            android:layout_marginEnd="@dimen/app_spacing"
-            android:clipChildren="false"
-            android:orientation="vertical"
-            android:padding="@dimen/app_spacing">
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing">
-
-                <TextView
-                    android:id="@+id/txtInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/app_padding"
-                    android:textAppearance="@style/TextAppearance.Paws.Small" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSubmit"
-                style="@style/Widget.Paws.Button"
-                android:layout_width="200dp"
-                android:layout_height="@dimen/height_buttons_small"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:padding="@dimen/padding_buttons"
-                android:text="@string/app_btn_submit"
-                tools:enabled="false" />
-
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"

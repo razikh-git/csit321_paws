@@ -51,6 +51,9 @@
         <item name="android:textSize">@dimen/text_size_tiny</item>
     </style>
 
+    <style name="TextAppearance.Paws.Button.Block" parent="TextAppearance.Paws.Button.List">
+        <item name="android:textStyle">normal</item>
+    </style>
     <style name="TextAppearance.Paws.Button.List" parent="TextAppearance.Paws.Medium">
         <item name="android:textColor">@color/color_on_background</item>
     </style>
@@ -110,6 +113,10 @@
         <item name="android:textColor">@color/color_on_background</item>
         <item name="iconTint">@color/color_grey</item>
         <item name="iconPadding">@dimen/text_spacing</item>
+    </style>
+    <style name="Widget.Paws.Button.TextButton.Block" parent="Widget.Paws.Button.TextButton.List">
+        <item name="android:strokeWidth">2dp</item>
+        <item name="android:strokeColor">@color/color_on_background</item>
     </style>
 
     <!-- Custom progress bars. -->

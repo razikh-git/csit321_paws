@@ -49,6 +49,8 @@
     <string name="app_btn_continue">continue</string>
     <string name="app_btn_return">return</string>
     <string name="app_btn_reset">reset</string>
+    <string name="app_btn_optin">opt-in</string>
+    <string name="app_btn_optout">opt-out</string>
     <string name="app_btn_perm_grant">accept</string>
     <string name="app_btn_perm_deny">later</string>
 
@@ -114,8 +116,13 @@
     <string name="pp_btn_accept">proceed</string>
 
     <!-- Profiling Menu Activity. -->
+    <string name="pm_btn_selfanalysis">self-analysis</string>
     <string name="pm_btn_survey">survey</string>
     <string name="pm_btn_facebook">facebook</string>
+    <string name="pm_card_selfanalysis">
+        "Answer two questions"
+        " to quickly calibrate the system"
+    </string>
     <string name="pm_card_survey">
         "Complete a short survey"
         " to discover your personality type"
@@ -135,7 +142,7 @@
     </string>
 
     <string name="sa_risk_title">
-        Which of these profiles best describes you?
+        Which of these personal outlines profiles would you say best describes your day-to-day self?
     </string>
 
     <string name="sa_risk_low">
@@ -150,15 +157,12 @@
     </string>
     <string name="sa_risk_high">
         Extraverted
-        Sensation-Seeking
+        Headstrong
         Focused
-    </string>
-    <string name="sa_risk_none">
-        I would like to opt out of personalisation features
     </string>
 
     <string name="sa_updates_title">
-        Which of these situations would we be most suited to notify you of?
+        Which of these situations is best suited to your preferences for notifications?
     </string>
 
     <string name="sa_updates_low">
@@ -168,10 +172,7 @@
         Dangerous conditions relevant to me
     </string>
     <string name="sa_updates_high">
-        Imminent threat to my life or personal safety
-    </string>
-    <string name="sa_updates_none">
-        I would like to opt out of receiving any notifications
+        Imminent threat to my personal safety or life
     </string>
 
     <!-- Survey Entry Activity. -->
