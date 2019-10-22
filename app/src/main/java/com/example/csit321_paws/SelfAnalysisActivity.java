@@ -5,19 +5,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.card.MaterialCardView;
-
-import java.util.List;
+import com.google.android.material.button.MaterialButton;
 
 public class SelfAnalysisActivity extends BottomNavBarActivity {
 
     private SharedPreferences mSharedPref;
     private SharedPreferences.Editor mSharedEditor;
+
+    private static float mScale;
 
     private static boolean mIsRiskSelected;
     private static boolean mIsUpdatesSelected;
@@ -36,6 +35,8 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
         BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        mScale = getApplicationContext().getResources().getDisplayMetrics().density;
+
         mIsRiskSelected = false;
         mIsUpdatesSelected = false;
 
@@ -46,13 +47,14 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
     private boolean initButtons() {
         // Button functionality.
         try {
-            findViewById(R.id.cardRiskLow).setOnClickListener((view) -> onClickRisk(view));
-            findViewById(R.id.cardRiskMed).setOnClickListener((view) -> onClickRisk(view));
-            findViewById(R.id.cardRiskHigh).setOnClickListener((view) -> onClickRisk(view));
-            findViewById(R.id.cardUpdatesLow).setOnClickListener((view) -> onClickUpdates(view));
-            findViewById(R.id.cardUpdatesMed).setOnClickListener((view) -> onClickUpdates(view));
-            findViewById(R.id.cardUpdatesHigh).setOnClickListener((view) -> onClickUpdates(view));
-            findViewById(R.id.btnSubmit).setOnClickListener((view) -> onClickSubmit(view));
+            findViewById(R.id.btnSubmit).setEnabled(false);
+
+            findViewById(R.id.btnRiskLow).setOnClickListener((view) -> onClickRisk(view));
+            findViewById(R.id.btnRiskMed).setOnClickListener((view) -> onClickRisk(view));
+            findViewById(R.id.btnRiskHigh).setOnClickListener((view) -> onClickRisk(view));
+            findViewById(R.id.btnUpdatesLow).setOnClickListener((view) -> onClickUpdates(view));
+            findViewById(R.id.btnUpdatesMed).setOnClickListener((view) -> onClickUpdates(view));
+            findViewById(R.id.btnUpdatesHigh).setOnClickListener((view) -> onClickUpdates(view));
             findViewById(R.id.btnOptOut).setOnClickListener((view) -> onClickOptOut(view));
             return true;
         } catch (Exception e) {
@@ -63,22 +65,20 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
 
     private void onClickRisk(View view) {
         // Change styles of optional cards.
-        int[] cardViews = {R.id.cardRiskLow, R.id.cardRiskMed, R.id.cardRiskHigh};
-        for (int card : cardViews) {
-            ((MaterialCardView)findViewById(card)).setStrokeColor(
-                    ContextCompat.getColor(this, R.color.color_grey));
-            ((MaterialCardView)findViewById(card)).setBackgroundColor(
-                    ContextCompat.getColor(this, android.R.color.background_light));
+        int[] buttons = {R.id.btnRiskLow, R.id.btnRiskMed, R.id.btnRiskHigh};
+        for (int btn : buttons) {
+            ((MaterialButton)findViewById(btn)).setStrokeWidth(
+                    (int)(2 * mScale + 0.5f));
+            ((MaterialButton)findViewById(btn)).setBackgroundColor(
+                    ContextCompat.getColor(this, R.color.color_card));
+            ((MaterialButton)findViewById(btn)).setTextColor(
+                    ContextCompat.getColor(this, R.color.color_on_background));
         }
-        int[] txtViews = {R.id.txtRiskLow, R.id.txtRiskMed, R.id.txtRiskHigh};
-        for (int txt : txtViews) {
-            ((TextView)findViewById(txt)).setTextColor(
-                    ContextCompat.getColor(this, R.color.color_black));
-        }
-        ((MaterialCardView)findViewById(view.getId())).setStrokeColor(
+        ((MaterialButton)findViewById(view.getId())).setStrokeWidth(0);
+        ((MaterialButton)findViewById(view.getId())).setBackgroundColor(
                 ContextCompat.getColor(this, R.color.color_primary));
-        ((MaterialCardView)findViewById(view.getId())).setBackgroundColor(
-                ContextCompat.getColor(this, R.color.color_primary));
+        ((MaterialButton)findViewById(view.getId())).setTextColor(
+                ContextCompat.getColor(this, R.color.color_on_primary));
 
         mIsRiskSelected = true;
         checkToEnableSubmission();
@@ -86,15 +86,20 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
 
     private void onClickUpdates(View view) {
         // Change styles of optional cards.
-        ((MaterialCardView)findViewById(R.id.cardUpdatesLow)).setStrokeColor(
-                ContextCompat.getColor(this, R.color.color_grey));
-        ((MaterialCardView)findViewById(R.id.cardUpdatesMed)).setStrokeColor(
-                ContextCompat.getColor(this, R.color.color_grey));
-        ((MaterialCardView)findViewById(R.id.cardUpdatesHigh)).setStrokeColor(
-                ContextCompat.getColor(this, R.color.color_grey));
-
-        ((MaterialCardView)findViewById(view.getId())).setStrokeColor(
+        int[] buttons = {R.id.btnUpdatesLow, R.id.btnUpdatesMed, R.id.btnUpdatesHigh};
+        for (int btn : buttons) {
+            ((MaterialButton)findViewById(btn)).setStrokeWidth(
+                    (int)(2 * mScale + 0.5f));
+            ((MaterialButton)findViewById(btn)).setBackgroundColor(
+                    ContextCompat.getColor(this, R.color.color_card));
+            ((MaterialButton)findViewById(btn)).setTextColor(
+                    ContextCompat.getColor(this, R.color.color_on_background));
+        }
+        ((MaterialButton)findViewById(view.getId())).setStrokeWidth(0);
+        ((MaterialButton)findViewById(view.getId())).setBackgroundColor(
                 ContextCompat.getColor(this, R.color.color_primary));
+        ((MaterialButton)findViewById(view.getId())).setTextColor(
+                ContextCompat.getColor(this, R.color.color_on_primary));
 
         mIsUpdatesSelected = true;
         checkToEnableSubmission();
@@ -103,6 +108,7 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
     private void checkToEnableSubmission() {
         if (mIsRiskSelected && mIsUpdatesSelected) {
             findViewById(R.id.btnSubmit).setEnabled(true);
+            findViewById(R.id.btnSubmit).setOnClickListener((view) -> onClickSubmit(view));
         }
     }
 
@@ -115,7 +121,7 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
 
         // Continue to the completed splash.
         setResult(RESULT_OK, new Intent().putExtra(
-                getResources().getString(R.string.intent_survey_result), ResultCode.RESULT_COMPLETE));
+                AnalysisEntryCode.EXTRA_KEY, ResultCode.RESULT_COMPLETE));
         finish();
         Intent intent = new Intent(this, SurveyCompleteActivity.class);
         intent.putExtra(AnalysisEntryCode.EXTRA_KEY, AnalysisEntryCode.ENTRY_SELF_ANALYSIS);
@@ -128,7 +134,7 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
 
         // Return to the Profiling Menu activity.
         setResult(RESULT_CANCELED, new Intent().putExtra(
-                getResources().getString(R.string.intent_survey_result), ResultCode.RESULT_INCOMPLETE));
+                AnalysisEntryCode.EXTRA_KEY, ResultCode.RESULT_INCOMPLETE));
         finish();
     }
 }

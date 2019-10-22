@@ -9,109 +9,205 @@
     tools:context=".ProfilingMenuActivity">
 
     <LinearLayout
-        android:id="@+id/layProfilingMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/height_navbars"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:clipChildren="false"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="2dp"
+        tools:layout_editor_absoluteY="2dp" >
+
+        <!-- Header Banner. -->
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardInfo"
+            android:id="@+id/cardHeader"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/app_gutter"
-            android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/txtInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="@dimen/app_padding"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Paws.Small" />
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardSurvey"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/app_gutter"
-            android:layout_marginTop="@dimen/app_spacing"
-            android:layout_marginRight="@dimen/app_gutter"
-            android:layout_marginBottom="@dimen/app_spacing"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.Paws.Small">
+            android:layout_height="@dimen/height_banners_static"
+            app:cardElevation="@dimen/elevation_banners">
 
             <LinearLayout
-                android:id="@+id/layButtons"
+                android:id="@+id/layHeader"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/app_gutter"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:layout_marginRight="@dimen/app_gutter"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:layout_height="@dimen/dimen_icon_huge"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSelfAnalysis"
-                    style="@style/Widget.Paws.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/height_buttons_small"
-                    android:text="@string/pm_btn_selfanalysis" />
-
-                <TextView
-                    android:id="@+id/txtSelfAnalysis"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/imgLogo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/app_spacing"
+                    android:layout_marginEnd="@dimen/app_spacing"
+                    android:adjustViewBounds="true"
                     android:gravity="center"
-                    android:padding="@dimen/app_padding"
-                    android:text="@string/pm_card_selfanalysis"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.Paws.Small" />
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/logo" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFacebook"
-                    style="@style/Widget.Paws.Button"
+                <LinearLayout
+                    android:id="@+id/layHeaderRight"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/height_buttons_small"
-                    android:text="@string/pm_btn_facebook" />
+                    android:layout_height="match_parent"
+                    android:layout_gravity="fill_vertical"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/txtSurvey"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="@dimen/app_padding"
-                    android:text="@string/pm_card_facebook"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.Paws.Small" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="@string/pm_title"
+                        android:textAppearance="@style/TextAppearance.Paws.Title" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSurveys"
-                    style="@style/Widget.Paws.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/height_buttons_small"
-                    android:text="@string/pm_btn_survey" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="@string/pm_subtitle"
+                        android:textAppearance="@style/TextAppearance.Paws.Caption" />
 
-                <TextView
-                    android:id="@+id/txtFacebook"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="@dimen/app_padding"
-                    android:text="@string/pm_card_facebook"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.Paws.Small" />
+                </LinearLayout>
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:fitsSystemWindows="true" >
+
+            <!-- Body Cards. -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/app_gutter"
+                android:layout_marginTop="@dimen/app_spacing"
+                android:layout_marginRight="@dimen/app_gutter"
+                android:layout_marginBottom="@dimen/height_navbars"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <!-- Self-Analysis Card. -->
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/app_spacing"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Paws.Small">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/app_spacing"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/app_padding"
+                            android:paddingLeft="@dimen/app_padding"
+                            android:paddingRight="@dimen/app_padding"
+                            android:text="@string/pm_card_selfanalysis"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSelfAnalysis"
+                            style="@style/Widget.Paws.Button"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/height_buttons_small"
+                            android:text="@string/pm_btn_selfanalysis" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Survey Card. -->
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/app_spacing"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Paws.Small">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/app_spacing"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/app_padding"
+                            android:paddingLeft="@dimen/app_padding"
+                            android:paddingRight="@dimen/app_padding"
+                            android:text="@string/pm_card_survey"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSurveys"
+                            style="@style/Widget.Paws.Button"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/height_buttons_small"
+                            android:text="@string/pm_btn_survey" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/app_spacing"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Paws.Small">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/app_spacing"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/app_padding"
+                            android:paddingLeft="@dimen/app_padding"
+                            android:paddingRight="@dimen/app_padding"
+                            android:text="@string/pm_card_facebook"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnFacebook"
+                            style="@style/Widget.Paws.Button"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/height_buttons_small"
+                            android:text="@string/pm_btn_facebook" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
 
     </LinearLayout>
 

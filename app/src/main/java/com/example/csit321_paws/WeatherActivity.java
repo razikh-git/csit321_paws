@@ -203,7 +203,6 @@ public class WeatherActivity
                 txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 txt.setTextAppearance(this, R.style.TextAppearance_Paws_Tiny);
                 txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
-                txt.setPadding(pad, 0, pad, 0);
                 layout.addView(txt);
 
                 // Add the predicted temperature.
@@ -221,7 +220,6 @@ public class WeatherActivity
                 txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
                 txt.setTextColor(ContextCompat.getColor(this, R.color.color_primary_alt));
-                txt.setPadding(pad, 0, pad, 0);
                 layout.addView(txt);
 
                 // Add the child to the hierarchy.
@@ -242,8 +240,8 @@ public class WeatherActivity
                     .getInt("id");
             int id2 = id;
 
-            // TODO change the setup to include ALL HOURS FROM THE MORNING OF THE NEXT DAY ONWARDS
-            // todo rather than the current setup; which continues from 12hrs after the current time
+            /* TODO change the setup to include ALL HOURS FROM THE MORNING OF THE NEXT DAY ONWARDS
+            rather than the current setup; which continues from 12hrs after the current time */
 
             layParent = findViewById(R.id.layWeatherWeekly);
             for (int i = index; i < 40; ++i) {
@@ -288,7 +286,7 @@ public class WeatherActivity
                     txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                     txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
                     txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
-                    txt.setPadding(pad, pad / 3, pad, pad);
+                    txt.setPadding(0, pad / 3, 0, pad);
                     layout.addView(txt);
 
                     // TODO customise the icon based on importance (ie. ID > 100)
@@ -407,7 +405,6 @@ public class WeatherActivity
                     txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                     txt.setTextAppearance(this, R.style.TextAppearance_Paws_Small);
                     txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
-                    txt.setPadding(pad, 0, pad, 0);
                     layout.addView(txt);
 
                     // Add any precipitation for the lowest-tier weather effects for the day.
@@ -477,7 +474,6 @@ public class WeatherActivity
                         txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                         txt.setTextAppearance(this, R.style.TextAppearance_Paws_Tiny);
                         txt.setTextColor(ContextCompat.getColor(this, R.color.color_black));
-                        txt.setPadding(pad, 0, pad, 0);
                         layout.addView(txt);
                     }
 

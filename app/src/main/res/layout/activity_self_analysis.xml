@@ -99,116 +99,73 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_gravity="center"
                         android:orientation="vertical"
-                        android:paddingTop="@dimen/app_padding"
-                        android:paddingBottom="@dimen/app_padding">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <View
-                                android:layout_width="@dimen/app_spacing_half"
-                                android:layout_height="match_parent" />
-
-                            <com.google.android.material.card.MaterialCardView
-                                android:id="@+id/cardRiskLow"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:clickable="true"
-                                android:focusable="true"
-                                app:strokeColor="@color/color_grey"
-                                app:strokeWidth="@dimen/width_stroke">
-
-                                <TextView
-                                    android:id="@+id/txtRiskLow"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:padding="@dimen/app_padding"
-                                    android:scrollHorizontally="true"
-                                    android:text="@string/sa_risk_low"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
-
-                            </com.google.android.material.card.MaterialCardView>
-
-                            <View
-                                android:layout_width="@dimen/app_spacing_half"
-                                android:layout_height="match_parent" />
-
-                            <com.google.android.material.card.MaterialCardView
-                                android:id="@+id/cardRiskMed"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:clickable="true"
-                                android:focusable="true"
-                                app:strokeColor="@color/color_grey"
-                                app:strokeWidth="@dimen/width_stroke">
-
-                                <TextView
-                                    android:id="@+id/txtRiskMed"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:maxLines="3"
-                                    android:padding="@dimen/app_padding"
-                                    android:scrollHorizontally="true"
-                                    android:text="@string/sa_risk_med"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
-
-                            </com.google.android.material.card.MaterialCardView>
-
-                            <View
-                                android:layout_width="@dimen/app_spacing_half"
-                                android:layout_height="match_parent" />
-
-                            <com.google.android.material.card.MaterialCardView
-                                android:id="@+id/cardRiskHigh"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:clickable="true"
-                                android:focusable="true"
-                                app:strokeColor="@color/color_grey"
-                                app:strokeWidth="@dimen/width_stroke">
-
-                                <TextView
-                                    android:id="@+id/txtRiskHigh"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:ellipsize="end"
-                                    android:gravity="center"
-                                    android:maxLines="3"
-                                    android:padding="@dimen/app_padding"
-                                    android:scrollHorizontally="true"
-                                    android:text="@string/sa_risk_high"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
-
-                            </com.google.android.material.card.MaterialCardView>
-
-                            <View
-                                android:layout_width="@dimen/app_spacing_half"
-                                android:layout_height="match_parent" />
-
-                        </LinearLayout>
+                        android:padding="@dimen/app_padding" >
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/app_spacing"
+                            android:layout_marginBottom="@dimen/text_spacing"
                             android:paddingLeft="@dimen/text_spacing"
                             android:paddingRight="@dimen/text_spacing"
                             android:scrollHorizontally="true"
                             android:maxLines="3"
-                            android:text="@string/sa_risk_title"
+                            android:text="@string/sa_risk_question"
                             android:textAlignment="center"
                             android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnRiskLow"
+                                style="@style/Widget.Paws.Button.TextButton.Block"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/height_buttons_block"
+                                android:layout_weight="1"
+                                android:text="@string/sa_risk_low"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Block"
+                                android:textColor="@color/color_on_background"
+                                app:strokeColor="@color/color_on_background"
+                                app:strokeWidth="@dimen/width_stroke" />
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnRiskMed"
+                                style="@style/Widget.Paws.Button.TextButton.Block"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/height_buttons_block"
+                                android:layout_weight="1"
+                                android:text="@string/sa_risk_med"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Block"
+                                android:textColor="@color/color_on_background"
+                                app:strokeColor="@color/color_on_background"
+                                app:strokeWidth="@dimen/width_stroke" />
+
+                            <View
+                                android:layout_width="@dimen/app_spacing_half"
+                                android:layout_height="match_parent" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnRiskHigh"
+                                style="@style/Widget.Paws.Button.TextButton.Block"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/height_buttons_block"
+                                android:layout_weight="1"
+                                android:text="@string/sa_risk_high"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Block"
+                                android:textColor="@color/color_on_background"
+                                app:strokeColor="@color/color_on_background"
+                                app:strokeWidth="@dimen/width_stroke" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -223,30 +180,34 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:paddingTop="@dimen/app_padding"
-                        android:paddingBottom="@dimen/app_padding"
+                        android:padding="@dimen/app_padding"
                         android:orientation="vertical" >
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/app_spacing_half"
+                            android:paddingLeft="@dimen/text_spacing"
+                            android:paddingRight="@dimen/text_spacing"
+                            android:text="@string/sa_updates_question"
+                            android:textAlignment="center"
+                            android:textAppearance="@style/TextAppearance.Paws.Medium" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
-                            <View
-                                android:layout_width="@dimen/app_spacing_half"
-                                android:layout_height="match_parent" />
-
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/cardUpdatesLow"
-                                style="@style/Widget.Paws.Button"
+                                android:id="@+id/btnUpdatesLow"
+                                style="@style/Widget.Paws.Button.TextButton.Block"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
-                                android:maxLines="4"
                                 android:text="@string/sa_updates_low"
-                                android:textColor="@color/color_white"
-                                android:textAppearance="@style/TextAppearance.Paws.Button.List"
-                                app:strokeColor="@color/color_grey"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Block"
+                                android:textColor="@color/color_on_background"
+                                app:strokeColor="@color/color_on_background"
                                 app:strokeWidth="@dimen/width_stroke" />
 
                             <View
@@ -254,60 +215,34 @@
                                 android:layout_height="match_parent" />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/cardUpdatesMed"
-                                style="@style/Widget.Paws.Button"
+                                android:id="@+id/btnUpdatesMed"
+                                style="@style/Widget.Paws.Button.TextButton.Block"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
-                                android:maxLines="4"
                                 android:text="@string/sa_updates_med"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Block"
                                 android:textColor="@color/color_on_background"
-                                android:textAppearance="@style/TextAppearance.Paws.Button.Block" />
+                                app:strokeColor="@color/color_on_background"
+                                app:strokeWidth="@dimen/width_stroke" />
 
                             <View
                                 android:layout_width="@dimen/app_spacing_half"
                                 android:layout_height="match_parent" />
 
-                            <com.google.android.material.card.MaterialCardView
-                                android:id="@+id/cardUpdatesHigh"
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnUpdatesHigh"
+                                style="@style/Widget.Paws.Button.TextButton.Block"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
-                                android:clickable="true"
-                                android:focusable="true"
-                                app:strokeColor="@color/color_grey"
-                                app:strokeWidth="@dimen/width_stroke">
-
-                                <TextView
-                                    android:id="@+id/txtUpdatesHigh"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center"
-                                    android:padding="@dimen/app_padding"
-                                    android:scrollHorizontally="true"
-                                    android:ellipsize="end"
-                                    android:maxLines="4"
-                                    android:text="@string/sa_updates_high"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/TextAppearance.Paws.Medium" />
-
-                            </com.google.android.material.card.MaterialCardView>
-
-                            <View
-                                android:layout_width="@dimen/app_spacing_half"
-                                android:layout_height="match_parent" />
+                                android:text="@string/sa_updates_high"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Block"
+                                android:textColor="@color/color_on_background"
+                                app:strokeColor="@color/color_on_background"
+                                app:strokeWidth="@dimen/width_stroke" />
 
                         </LinearLayout>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/app_spacing"
-                            android:paddingLeft="@dimen/text_spacing"
-                            android:paddingRight="@dimen/text_spacing"
-                            android:text="@string/sa_updates_title"
-                            android:textAlignment="center"
-                            android:textAppearance="@style/TextAppearance.Paws.Medium" />
 
                     </LinearLayout>
 
@@ -317,7 +252,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="@dimen/app_gutter"
-                    android:layout_marginTop="@dimen/app_spacing"
+                    android:layout_marginTop="@dimen/app_spacing_half"
                     android:layout_marginEnd="@dimen/app_gutter"
                     android:orientation="horizontal">
 

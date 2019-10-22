@@ -111,10 +111,11 @@
                         android:layout_height="@dimen/height_buttons_small"
                         android:layout_marginBottom="@dimen/text_spacing"
                         android:backgroundTint="@color/color_facebook"
+                        android:fontFamily="sans-serif"
                         android:text="@string/fe_button"
                         app:icon="@drawable/facebook"
-                        app:iconTint="@color/color_on_primary"
-                        app:iconSize="@dimen/dimen_icon_small"/>
+                        app:iconSize="@dimen/dimen_icon_small"
+                        app:iconTint="@color/color_on_primary" />
 
                     <TextView
                         android:id="@+id/txtFacebookLabel"

@@ -29,8 +29,6 @@
     <string name="app_url_map_layer_temp" translatable="false">temp_new</string>
 
     <!-- Survey data. -->
-    <string name="intent_survey_result" translatable="false">intent_survey_result</string>
-
     <string name="file_survey_questions" translatable="false">paws_survey_questions</string>
     <string name="file_survey_results" translatable="false">paws_survey_results</string>
     <string name="file_facebook_results" translatable="false">paws_fb_results</string>
@@ -87,16 +85,10 @@
     <!--       Activity strings       -->
 
     <!-- Home Screen Activity. -->
-    <string name="home_warning">Survey incomplete</string>
+    <string name="home_warning_title">Survey incomplete</string>
+    <string name="home_warning_subtitle">Some personalisation features are not enabled.</string>
 
-    <string name="home_weather_temp">Temperature</string>
-    <string name="home_weather_wind">Wind</string>
-    <string name="home_weather_precip">Precipitation</string>
-    <string name="home_precip_none">Clear</string>
-    <string name="home_precip_rain">Rain</string>
-    <string name="home_precip_snow">Snow</string>
-    <string name="home_weather_footer">last updated:</string>
-
+    <string name="home_weather_timestamp">Updated</string>
     <string name="home_card_surveys">Surveys</string>
     <string name="home_card_maps">Maps</string>
     <string name="home_card_profile">Profile</string>
@@ -116,33 +108,32 @@
     <string name="pp_btn_accept">proceed</string>
 
     <!-- Profiling Menu Activity. -->
+    <string name="pm_title">Personalisation Hub</string>
+    <string name="pm_subtitle">system setup and calibration</string>
     <string name="pm_btn_selfanalysis">self-analysis</string>
     <string name="pm_btn_survey">survey</string>
     <string name="pm_btn_facebook">facebook</string>
     <string name="pm_card_selfanalysis">
-        "Answer two questions"
-        " to quickly calibrate the system"
+        "Answer two questions to quickly begin using PAWS"
     </string>
     <string name="pm_card_survey">
-        "Complete a short survey"
-        " to discover your personality type"
+        "Complete a short survey to identify your personality type"
     </string>
     <string name="pm_card_facebook">
-        "Use Facebook integration to"
-        " weight results with your profile"
+        "Use Facebook integration to weight results with your profile"
     </string>
 
     <!-- TODO: fill in description of 'this is designed to calibrate personalisation features' etc -->
 
     <!-- Self-Analysis Activity. -->
     <string name="sa_title">Self-Analysis</string>
-    <string name="sa_subtitle">Two-point quick-start form</string>
+    <string name="sa_subtitle">two-point quick-start form</string>
     <string name="sa_description">
-
+        placeholder description
     </string>
 
-    <string name="sa_risk_title">
-        Which of these personal outlines profiles would you say best describes your day-to-day self?
+    <string name="sa_risk_question">
+        Which of these personal profiles would you say best describes your day-to-day self?
     </string>
 
     <string name="sa_risk_low">
@@ -161,7 +152,7 @@
         Focused
     </string>
 
-    <string name="sa_updates_title">
+    <string name="sa_updates_question">
         Which of these situations is best suited to your preferences for notifications?
     </string>
 

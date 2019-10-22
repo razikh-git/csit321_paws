@@ -25,22 +25,6 @@ public class ProfilingMenuActivity extends BottomNavBarActivity {
         findViewById(R.id.btnSelfAnalysis).setOnClickListener((view) -> onClickSelfAnalysis(view));
         findViewById(R.id.btnSurveys).setOnClickListener((view) -> onClickSurvey(view));
         findViewById(R.id.btnFacebook).setOnClickListener((view) -> onClickFacebook(view));
-
-        // TODO : integrate binary files to allow for contextual highlighting of survey cards
-
-        // Initialise info screen contents.
-        TextView txt = findViewById(R.id.txtInfo);
-        try {
-            Resources res = getResources();
-            InputStream in = res.openRawResource(R.raw.slp_info);
-            byte[] b = new byte[in.available()];
-            in.read(b);
-
-            txt.setText(new String(b));
-        } catch (Exception e){
-            e.printStackTrace();
-            txt.setText(R.string.app_txt_fallback);
-        }
     }
 
     public void onClickSelfAnalysis(View view){

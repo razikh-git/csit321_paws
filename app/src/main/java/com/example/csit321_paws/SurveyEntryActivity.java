@@ -228,43 +228,6 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
-
         initInterface();
-
-        switch (requestCode) {
-            // Result was returned from the SurveyQuestionActivity call.
-            case RequestCode.SURVEY_CONTINUE: {
-                switch (resultCode) {
-                    case Activity.RESULT_OK: {
-                        int result = resultData.getIntExtra(
-                                getResources().getString(R.string.intent_survey_result), ResultCode.RESULT_INCOMPLETE);
-                        switch (result) {
-
-                            // TODO : separate the actions in initInterface() per return code
-
-                            // Reinitialise the interface after returning from the survey.
-                            case ResultCode.RESULT_INCOMPLETE:
-                            case ResultCode.RESULT_COMPLETE: {
-                                //initInterface();
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case Activity.RESULT_CANCELED: {
-
-                        // . . .
-
-                        break;
-                    }
-                    default: {
-
-                        // . . .
-
-                    }
-                }
-                break;
-            }
-        }
     }
 }

@@ -99,8 +99,8 @@ public class HomeActivity
     private boolean initButtons() {
         // Button functionality.
         try {
-            findViewById(R.id.layWeatherDataContainer).setOnClickListener((view) -> onClickWeather(view));
             findViewById(R.id.cardWarningBanner).setOnClickListener((view) -> onClickSurveys(view));
+            findViewById(R.id.cardWeather).setOnClickListener((view) -> onClickWeather(view));
             findViewById(R.id.cardSurveys).setOnClickListener((view) -> onClickSurveys(view));
             findViewById(R.id.cardMaps).setOnClickListener((view) -> onClickMaps(view));
             findViewById(R.id.btnSettings).setOnClickListener((view) -> onClickSettings(view));
@@ -165,16 +165,6 @@ public class HomeActivity
 
         LatLng latLng = new LatLng(mLat, mLng);
 
-        // Use data from locational tracking if possible.
-/*
-        if (loc != null) {
-            ((TextView)findViewById(R.id.txtTimestampTop)).setText(
-                DateFormat.format("HH:mm:ss", loc.getTime()).toString());
-            ((TextView)findViewById(R.id.txtTimestampBottom)).setText(
-                DateFormat.format("dd-MM-yyyy", loc.getTime()).toString());
-        }
-*/
-
         Log.println(Log.DEBUG, TAG, "Loaded lat/long presets.");
 
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, REQUEST_PERMISSIONS_NETWORK)) {
@@ -214,59 +204,6 @@ public class HomeActivity
                 return false;
             }
 
-            // Fill in header data.
-
-            /*
-            // Weather icon
-            str = getString(R.string.app_url_owm_root)
-                    + "img/"
-                    + "wn/"
-                    + weatherCurrentJSON.getString("icon")
-                    + ".png";
-            ImageLoader.getInstance().displayImage(str, (ImageView) findViewById(R.id.imgWeatherIcon),
-                    null, new ImageLoadingListener() {
-                        @Override
-                        public void onLoadingStarted(String imageUri, View view) {
-                            // Display already-visible circular progress bar.
-                        }
-
-                        @Override
-                        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                            // Hide progress bar.
-                            findViewById(R.id.barWeatherIcon).setVisibility(GONE);
-
-                            // Display error icon.
-                            view.setVisibility(VISIBLE);
-                            ((ImageView)view).setColorFilter(ContextCompat.getColor(
-                                    view.getContext(), R.color.color_on_primary_light));
-                            ((ImageView)view).setImageDrawable(getDrawable(R.drawable.ic_cloud_off));
-                        }
-
-                        @Override
-                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                            // Hide progress bar.
-                            findViewById(R.id.barWeatherIcon).setVisibility(GONE);
-
-                            // Display weather icon.
-                            view.setVisibility(VISIBLE);
-                            findViewById(R.id.imgWeatherIcon).setVisibility(VISIBLE);
-                            ((ImageView)view).setImageBitmap(loadedImage);
-                        }
-
-                        @Override
-                        public void onLoadingCancelled(String imageUri, View view) {
-                            // Hide progress bar.
-                            findViewById(R.id.barWeatherIcon).setVisibility(GONE);
-
-                            // Display error icon.
-                            view.setVisibility(VISIBLE);
-                            ((ImageView)view).setColorFilter(ContextCompat.getColor(
-                                    view.getContext(), R.color.color_on_primary_light));
-                            ((ImageView)view).setImageDrawable(getDrawable(R.drawable.ic_cloud_off));
-                        }
-            });
-            */
-
             // Set icon for weather type.
             Drawable drawable = PAWSAPI.getWeatherDrawable(this, weatherCurrentJSON.getString("icon"));
 
@@ -293,14 +230,13 @@ public class HomeActivity
             // City name
             ((TextView)findViewById(R.id.txtCity)).setText(
                     weatherForecastJSON.getJSONObject("city").getString("name"));
-            // Country code
-            ((TextView)findViewById(R.id.txtCountry)).setText(
-                    weatherForecastJSON.getJSONObject("city").getString("country"));
-            // GPS Coordinates
-            char bearingLng = mLng > 0 ? 'E' : 'W';
-            char bearingLat = mLat > 0 ? 'N' : 'S';
-            ((TextView)findViewById(R.id.txtCoordinates)).setText(
-                    Math.abs(mLng) + " " + bearingLng + "  " + Math.abs(mLat) + " " + bearingLat);
+
+            // Time of forecast
+            ((TextView)(findViewById(R.id.txtWeatherTimestamp))).setText(
+                    getString(R.string.home_weather_timestamp) + " " +
+                            DateFormat.format("dd/MM HH:mm",
+                                    weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                                            .getLong("dt") * 1000).toString());
 
             // Fill in body data.
 
@@ -381,12 +317,6 @@ public class HomeActivity
                             "last 3 hrs");
                     break;
             }
-
-            // Time of forecast
-            ((TextView)(findViewById(R.id.txtFooterTime))).setText(
-                    DateFormat.format("HH:mm dd.MM.yyyy",
-                    weatherForecastJSON.getJSONArray("list").getJSONObject(index)
-                            .getLong("dt") * 1000).toString());
         } catch (Exception e) {
             e.printStackTrace();
             return false;
