@@ -127,6 +127,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
+                                android:backgroundTint="@color/color_card"
                                 android:text="@string/sa_risk_low"
                                 android:textAppearance="@style/TextAppearance.Paws.Button.Block"
                                 android:textColor="@color/color_on_background"
@@ -143,6 +144,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
+                                android:backgroundTint="@color/color_card"
                                 android:text="@string/sa_risk_med"
                                 android:textAppearance="@style/TextAppearance.Paws.Button.Block"
                                 android:textColor="@color/color_on_background"
@@ -159,6 +161,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
+                                android:backgroundTint="@color/color_card"
                                 android:text="@string/sa_risk_high"
                                 android:textAppearance="@style/TextAppearance.Paws.Button.Block"
                                 android:textColor="@color/color_on_background"
@@ -204,6 +207,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
+                                android:backgroundTint="@color/color_card"
                                 android:text="@string/sa_updates_low"
                                 android:textAppearance="@style/TextAppearance.Paws.Button.Block"
                                 android:textColor="@color/color_on_background"
@@ -220,6 +224,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
+                                android:backgroundTint="@color/color_card"
                                 android:text="@string/sa_updates_med"
                                 android:textAppearance="@style/TextAppearance.Paws.Button.Block"
                                 android:textColor="@color/color_on_background"
@@ -236,6 +241,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/height_buttons_block"
                                 android:layout_weight="1"
+                                android:backgroundTint="@color/color_card"
                                 android:text="@string/sa_updates_high"
                                 android:textAppearance="@style/TextAppearance.Paws.Button.Block"
                                 android:textColor="@color/color_on_background"
@@ -265,7 +271,7 @@
                         android:layout_height="@dimen/height_buttons_small"
                         android:layout_weight="1"
                         android:text="@string/app_btn_optout"
-                        android:textColor="@color/color_grey" />
+                        android:textColor="@color/color_midtone" />
 
                     <!-- Contextual Submit Button. -->
 

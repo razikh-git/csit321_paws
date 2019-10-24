@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.csit321_paws">
+    package="com.amw188.csit321_paws">
+
+    <uses-feature android:name="android.hardware.screen.portrait" />
+    <uses-feature android:name="android.hardware.location.gps" />
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -9,11 +19,55 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/mainAppTheme">
-        <activity android:name=".SelfAnalysisActivity"></activity>
         <activity
             android:name=".SettingsActivity"
+            android:screenOrientation="sensorPortrait"
             android:label="@string/title_activity_settings" />
-        <activity android:name=".MapsActivity" />
+        <activity android:name=".SelfAnalysisActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_surveys" />
+        <activity android:name=".SurveyCompleteActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_surveys" />
+        <activity android:name=".SurveyQuestionActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_surveys" />
+        <activity android:name=".FacebookEntryActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_surveys" />
+        <activity android:name=".SurveyEntryActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_surveys" />
+        <activity android:name=".ProfilingMenuActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_surveys" />
+        <activity android:name=".MapsActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_maps" />
+        <activity android:name=".WeatherActivity"
+            android:screenOrientation="sensorPortrait"
+            android:label="@string/label_weather" />
+        <activity
+            android:name=".HomeActivity"
+            android:label="@string/label_home"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/mainAppTheme" />
+        <activity
+            android:name=".ProfilingPromptActivity"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/mainAppTheme" />
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/label_home"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/splashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -22,27 +76,6 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
-        <activity android:name=".SurveyCompleteActivity" />
-        <activity android:name=".SurveyQuestionActivity" />
-        <activity android:name=".WeatherActivity" />
-        <activity android:name=".FacebookEntryActivity" />
-        <activity android:name=".SurveyEntryActivity" />
-        <activity android:name=".ProfilingMenuActivity" />
-        <activity
-            android:name=".HomeActivity"
-            android:theme="@style/mainAppTheme" />
-        <activity
-            android:name=".ProfilingPromptActivity"
-            android:theme="@style/mainAppTheme" />
-        <activity
-            android:name=".MainActivity"
-            android:theme="@style/splashTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -54,13 +87,5 @@
             android:name=".FetchAddressIntentService"
             android:exported="false" />
     </application>
-
-    <uses-feature android:name="android.hardware.location.gps" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>

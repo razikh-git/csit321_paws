@@ -20,4 +20,41 @@
         <item>default</item>
         <item>override</item>
     </string-array>
+
+    <!-- Location Usage Preference. -->
+    <string-array name="location_usage_entries">
+        <item>Highest accuracy</item>
+        <item>Balanced</item>
+        <item>Lowest battery usage</item>
+        <item>Disabled</item>
+    </string-array>
+
+    <string-array name="location_usage_values">
+        <item>100</item>
+        <item>102</item>
+        <item>104</item>
+        <item>105</item>
+    </string-array>
+
+    <!-- Location Update Rate Preference. -->
+    <string-array name="location_rate_entries">
+        <item>Every 5 seconds</item>
+        <item>Every 30 seconds</item>
+        <item>Every 60 seconds</item>
+        <item>Every 5 minutes</item>
+        <item>Every 15 minutes</item>
+        <item>Every 30 minutes</item>
+        <item>Never</item>
+    </string-array>
+
+    <string-array name="location_rate_values">
+        <item>5000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>300000</item>
+        <item>900000</item>
+        <item>1800000</item>
+        <item>-1</item>
+    </string-array>
+
 </resources>

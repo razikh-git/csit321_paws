@@ -41,6 +41,12 @@
     <string name="app_name" translatable="false">PAWS</string>
     <string name="app_detail">CSIT321\nPAWS\nPrivate prototype</string>
 
+    <!-- Activity labels. -->
+    <string name="label_home">@string/app_name</string>
+    <string name="label_maps">Mapping</string>
+    <string name="label_weather">Weather</string>
+    <string name="label_surveys">Profiling</string>
+
     <!-- Generic button strings. -->
     <string name="app_btn_start">start</string>
     <string name="app_btn_submit">submit</string>
@@ -87,6 +93,10 @@
     <!-- Home Screen Activity. -->
     <string name="home_warning_title">Survey incomplete</string>
     <string name="home_warning_subtitle">Some personalisation features are not enabled.</string>
+
+    <string name="home_clear_label">humidity</string>
+    <string name="home_cloud_label">coverage</string>
+    <string name="home_precip_label">last 3 hrs</string>
 
     <string name="home_weather_timestamp">Updated</string>
     <string name="home_card_surveys">Surveys</string>
@@ -215,7 +225,9 @@
     <!-- Mapping Activity. -->
     <string name="ma_wind">Wind</string>
     <string name="ma_precip">Precipitation</string>
-    <string name="ma_risk">Risk Analysis</string>
+    <string name="ma_risk">Polygons</string>
+    <string name="ma_tracking_enable">Start tracking my journey</string>
+    <string name="ma_tracking_disable">End tracking</string>
     <string name="ma_search_hint">Search</string>
     <string name="ma_map_type">Map Type</string>
     <string name="ma_default">Default</string>
@@ -229,13 +241,17 @@
     <string name="sv_fa_geocoder_unavailable">The service geocoder was unavailable.</string>
     <string name="title_activity_settings">Settings</string>
 
-    <!-- Preference Titles -->
+    <!-- Preference Titles. -->
     <string name="pref_header_general">General</string>
     <string name="pref_header_usage">Data and Battery Usage</string>
 
-    <!-- Messages Preferences -->
+    <!-- Units Preferences. -->
     <string name="pref_title_units">Units of measurement</string>
     <string name="pref_title_time">Time format</string>
+
+    <!-- Location Preferences. -->
+    <string name="pref_title_location_usage">Location precision</string>
+    <string name="pref_title_location_rate">Location update rate</string>
 
     <!-- TODO format and remove -->
 

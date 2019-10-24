@@ -38,16 +38,21 @@
 
     <PreferenceCategory app:title="@string/pref_header_usage">
 
-        <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
+        <ListPreference
+            app:defaultValue="100"
+            app:entries="@array/location_usage_entries"
+            app:entryValues="@array/location_usage_values"
+            app:key="location_usage"
+            app:title="@string/pref_title_location_usage"
+            app:useSimpleSummaryProvider="true" />
 
-        <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
+        <ListPreference
+            app:defaultValue="5000"
+            app:entries="@array/location_rate_entries"
+            app:entryValues="@array/location_rate_values"
+            app:key="location_rate"
+            app:title="@string/pref_title_location_rate"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 

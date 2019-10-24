@@ -74,7 +74,7 @@
     </style>
     <style name="TextAppearance.Paws.Caption" parent="TextAppearance.Paws.Small">
         <item name="android:textSize">@dimen/text_size_small</item>
-        <item name="android:textColor">@color/color_grey</item>
+        <item name="android:textColor">@color/color_midtone</item>
         <item name="android:fontFamily">@font/noto</item>
     </style>
     <style name="TextAppearance.Paws.Icon" parent="TextAppearance.Paws.Small">
@@ -111,7 +111,7 @@
         <item name="android:textAppearance">@style/TextAppearance.Paws.Button.List</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/color_on_background</item>
-        <item name="iconTint">@color/color_grey</item>
+        <item name="iconTint">@color/color_on_background</item>
         <item name="iconPadding">@dimen/text_spacing</item>
     </style>
     <style name="Widget.Paws.Button.TextButton.Block" parent="Widget.Paws.Button.TextButton.List">

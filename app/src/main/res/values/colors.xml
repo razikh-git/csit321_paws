@@ -2,28 +2,33 @@
 <resources>
 
     <!-- Mixed-purpose colors. -->
-    <color name="color_white">#FFFDFDFD</color>
-    <color name="color_white_alt">#F9F9F9</color>
-    <color name="color_grey">#8D8D8D</color>
-    <color name="color_black">#434649</color>
+    <color name="color_ref_white">#FFFDFDFD</color>
+    <color name="color_ref_white_alt">#F9F9F9</color>
+    <color name="color_ref_grey">#8D8D8D</color>
+    <color name="color_ref_black">#434649</color>
+    <color name="color_ref_brand">#7FDDE9</color>
+    <color name="color_ref_brand_alt">#39BED1</color>
+    <color name="color_ref_error">#EC6E4C</color>
 
     <!-- Element colors. -->
-    <color name="color_background">@color/color_white_alt</color>
-    <color name="color_card">@color/color_white</color>
+    <color name="color_background">@color/color_ref_white_alt</color>
+    <color name="color_card">@color/color_ref_white</color>
 
     <!-- TODO: separate color_primary/alt/secondary to retain accent value -->
 
     <!-- Overrides -->
     <color name="color_primary">#7FDDE9</color>
     <color name="color_primary_alt">#39BED1</color>
-    <color name="color_error">#EC6E4C</color>
+    <color name="color_error">@color/color_ref_error</color>
     <color name="color_accent">@color/color_primary</color>
+    <color name="color_accent_alt">@color/color_primary_alt</color>
+    <color name="color_midtone">@color/color_ref_grey</color>
 
     <color name="color_facebook">#3B5998</color>
 
     <!-- Font colors. -->
-    <color name="color_on_primary">@color/color_white</color>
-    <color name="color_on_background">@color/color_black</color>
+    <color name="color_on_primary">@color/color_ref_white</color>
+    <color name="color_on_background">@color/color_ref_black</color>
     <color name="color_highlight">@color/color_accent</color>
 
 </resources>
