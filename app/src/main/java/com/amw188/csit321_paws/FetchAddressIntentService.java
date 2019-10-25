@@ -14,13 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
-/**
- * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * <p>
- * TODO: Customize class - update intent actions, extra parameters and static
- * helper methods.
- */
 public class FetchAddressIntentService extends IntentService {
 
     public FetchAddressIntentService() {
@@ -29,10 +22,7 @@ public class FetchAddressIntentService extends IntentService {
 
     protected ResultReceiver mReceiver;
 
-    /**
-     * Starts this service to perform an action with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     */
+    // Queues up an address fetch request.
     public static void startActionFetchAddress(Context context, ResultReceiver receiver, Location location) {
         Intent intent = new Intent(context, FetchAddressIntentService.class);
         intent.setAction(FetchAddressCode.ACTION_FETCH_ADDRESS);
@@ -43,7 +33,6 @@ public class FetchAddressIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
         if (intent != null) {
             final String action = intent.getAction();
             if (action.equals(FetchAddressCode.ACTION_FETCH_ADDRESS)) {
@@ -54,10 +43,7 @@ public class FetchAddressIntentService extends IntentService {
         }
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
+    // Handles address fetching in a background thread.
     private void handleActionFetchAddress(Location location) {
         String error = "";
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());

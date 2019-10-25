@@ -9,10 +9,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class SettingsActivity extends BottomNavBarActivity {
 
-    static final String KEY_PREF_LOCATION_PRIORITY = "location_usage";
+    static final String KEY_PREF_LOCATION_PRIORITY = "location_priority";
     static final String KEY_PREF_LOCATION_RATE = "location_rate";
-
-    // TODO : Implement reactive reloading of content in other activities upon settings changed
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -8,182 +8,70 @@
     android:background="@color/color_background"
     tools:context=".SurveyEntryActivity">
 
-    <LinearLayout
-        android:id="@+id/laySurveyEntry"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/height_navbars"
-        android:clipChildren="false"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="2dp"
-        tools:layout_editor_absoluteY="2dp">
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardHeader"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/height_banners_static"
-            app:cardElevation="@dimen/elevation_banners">
-
-            <LinearLayout
-                android:id="@+id/layHeader"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/dimen_icon_huge"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/imgLogo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/app_spacing"
-                    android:layout_marginEnd="@dimen/app_spacing"
-                    android:adjustViewBounds="true"
-                    android:gravity="center"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/logo" />
-
-                <LinearLayout
-                    android:id="@+id/layHeaderRight"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="fill_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/txtHeaderTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="@string/se_title"
-                        android:textAppearance="@style/TextAppearance.Paws.Title" />
-
-                    <TextView
-                        android:id="@+id/txtHeaderSubtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="@string/se_subtitle"
-                        android:textAppearance="@style/TextAppearance.Paws.Caption" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fitsSystemWindows="true" >
 
         <LinearLayout
-            android:id="@+id/laySurveyEntryBody"
+            android:id="@+id/laySurveyEntry"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/app_spacing"
-            android:layout_marginEnd="@dimen/app_spacing"
+            android:layout_marginBottom="@dimen/height_navbars"
             android:clipChildren="false"
             android:orientation="vertical"
-            android:padding="@dimen/app_spacing">
+            tools:layout_editor_absoluteX="2dp"
+            tools:layout_editor_absoluteY="2dp">
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardInfo"
+                android:id="@+id/cardHeader"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing">
-
-                <TextView
-                    android:id="@+id/txtInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/app_padding"
-                    android:textAppearance="@style/TextAppearance.Paws.Small" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardSurveyResults"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:backgroundTint="@color/survey_results_colors"
-                android:backgroundTintMode="src_over"
-                android:padding="@dimen/app_padding"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                app:strokeColor="@color/color_error"
-                app:strokeWidth="@dimen/width_stroke">
+                android:layout_height="@dimen/height_banners_static"
+                app:cardElevation="@dimen/elevation_banners">
 
                 <LinearLayout
-                    android:id="@+id/laySurveyResults"
+                    android:id="@+id/layHeader"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipChildren="false"
-                    android:clipToPadding="false"
-                    android:orientation="vertical"
-                    android:padding="@dimen/app_padding">
+                    android:layout_height="@dimen/dimen_icon_huge"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imgLogo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="@dimen/app_spacing"
+                        android:layout_marginEnd="@dimen/app_spacing"
+                        android:adjustViewBounds="true"
+                        android:gravity="center"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/logo" />
 
                     <LinearLayout
-                        android:id="@+id/laySurveyResultsTop"
+                        android:id="@+id/layHeaderRight"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:paddingStart="@dimen/app_padding"
-                        android:paddingEnd="@dimen/app_padding"
-                        android:clipChildren="false"
-                        android:clipToPadding="false"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:id="@+id/laySurveyProgressGraphics"
-                            android:layout_width="@dimen/dimen_icon_medium"
-                            android:layout_height="@dimen/dimen_icon_medium"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/imgProgressIcon"
-                                android:layout_width="@dimen/dimen_icon_medium"
-                                android:layout_height="@dimen/dimen_icon_medium"
-                                android:visibility="gone"
-                                app:srcCompat="@drawable/ic_radiobutton_unchecked" />
-
-                            <ProgressBar
-                                android:id="@+id/barProgressSurvey"
-                                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:max="100"
-                                android:progressDrawable="@drawable/progress_circular_thick"
-                                android:visibility="gone" />
-
-                        </LinearLayout>
+                        android:layout_gravity="fill_vertical"
+                        android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/txtProgressSurvey"
+                            android:id="@+id/txtHeaderTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:textAppearance="@style/TextAppearance.Paws.Large" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/laySurveyResultsBottom"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                            android:text="@string/se_title"
+                            android:textAppearance="@style/TextAppearance.Paws.Title" />
 
                         <TextView
-                            android:id="@+id/txtTimestamp"
-                            android:layout_width="match_parent"
+                            android:id="@+id/txtHeaderSubtitle"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:gravity="center"
-                            android:text="--:--/--/--"
-                            android:textAppearance="@style/TextAppearance.Paws.Small" />
+                            android:text="@string/se_subtitle"
+                            android:textAppearance="@style/TextAppearance.Paws.Caption" />
 
                     </LinearLayout>
 
@@ -191,39 +79,149 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/txtSurveyResultsLabel"
+            <LinearLayout
+                android:id="@+id/laySurveyEntryBody"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/text_spacing"
-                android:visibility="gone"
-                android:text="@string/se_results_label"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Paws.Caption" />
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/app_spacing"
+                android:layout_marginEnd="@dimen/app_spacing"
+                android:clipChildren="false"
+                android:orientation="vertical"
+                android:padding="@dimen/app_spacing">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnContinue"
-                style="@style/Widget.Paws.Button"
-                android:layout_width="200dp"
-                android:layout_height="@dimen/height_buttons_small"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:padding="@dimen/padding_buttons"
-                android:text="@string/app_btn_start" />
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/app_spacing">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnReset"
-                style="@style/Widget.Paws.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/height_buttons_small"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:padding="@dimen/padding_buttons"
-                android:text="@string/app_btn_reset" />
+                    <TextView
+                        android:id="@+id/txtInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/app_padding"
+                        android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSurveyResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/app_spacing"
+                    android:backgroundTint="@color/survey_results_colors"
+                    android:backgroundTintMode="src_over"
+                    android:padding="@dimen/app_padding"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    app:strokeColor="@color/color_error"
+                    app:strokeWidth="@dimen/width_stroke">
+
+                    <LinearLayout
+                        android:id="@+id/laySurveyResults"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
+                        android:orientation="vertical"
+                        android:padding="@dimen/app_padding">
+
+                        <LinearLayout
+                            android:id="@+id/laySurveyResultsTop"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:paddingStart="@dimen/app_padding"
+                            android:paddingEnd="@dimen/app_padding"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:id="@+id/laySurveyProgressGraphics"
+                                android:layout_width="@dimen/dimen_icon_medium"
+                                android:layout_height="@dimen/dimen_icon_medium"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:clipChildren="false"
+                                android:clipToPadding="false"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:id="@+id/imgProgressIcon"
+                                    android:layout_width="@dimen/dimen_icon_medium"
+                                    android:layout_height="@dimen/dimen_icon_medium"
+                                    android:visibility="gone"
+                                    app:srcCompat="@drawable/ic_radiobutton_unchecked" />
+
+                                <ProgressBar
+                                    android:id="@+id/barProgressSurvey"
+                                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:max="100"
+                                    android:progressDrawable="@drawable/progress_circular_thick"
+                                    android:visibility="gone" />
+
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/txtProgressSurvey"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Large" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/laySurveyResultsBottom"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/txtTimestamp"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="--:--/--/--"
+                                android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/txtSurveyResultsLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/text_spacing"
+                    android:visibility="gone"
+                    android:text="@string/se_results_label"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Paws.Caption" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnContinue"
+                    style="@style/Widget.Paws.Button"
+                    android:layout_width="200dp"
+                    android:layout_height="@dimen/height_buttons_small"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/app_spacing"
+                    android:padding="@dimen/padding_buttons"
+                    android:text="@string/app_btn_start" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"

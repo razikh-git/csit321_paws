@@ -14,7 +14,12 @@
     <color name="color_background">@color/color_ref_white_alt</color>
     <color name="color_card">@color/color_ref_white</color>
 
-    <!-- TODO: separate color_primary/alt/secondary to retain accent value -->
+    <color name="color_risk_low">#FFEB3B</color>
+    <color name="color_risk_low_fill">#4DFFEB3B</color>
+    <color name="color_risk_med">#FF9800</color>
+    <color name="color_risk_med_fill">#4DFF9800</color>
+    <color name="color_risk_high">#E91E63</color>
+    <color name="color_risk_high_fill">#4DE91E63</color>
 
     <!-- Overrides -->
     <color name="color_primary">#7FDDE9</color>

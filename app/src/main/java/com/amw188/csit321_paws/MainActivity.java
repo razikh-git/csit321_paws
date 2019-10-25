@@ -21,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
 
+        // Initilise notifications subsystem.
+        //Notifications.getInstance().init(this);
+
         // Load global preferences.
         SharedPreferences sharedPref = this.getSharedPreferences(
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
@@ -32,9 +35,9 @@ public class MainActivity extends AppCompatActivity {
             enterHome();
         } else {
             // Initialise all preferences.
-            sharedEditor.putInt("survey_last_question", 1);
-            sharedEditor.putLong("profile_time_completed", 0);
-            sharedEditor.putString("units", "metric");
+            sharedEditor.putInt("survey_last_question", 0);
+            sharedEditor.putLong("survey_time_completed", 0);
+            sharedEditor.putLong("selfanalysis_time_completed", 0);
             sharedEditor.putBoolean("facebook_init", false);
             sharedEditor.putBoolean("app_init", true);
             sharedEditor.apply();

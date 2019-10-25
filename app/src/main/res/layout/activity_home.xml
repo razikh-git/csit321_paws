@@ -101,6 +101,7 @@
                     app:cardCornerRadius="0dp" >
 
                     <LinearLayout
+                        android:id="@+id/layWeatherHeader"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingStart="@dimen/app_gutter"
@@ -121,7 +122,10 @@
                                 android:layout_height="wrap_content"
                                 android:maxLines="1"
                                 android:textColor="@color/color_on_primary"
-                                android:textAppearance="@style/TextAppearance.Paws.Huge" />
+                                android:textAppearance="@style/TextAppearance.Paws.Huge"
+                                android:shadowColor="@color/color_ref_black"
+                                android:shadowDx="2"
+                                android:shadowDy="2"/>
 
                         </LinearLayout>
 
@@ -131,7 +135,10 @@
                             android:layout_height="match_parent"
                             android:maxLines="1"
                             android:textAppearance="@style/TextAppearance.Paws.Small"
-                            android:textColor="@color/color_on_primary" />
+                            android:textColor="@color/color_on_primary"
+                            android:shadowColor="@color/color_ref_black"
+                            android:shadowDx="2"
+                            android:shadowDy="2" />
 
                     </LinearLayout>
 
@@ -378,7 +385,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/app_spacing"
-                android:layout_marginBottom="@dimen/app_gutter"
+                android:layout_marginBottom="@dimen/app_spacing"
                 app:cardBackgroundColor="@color/color_card">
 
                 <LinearLayout

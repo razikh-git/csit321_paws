@@ -10,30 +10,19 @@
         <item>imperial</item>
     </string-array>
 
-    <!-- Time Preference. -->
-    <string-array name="time_entries">
-        <item>Use locale default</item>
-        <item>Override</item>
-    </string-array>
-
-    <string-array name="time_values">
-        <item>default</item>
-        <item>override</item>
-    </string-array>
-
     <!-- Location Usage Preference. -->
-    <string-array name="location_usage_entries">
+    <string-array name="location_priority_entries">
         <item>Highest accuracy</item>
         <item>Balanced</item>
         <item>Lowest battery usage</item>
         <item>Disabled</item>
     </string-array>
 
-    <string-array name="location_usage_values">
-        <item>100</item>
-        <item>102</item>
-        <item>104</item>
-        <item>105</item>
+    <string-array name="location_priority_values">
+        <item>100</item>    <!-- High-power -->
+        <item>102</item>    <!-- Balanced -->
+        <item>104</item>    <!-- Low-power -->
+        <item>105</item>    <!-- Disabled -->
     </string-array>
 
     <!-- Location Update Rate Preference. -->

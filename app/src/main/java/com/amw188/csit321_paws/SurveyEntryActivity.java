@@ -69,7 +69,6 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
         // Button functionality.
         try {
             findViewById(R.id.btnContinue).setOnClickListener((view) -> onClickContinue(view));
-            findViewById(R.id.btnReset).setOnClickListener((view) -> onClickReset(view));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,12 +97,9 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
         TextViewCompat.setTextAppearance(
                 findViewById(R.id.txtProgressSurvey), R.style.TextAppearance_Paws_Medium);
 
-        if (mSharedPref.getInt("survey_last_question", 1)
-                < getResources().getInteger(R.integer.survey_question_count)) {
-
+        if (mSharedPref.getInt("survey_last_question", 0) < getResources().getInteger(R.integer.survey_question_count)) {
             // Incomplete profiling surveys:
-
-            if (mSharedPref.getInt("survey_last_question", 1) == 1) {
+            if (mSharedPref.getInt("survey_last_question", 0) == 0) {
                 // Profiling surveys with no progress whatsoever:
 
                 // Relabel the survey entry button.
@@ -207,14 +203,14 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
     public void onClickReset(View view) {
         // Prompt confirmation with a popout.
 
-        // TODO : remove and reimplement debug functionality
+        // TODO : remove and reimplement profile clear functionality
         mSharedEditor.putBoolean("app_init", false);
         mSharedEditor.putBoolean("facebook_init", false);
 
         // Reset all survey profile data.
         for (int i = 0; i < getResources().getInteger(R.integer.survey_question_count); ++i)
             mSharedEditor.putInt("survey_answer_" + i, 0);
-        mSharedEditor.putInt("survey_last_question", 1);
+        mSharedEditor.putInt("survey_last_question", 0);
         mSharedEditor.putLong("profile_time_completed", 0);
         mSharedEditor.apply();
 

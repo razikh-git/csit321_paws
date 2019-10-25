@@ -5,12 +5,12 @@
     <uses-feature android:name="android.hardware.screen.portrait" />
     <uses-feature android:name="android.hardware.location.gps" />
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -19,34 +19,43 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/mainAppTheme">
+
         <activity
             android:name=".SettingsActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/title_activity_settings" />
-        <activity android:name=".SelfAnalysisActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_surveys" />
-        <activity android:name=".SurveyCompleteActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_surveys" />
-        <activity android:name=".SurveyQuestionActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_surveys" />
-        <activity android:name=".FacebookEntryActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_surveys" />
-        <activity android:name=".SurveyEntryActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_surveys" />
-        <activity android:name=".ProfilingMenuActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_surveys" />
-        <activity android:name=".MapsActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_maps" />
-        <activity android:name=".WeatherActivity"
-            android:screenOrientation="sensorPortrait"
-            android:label="@string/label_weather" />
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".SelfAnalysisActivity"
+            android:label="@string/label_surveys"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".SurveyCompleteActivity"
+            android:label="@string/label_surveys"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".SurveyQuestionActivity"
+            android:label="@string/label_surveys"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".FacebookEntryActivity"
+            android:label="@string/label_surveys"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".SurveyEntryActivity"
+            android:label="@string/label_surveys"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".ProfilingMenuActivity"
+            android:label="@string/label_surveys"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".MapsActivity"
+            android:label="@string/label_maps"
+            android:screenOrientation="sensorPortrait" />
+        <activity
+            android:name=".WeatherActivity"
+            android:label="@string/label_weather"
+            android:screenOrientation="sensorPortrait" />
         <activity
             android:name=".HomeActivity"
             android:label="@string/label_home"
@@ -68,24 +77,21 @@
             </intent-filter>
         </activity>
 
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <receiver android:name=".GeofenceBroadcastReceiver" />
-
         <service
             android:name=".FetchAddressIntentService"
             android:exported="false" />
+
+        <service
+            android:name=".TrackingService"
+            android:foregroundServiceType="location"
+            android:label="@string/label_service"
+            android:enabled="true"
+            android:exported="true" />
+
     </application>
 
 </manifest>

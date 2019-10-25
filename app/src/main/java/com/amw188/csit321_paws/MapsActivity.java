@@ -1,23 +1,29 @@
 package com.amw188.csit321_paws;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Looper;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -61,22 +67,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MapsActivity
         extends
                 LocationActivity
         implements
-                OnMapReadyCallback
+                OnMapReadyCallback,
+                TrackingService.LocationResultListener
 {
     SharedPreferences mSharedPref;
-    SharedPreferences.Editor mSharedEditor;
 
-    private static final String TAG = "snowpaws_maps";
+    private static final String TAG = "snowpaws_ma";
 
     private static final String BUNDLE_KEY = "MapViewBundleKey";
     private static final String CAMERA_KEY = "MapCameraPositionKey";
     private static final String LOCATION_KEY = "MapLocationKey";
     private static final String ISTRACKING_KEY = "MapIsTrackingKey";
+
+    private static final String TIMER_KEY = "PAWSCooldown";
+    private static final long NOTIFICATION_COOLDOWN_INTERVAL = 30000;
 
     private static final int DEFAULT_ZOOM = 5;
     private static final int DASH_WIDTH = 30;
@@ -88,22 +99,38 @@ public class MapsActivity
 
     private static final int LOCATION_REQUEST_DEFAULT_INTERVAL = 5000;
 
-    private LocationCallback mLocationRequestCallback;
-    private boolean mIsTrackingLocation;
-
+    // Google Maps
+    private Bundle mBundle;
     private MapView mMapView;
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
 
+    // Map Elements
     private Marker mMarker;
     private boolean mIsPolyDrawing;
     private Polyline mPolyLine;
     private List<Polygon> mPolyList = new ArrayList<>();
 
+    // OpenWeatherMaps
     private String mTileOverlayURL;
     private Map<String, TileOverlay> mTileOverlayMap;
     private Map<String, TileProvider> mTileProviderMap = new HashMap<>();
     private Map<String, TileOverlayOptions> mTileOverlayOptionsMap = new HashMap<>();
+
+    // PAWS Location Service
+    private TrackingService mTrackingService;
+    private TrackingReceiver mTrackingReceiver;
+    private boolean mBound;
+    private boolean mIsTrackingLocation;
+    private boolean mIsCooldown;
+    private Timer mCooldownTimer;
+
+    private class TrackingReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Location location = intent.getParcelableExtra(TrackingService.EXTRA_LOCATION);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,9 +142,8 @@ public class MapsActivity
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
 
         // Load saved state.
-        Bundle bundle = null;
         if (savedInstanceState != null) {
-            bundle = savedInstanceState.getBundle(BUNDLE_KEY);
+            mBundle = savedInstanceState.getBundle(BUNDLE_KEY);
             mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
             mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
             mIsTrackingLocation = savedInstanceState.getBoolean(ISTRACKING_KEY);
@@ -126,18 +152,38 @@ public class MapsActivity
         // Load the activity layout.
         setContentView(R.layout.activity_maps);
 
-        // Initialise buttons.
-        initButtons();
-
         // Bottom navigation bar functionality.
         BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        // Beg for permissions. Block all further functionality without them.
+        if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
+                RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
+            if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
+                    RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
+                if (checkHasPermissions(RequestCode.PERMISSION_LOCATION_BACKGROUND,
+                        RequestCode.REQUEST_PERMISSIONS_BACKGROUND)) {
+                    // Continue with the activity.
+                    initActivity();
+                }
+            }
+        }
+
+    }
+
+    private void initActivity() {
+        // Initialise buttons.
+        initButtons();
+
+        // Prepare PAWS location tracking.
+        mTrackingReceiver = new TrackingReceiver();
+        mCooldownTimer = new Timer(TIMER_KEY);
 
         // Prepare the map.
         mTileOverlayURL = getString(R.string.app_url_owm_map_root)
                 +"%s/%s/%d/%d.png?appid=%s";
         mMapView = findViewById(R.id.mapView);
-        mMapView.onCreate(bundle);
+        mMapView.onCreate(mBundle);
         mMapView.getMapAsync(this);
     }
 
@@ -307,14 +353,6 @@ public class MapsActivity
             if (sheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
                 // Show the bottom sheet
                 sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                // Adjust the map to fit
-                mMapView.setPadding(0, 0, 0,
-                        (int)getResources().getDimension(R.dimen.height_sheets));
-            }
-            else
-            {
-                // Expand the map to fill
-                mMapView.setPadding(0, 0, 0, 0);
             }
         }
     }
@@ -337,30 +375,85 @@ public class MapsActivity
 
     private void onMapDrawingClick(LatLng latLng) {
         List<LatLng> polyPoints = mPolyLine.getPoints();
-        for (LatLng point : polyPoints) {
 
+        if (polyPoints.size() > 0) {
             // Identify whether the user closed the polygon.
-            float[] results = new float[1];
+            LatLng startPoint = polyPoints.get(0);
+            float[] distance = new float[1];
             Location.distanceBetween(latLng.latitude, latLng.longitude,
-                    point.latitude, point.longitude,
-                    results);
+                    startPoint.latitude, startPoint.longitude,
+                    distance);
 
-            double range = POLY_SELECT_RANGE / mCameraPosition.zoom;
-            if (results[0] < range) {
-                // Generate a new polygon from the points.
-                PolygonOptions polyOptions = new PolygonOptions();
-                polyOptions.strokeWidth(POLY_STROKE_WIDTH);
+            double pow = 1;
+            if (mCameraPosition.zoom >= 15)
+                pow = 3.5;
+            else if (mCameraPosition.zoom >= 13.5)
+                pow = 3;
+            else if (mCameraPosition.zoom >= 11)
+                pow = 2.5;
+            else if (mCameraPosition.zoom >= 8.5)
+                pow = 2;
+            double scale = Math.pow(mCameraPosition.zoom, pow);
+            double range = POLY_SELECT_RANGE / scale;
 
-                // TODO : add fill+stroke colour algorithmically by depth
+            Log.d(TAG, "onMapDrawingClick() : "
+                    + "\nTap   : "
+                    + new DecimalFormat("#.######").format(latLng.latitude) + " "
+                    + new DecimalFormat("#.######").format(latLng.longitude)
+                    + "\nStart : "
+                    + new DecimalFormat("#.######").format(startPoint.latitude) + " "
+                    + new DecimalFormat("#.######").format(startPoint.longitude)
+                    + "\nDist  : "
+                    + distance[0]
+                    + "\nMPP   : "
+                    + new DecimalFormat("#.##").format(scale)
+                    + " at zoom " + mCameraPosition.zoom
+                    + " pow " + pow
+                    + "\nRange : "
+                    + new DecimalFormat("#.##").format(range)
+                    + "\n"
+                    + distance[0] + (distance[0] < range ? " < " : " > ")
+                    + new DecimalFormat("#.##").format(range)
+                    + "\nd     : " + (distance[0] - range)
+            );
 
-                for (LatLng p : polyPoints) {
-                    polyOptions.add(p);
+            if (distance[0] < range) {
+                if (polyPoints.size() > 2) {
+                    // Generate a new polygon from the points.
+                    PolygonOptions polyOptions = new PolygonOptions();
+                    polyOptions.strokeWidth(POLY_STROKE_WIDTH);
+                    int strokeColor = ContextCompat.getColor(this, R.color.color_risk_low);
+                    int fillColor = ContextCompat.getColor(this, R.color.color_risk_low_fill);
+
+                    // Check for bounding box overlaps.
+                    for (LatLng polyPoint : polyPoints) {
+                        for (Polygon polygon : mPolyList) {
+                            if (PolyUtil.containsLocation(polyPoint, polygon.getPoints(), false)) {
+                                // Change polygon style.
+                                if (polygon.getStrokeColor() == ContextCompat.getColor(
+                                        this, R.color.color_risk_low)) {
+                                    strokeColor = ContextCompat.getColor(this, R.color.color_risk_med);
+                                    fillColor = ContextCompat.getColor(this, R.color.color_risk_med_fill);
+                                } else {
+                                    strokeColor = ContextCompat.getColor(this, R.color.color_risk_high);
+                                    fillColor = ContextCompat.getColor(this, R.color.color_risk_high_fill);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    polyOptions.strokeColor(strokeColor);
+                    polyOptions.fillColor(fillColor);
+
+                    for (LatLng p : polyPoints) {
+                        polyOptions.add(p);
+                    }
+                    mPolyList.add(mMap.addPolygon(polyOptions));
+
+                    // Clear the polyline from the map.
+                    mPolyLine.setPoints(new ArrayList<>());
+                    return;
                 }
-                mPolyList.add(mMap.addPolygon(polyOptions));
-
-                // Clear the polyline from the map.
-                mPolyLine.setPoints(new ArrayList<>());
-                return;
             }
         }
 
@@ -372,7 +465,11 @@ public class MapsActivity
     private void onMapDrawingLongClick(LatLng latLng) {
         List<LatLng> polyPoints = mPolyLine.getPoints();
         if (polyPoints.size() > 0) {
+            // Pop the last point on the polyline.
             polyPoints.remove(polyPoints.size() - 1);
+            // Clear the list if there are no lines visible.
+            if (polyPoints.size() == 1)
+                polyPoints.remove(0);
             mPolyLine.setPoints(polyPoints);
         }
     }
@@ -389,6 +486,7 @@ public class MapsActivity
         // Start or end the location tracking service.
         if (mIsTrackingLocation) {
             // Change element styling.
+            findViewById(R.id.viewFABPadding).setVisibility(View.GONE);
             findViewById(R.id.laySheetHeader).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_primary_alt));
             ((MaterialButton)findViewById(R.id.btnMapTracking)).setText(
@@ -499,12 +597,9 @@ public class MapsActivity
 
     /**
      * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
      * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     * it. This method will only be triggered once the user has installed Google Play services
+     * and returned to the app.
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -623,46 +718,26 @@ public class MapsActivity
     }
 
     private void initLocationRequestServices() {
-        mMap.setMyLocationEnabled(true);
-        mLocationRequestCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult != null)
-                    onLocationResult(locationResult);
-            }
-        };
+        // Bind to the tracking service.
+        bindService(new Intent(this, TrackingService.class),
+                mServiceConnection, Context.BIND_AUTO_CREATE);
+
+        // Check to continue tracking from the previous app use.
+        if (mIsTrackingLocation)
+            checkToStartLocationRequests();
     }
 
-    protected void onLocationResult(LocationResult locationResult) {
-        for (Location location : locationResult.getLocations()) {
-            for (Polygon polygon : mPolyList) {
-                if (PolyUtil.containsLocation(location.getLatitude(), location.getLongitude(),
-                        polygon.getPoints(), false)) {
-                    // TODO : Send notification!!!!!! wow!
-                    // this is literally the whole app
-                    // we finally made it
-                }
-            }
-        }
-    }
-
-    protected LocationRequest createLocationRequest() {
-        int updatePriority = mSharedPref.getInt(
+    public void checkToStartLocationRequests() {
+        // Check for enabled location usage.
+        if (Integer.parseInt(mSharedPref.getString(
                 SettingsActivity.KEY_PREF_LOCATION_PRIORITY,
-                LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-        int updateInterval = mSharedPref.getInt(
-                SettingsActivity.KEY_PREF_LOCATION_RATE,
-                LOCATION_REQUEST_DEFAULT_INTERVAL);
+                Integer.toString(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)))
+                == LocationRequest.PRIORITY_NO_POWER) {
+            // TODO : Error popout, usage is set to none
+            Log.d(TAG, "Location usage is set to Disabled.");
+            return;
+        }
 
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setFastestInterval(updateInterval);
-        locationRequest.setInterval(updateInterval + LOCATION_REQUEST_DEFAULT_INTERVAL);
-        locationRequest.setPriority(updatePriority);
-
-        return locationRequest;
-    }
-
-    private void checkToStartLocationRequests() {
         // Generate a new location request.
         LocationRequest locationRequest = createLocationRequest();
 
@@ -674,8 +749,6 @@ public class MapsActivity
         task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // Begin location operations.
-                mIsTrackingLocation = true;
                 startLocationRequests(locationRequest);
             }
         });
@@ -696,13 +769,13 @@ public class MapsActivity
     }
 
     private void startLocationRequests(LocationRequest locationRequest) {
-        // Start receiving updates.
-        mFusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                mLocationRequestCallback,
-                Looper.getMainLooper());
+        // Begin location operations.
+        mIsTrackingLocation = true;
+        mMap.setMyLocationEnabled(true);
+        mTrackingService.startTracking(locationRequest);
 
         // Change element styling.
+        findViewById(R.id.viewFABPadding).setVisibility(View.VISIBLE);
         findViewById(R.id.laySheetHeader).setBackgroundColor(
                 ContextCompat.getColor(this, R.color.color_error));
         ((MaterialButton)findViewById(R.id.btnMapTracking)).setText(
@@ -711,9 +784,83 @@ public class MapsActivity
                 ContextCompat.getColor(this, R.color.color_error));
     }
 
-    private void stopLocationRequests() {
-        mFusedLocationClient.removeLocationUpdates(mLocationRequestCallback);
+    protected LocationRequest createLocationRequest() {
+        // Inverse floating-point Preferences string-array workarounds
+        int updatePriority = Integer.parseInt(mSharedPref.getString(
+                SettingsActivity.KEY_PREF_LOCATION_PRIORITY,
+                Integer.toString(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)));
+        int updateInterval = Integer.parseInt(mSharedPref.getString(
+                SettingsActivity.KEY_PREF_LOCATION_RATE,
+                Integer.toString(LOCATION_REQUEST_DEFAULT_INTERVAL)));
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setFastestInterval(updateInterval);
+        locationRequest.setInterval(updateInterval + LOCATION_REQUEST_DEFAULT_INTERVAL);
+        locationRequest.setPriority(updatePriority);
+
+        return locationRequest;
     }
+
+    public void onLocationResultReceived(LocationResult locationResult) {
+        for (Location location : locationResult.getLocations()) {
+            for (Polygon polygon : mPolyList) {
+                if (PolyUtil.containsLocation(location.getLatitude(), location.getLongitude(),
+                        polygon.getPoints(), false)) {
+                    // TODO : Send notification!!!!!! wow!
+                    // this is literally the whole app
+                    // we finally made it
+
+                    int priority = 0;
+                    if (polygon.getStrokeColor() == ContextCompat.getColor(this, R.color.color_risk_high)) {
+                        priority = NotificationCompat.PRIORITY_HIGH;
+                    } else if (polygon.getStrokeColor() == ContextCompat.getColor(this, R.color.color_risk_med)) {
+                        priority = NotificationCompat.PRIORITY_DEFAULT;
+                    } else {
+                        priority = NotificationCompat.PRIORITY_LOW;
+                    }
+
+                    // make it work
+                    priority = NotificationCompat.PRIORITY_HIGH;
+
+                    // Consider additional risk weighting.
+                    int riskWeight = mSharedPref.getInt("selfanalysis_risk", 0);
+                    priority = Math.min(NotificationCompat.PRIORITY_HIGH,
+                            priority + (riskWeight != -1 ? riskWeight : 0));
+
+                    // TODO : Customise cooldown timers per priority level
+                    if (!mIsCooldown) {
+                        mIsCooldown = true;
+                        //Notifications.getInstance().show(this, priority);
+                        mTrackingService.notify(this, priority);
+                        mCooldownTimer.schedule(
+                                new TimerTask(){@Override public void run(){mIsCooldown = false;}},
+                                NOTIFICATION_COOLDOWN_INTERVAL);
+                    }
+                }
+            }
+        }
+    }
+
+    private void stopLocationRequests() {
+        mMap.setMyLocationEnabled(false);
+        mTrackingService.stopTracking();
+    }
+
+    // Monitors the state of the connection to the service.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            TrackingService.LocalBinder binder = (TrackingService.LocalBinder) service;
+            mTrackingService = binder.getService();
+            mTrackingService.setHostListener(MapsActivity.this);
+            mBound = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mTrackingService = null;
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onPermissionGranted(String perm) {}
@@ -722,7 +869,10 @@ public class MapsActivity
     protected void onPermissionBlocked(String perm) {}
 
     @Override
-    protected void onAllPermissionsGranted(String[] permissions) {}
+    protected void onAllPermissionsGranted(String[] permissions) {
+        // Reinitialise the activity.
+        initActivity();
+    }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -735,7 +885,8 @@ public class MapsActivity
             outState.putParcelable(CAMERA_KEY, mMap.getCameraPosition());
             outState.putBoolean(ISTRACKING_KEY, mIsTrackingLocation);
         }
-        mMapView.onSaveInstanceState(bundle);
+        if (mMapView != null)
+            mMapView.onSaveInstanceState(bundle);
     }
 
     @Override
@@ -744,43 +895,60 @@ public class MapsActivity
         mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
         mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
         mIsTrackingLocation = savedInstanceState.getBoolean(ISTRACKING_KEY); // TODO test this
+        if (mIsTrackingLocation)
+            checkToStartLocationRequests();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mMapView.onResume();
-        // TODO : Resume location updates
+        if (mMapView != null)
+            mMapView.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mTrackingReceiver,
+                new IntentFilter(TrackingService.ACTION_BROADCAST));
     }
 
     @Override
     protected void onPause() {
+        if (mMapView != null)
+            mMapView.onPause();
         super.onPause();
-        mMapView.onPause();
-        // TODO : End location updates
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mMapView.onStart();
+        if (mMapView != null)
+            mMapView.onStart();
+
+        // Bind to the service. If the service is in foreground mode, this signals to the service
+        // that since this activity is in the foreground, the service can exit foreground mode.
+        bindService(new Intent(this, TrackingService.class), mServiceConnection,
+                Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
+        if (mBound) {
+            unbindService(mServiceConnection);
+            mBound = false;
+        }
+        if (mMapView != null)
+            mMapView.onStop();
         super.onStop();
-        mMapView.onStop();
     }
 
     @Override
     protected void onDestroy() {
+        if (mMapView != null)
+            mMapView.onDestroy();
         super.onDestroy();
-        mMapView.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
+        if (mMapView != null)
+            mMapView.onLowMemory();
         super.onLowMemory();
-        mMapView.onLowMemory();
     }
 }

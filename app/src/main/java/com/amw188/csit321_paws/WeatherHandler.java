@@ -23,7 +23,7 @@ class WeatherHandler {
 
     // Interface to send updates to host activity
     interface WeatherReceivedListener {
-        void onWeatherReceived(LatLng latLng, String response);
+        void onWeatherReceived(LatLng latLng, String response, boolean isMetric);
     }
 
     private WeatherReceivedListener mHostListener;
@@ -36,7 +36,7 @@ class WeatherHandler {
         mHostListener = listener;
     }
 
-    boolean updateWeather(Context ctx, LatLng latLng) {
+    boolean updateWeather(Context ctx, LatLng latLng, boolean isMetric) {
         // Generate URL and request OWM data.
         try {
             SharedPreferences sharedPref = ctx.getSharedPreferences(
@@ -59,6 +59,9 @@ class WeatherHandler {
                             + "}"
                     ));
                 }
+                if (!lastWeather.has("is_metric")) {
+                    lastWeather.put("is_metric", !isMetric);
+                }
 
                 Log.d(TAG, "Checking data relevancy.\n"
                         + "LatLng comparison:\n"
@@ -68,7 +71,9 @@ class WeatherHandler {
                         + " " + new DecimalFormat("#.###").format(lastWeather.getJSONObject("lat_lng").getDouble("longitude")));
 
                 // Request new data if the location has changed.
-                if (Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng").getDouble("latitude")) < LOC_CERTAINTY
+                if (isMetric != lastWeather.getBoolean("is_metric")) {
+                    Log.d(TAG, "Units of measurement differ and an update will be retrieved.");
+                } else if (Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng").getDouble("latitude")) < LOC_CERTAINTY
                 && Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng").getDouble("longitude")) < LOC_CERTAINTY) {
                     Log.d(TAG, "Location differs significantly enough to warrant an update.");
 
@@ -96,7 +101,7 @@ class WeatherHandler {
             }
 
             // Fetch the complete weather data.
-            getWeather(ctx, latLng);
+            getWeather(ctx, latLng, isMetric);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -104,7 +109,7 @@ class WeatherHandler {
         return true;
     }
 
-    private void getWeather(Context ctx, LatLng latLng) {
+    private void getWeather(Context ctx, LatLng latLng, boolean isMetric) {
 
         SharedPreferences sharedPref = ctx.getSharedPreferences(
                 ctx.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
@@ -116,7 +121,7 @@ class WeatherHandler {
                 + "data/2.5/"
                 + "forecast"
                 + "?lat=" + latLng.latitude + "&lon=" + latLng.longitude
-                + "&units=" + sharedPref.getString("units", "metric")
+                + "&units=" + (isMetric ? "metric" : "imperial")
                 + "&lang=" + ctx.getResources().getConfiguration().locale.getDisplayLanguage()
                 + "&mode=" + "json"
                 + "&appid=" + ctx.getResources().getString(R.string.open_weather_maps_key);
@@ -126,7 +131,7 @@ class WeatherHandler {
                 (response) -> {
                     Log.d(TAG, "stringRequest.onResponse");
 
-                    mHostListener.onWeatherReceived(latLng, response);
+                    mHostListener.onWeatherReceived(latLng, response, isMetric);
 
                     // Embed the current latitude/longitude into the JSON.
                     try {
@@ -137,6 +142,7 @@ class WeatherHandler {
                                 + "\"longitude\":\"" + latLng.longitude + "\""
                                 + "}"
                         ));
+                        json.put("is_metric", isMetric);
                         response = json.toString();
                     } catch (JSONException e) {
                         e.printStackTrace();

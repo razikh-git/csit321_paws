@@ -11,7 +11,6 @@ final class PAWSAPI {
     private static double toKilometresPerHour(double ms) { return ms * 3.6d; }
     private static double toMilesPerHour(double ms) { return ms * 2.237d; }
     private static double toInches(double mm) { return mm / 25.4; }
-    private static double toFahrenheit(double celsius) { return (9.0/5.0)*celsius+32.0; }
 
     static String getPrecipitationString(boolean isMetric, double mm) {
             return isMetric
@@ -25,19 +24,17 @@ final class PAWSAPI {
                 : new DecimalFormat("#").format(toMilesPerHour(velocity)) + " mph";
     }
 
-    static String getTemperatureString(boolean isMetric, double temperature) {
-        return isMetric
-                ? new DecimalFormat("#").format(temperature) + "°"
-                : new DecimalFormat("#").format(toFahrenheit(temperature)) + "°";
+    static String getTemperatureString(double temperature) {
+        return new DecimalFormat("#").format(temperature) + "°";
     }
 
     static String getTemperatureString(boolean isMetric, double temperature, boolean isVerbose) {
         if (!isVerbose)
-            return getTemperatureString(isMetric, temperature);
+            return getTemperatureString(temperature);
         else
             return isMetric
                     ? new DecimalFormat("#").format(temperature) + "°C"
-                    : new DecimalFormat("#").format(toFahrenheit(temperature)) + "°F";
+                    : new DecimalFormat("#").format(temperature) + "°F";
     }
 
     static String getWindBearingString(double bearing) {

@@ -45,55 +45,10 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        // Populate the survey.
+        initButtons();
         initSurveyLayout();
         continueSurvey();
-        initButtons();
-    }
-
-    // Reload question elements with the next question's data.
-    private void nextQuestion() {
-        try {
-            // Fill the matching progress bubble.
-            ImageView img = findViewById(R.id.layProgressContainer)
-                    .findViewWithTag(TAG_PROGRESS + mIndex);
-            img.setImageDrawable(getDrawable(R.drawable.ic_radiobutton_checked));
-            img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary));
-
-            // Update the header question index.
-            ((TextView)findViewById(R.id.txtHeaderTitle)).setText(
-                    getResources().getString(R.string.sq_title)
-                    + " " + mIndex);
-
-            // Display the next question.
-            ((TextView)findViewById(R.id.txtQuestion)).setText(
-                    mSurvey.getJSONArray("questions").getJSONObject(mIndex).
-                            getString("statement"));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            ((TextView)findViewById(R.id.txtQuestion)).setText(
-                    getResources().getString(R.string.app_txt_fallback));
-        }
-
-        // Increment the current index in questionnaire.
-        mIndex++;
-    }
-
-    // Initialise layout elements contextual to the current question.
-    private void initQuestion(int index) {
-        if (mSurvey != null) {
-            // Question title:
-            try {
-                String txt = mSurvey.getJSONArray("questions").getJSONObject(index)
-                        .getString("statement");
-                ((TextView)findViewById(R.id.txtQuestion)).setText(
-                        txt);
-            } catch (Exception e) {
-                e.printStackTrace();
-                ((TextView)findViewById(R.id.txtQuestion)).setText(
-                        getResources().getString(R.string.app_txt_fallback));
-            }
-        }
     }
 
     // Initialise all answer buttons.
@@ -136,13 +91,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
     // Initialise the layout based on the last question completed.
     private void continueSurvey() {
-        mIndex = mSharedPref.getInt("survey_last_question", 1);
-
-        // Question counter:
-        ((TextView)findViewById(R.id.txtHeaderTitle)).setText(
-                getResources().getString(R.string.sq_title)
-                + " " + mIndex
-        );
+        mIndex = mSharedPref.getInt("survey_last_question", 0);
 
         // Load survey questionnaire data.
         try {
@@ -155,6 +104,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         } catch (Exception e){
             e.printStackTrace();
             ((TextView)findViewById(R.id.txtQuestion)).setText(R.string.app_txt_fallback);
+            return;
         }
 
         // Fill the progress bubbles.
@@ -169,8 +119,46 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         initQuestion(mIndex);
     }
 
+    // Initialise layout elements for the current question.
+    private void initQuestion(int index) {
+        if (mSurvey != null) {
+            // Question header title.
+            ((TextView)findViewById(R.id.txtHeaderTitle)).setText(
+                    getResources().getString(R.string.sq_title) + " " + (mIndex + 1)
+            );
+
+            // Question statement.
+            try {
+                String txt = mSurvey.getJSONArray("questions").getJSONObject(index)
+                        .getString("statement");
+                ((TextView)findViewById(R.id.txtQuestion)).setText(txt);
+            } catch (Exception e) {
+                e.printStackTrace();
+                ((TextView)findViewById(R.id.txtQuestion)).setText(
+                        getResources().getString(R.string.app_txt_fallback));
+            }
+        }
+    }
+
+    // Reload question elements with the next question's data.
+    private void nextQuestion() {
+        try {
+            // Fill the matching progress bubble.
+            ImageView img = findViewById(R.id.layProgressContainer)
+                    .findViewWithTag(TAG_PROGRESS + mIndex);
+            img.setImageDrawable(getDrawable(R.drawable.ic_radiobutton_checked));
+            img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary));
+
+            // Show the next question.
+            initQuestion(mIndex);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // Respond to button selections.
     protected void onClickAnswer(View view) {
+        ++mIndex;
         int answer = 0;
         switch (view.getId()) {
             case R.id.btnAnswer1:
@@ -201,7 +189,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
                     .getBoolean("negative"))
                 answer *= -1;
         } catch (JSONException e) {
-            Log.d(TAG, "onClickAnswer: You butchered your JSON!");
+            Log.e(TAG, "onClickAnswer: You butchered your JSON!");
             e.printStackTrace();
         }
 
@@ -215,7 +203,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
             nextQuestion();
         } else {
             // At the end of the survey, finalise all details.
-            mSharedEditor.putLong("profile_time_completed", System.currentTimeMillis());
+            mSharedEditor.putLong("survey_time_completed", System.currentTimeMillis());
             mSharedEditor.apply();
 
             // Continue to the completed splash.

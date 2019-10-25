@@ -26,23 +26,15 @@
             app:title="@string/pref_title_units"
             app:useSimpleSummaryProvider="true" />
 
-        <ListPreference
-            app:defaultValue="default"
-            app:entries="@array/time_entries"
-            app:entryValues="@array/time_values"
-            app:key="time"
-            app:title="@string/pref_title_time"
-            app:useSimpleSummaryProvider="true" />
-
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/pref_header_usage">
 
         <ListPreference
             app:defaultValue="100"
-            app:entries="@array/location_usage_entries"
-            app:entryValues="@array/location_usage_values"
-            app:key="location_usage"
+            app:entries="@array/location_priority_entries"
+            app:entryValues="@array/location_priority_values"
+            app:key="location_priority"
             app:title="@string/pref_title_location_usage"
             app:useSimpleSummaryProvider="true" />
 

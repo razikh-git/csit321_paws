@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.preference.Preference;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -22,13 +23,15 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 
 public class WeatherActivity
-        extends BottomNavBarActivity
-        implements WeatherHandler.WeatherReceivedListener
+        extends
+                BottomNavBarActivity
+        implements
+                WeatherHandler.WeatherReceivedListener,
+                Preference.OnPreferenceChangeListener
 {
     private static final String TAG = "snowpaws_wa";
 
     SharedPreferences mSharedPref;
-
     WeatherHandler mWeatherHandler;
 
     @Override
@@ -69,22 +72,30 @@ public class WeatherActivity
         }
         if (latLng != null) {
             // Call and await an update to the weather JSON string in prefs.
+            boolean isMetric = mSharedPref.getString("units", "metric").equals("metric");
             mWeatherHandler = new WeatherHandler(this);
-            if (!mWeatherHandler.updateWeather(this, latLng)) {
+            if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
                 // Initialise weather displays with last best values if none are being updated.
-                initWeatherDisplay(latLng, mSharedPref.getString("last_weather_json", "{}"));
+                initWeatherDisplay(
+                        latLng,
+                        mSharedPref.getString("last_weather_json", "{}"),
+                        isMetric);
             }
-        } else {
-            // TODO toss errors
         }
     }
 
     @Override
-    public void onWeatherReceived(LatLng latLng, String response) {
-        initWeatherDisplay(latLng, response);
+    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
+        initWeatherDisplay(latLng, response, isMetric);
     }
 
-    private boolean initWeatherDisplay(LatLng latLng, String response) {
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        Log.d(TAG, "Preference " + preference.getKey() + " changing to " + newValue);
+        return true;
+    }
+
+    private boolean initWeatherDisplay(LatLng latLng, String response, boolean isMetric) {
         String str;
         Double dbl;
         long lon;
@@ -93,9 +104,6 @@ public class WeatherActivity
         final int pad = Math.round(getResources().getDimension(R.dimen.text_spacing));
 
         try {
-            boolean isMetric = mSharedPref.getString("units", "metric")
-                    .equals("metric");
-
             // Fetch the latest weather forecast for the provided location.
             JSONObject weatherForecastJSON = new JSONObject(response);
 
@@ -207,7 +215,7 @@ public class WeatherActivity
                 dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
                         .getJSONObject("main")
                         .getDouble("temp");
-                str = PAWSAPI.getTemperatureString(isMetric, dbl);
+                str = PAWSAPI.getTemperatureString(dbl);
                 txt = new TextView(this);
                 params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -237,9 +245,6 @@ public class WeatherActivity
                     .getJSONArray("weather").getJSONObject(0)
                     .getInt("id");
             int id2 = id;
-
-            /* TODO change the setup to include ALL HOURS FROM THE MORNING OF THE NEXT DAY ONWARDS
-            rather than the current setup; which continues from 12hrs after the current time */
 
             layParent = findViewById(R.id.layWeatherWeekly);
             for (int i = index; i < 40; ++i) {
@@ -287,9 +292,6 @@ public class WeatherActivity
                     txt.setPadding(0, pad / 3, 0, pad);
                     layout.addView(txt);
 
-                    // TODO customise the icon based on importance (ie. ID > 100)
-                    // todo it doesnt work probably
-
                     // Create a new layout child for weather icons.
                     LinearLayout layTemp = new LinearLayout(this);
                     params = new LinearLayout.LayoutParams(
@@ -330,7 +332,7 @@ public class WeatherActivity
                     layTemp.setOrientation(LinearLayout.HORIZONTAL);
 
                     // Add the predicted high temperature.
-                    str = PAWSAPI.getTemperatureString(isMetric, tempHigh);
+                    str = PAWSAPI.getTemperatureString(tempHigh);
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -344,7 +346,7 @@ public class WeatherActivity
                     layTemp.addView(txt);
 
                     // Add the predicted low temperature.
-                    str = PAWSAPI.getTemperatureString(isMetric, tempLow);
+                    str = PAWSAPI.getTemperatureString(tempLow);
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -509,6 +511,8 @@ public class WeatherActivity
 
 
             // Fill in other weather details.
+
+            // TODO : Guarantee sunrise/sunset uses local timezone rather than system timezone.
 
             // Sunrise and sunset
             str = (DateFormat.format("h:mm a",

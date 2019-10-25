@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -52,7 +53,7 @@ public class HomeActivity
     }
 
     @Override
-    public void onWeatherReceived(LatLng latLng, String response) {
+    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
         initWeatherDisplay(response);
     }
 
@@ -79,7 +80,8 @@ public class HomeActivity
             findViewById(R.id.cardWarningBanner).setVisibility(VISIBLE);
 
         // Attempt to initialise location elements.
-        if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
+        if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
+                RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
             Log.println(Log.DEBUG, "snowpaws", "HomeActivity.initInterface.hasPermssions TRUE");
             fetchLocation();
         }
@@ -109,12 +111,10 @@ public class HomeActivity
                 return false;
             }
 
-            // Set icon for weather type.
-            Drawable drawable = PAWSAPI.getWeatherDrawable(this, weatherCurrentJSON.getString("icon"));
-
             // Hide progress bar.
             findViewById(R.id.barWeatherIcon).setVisibility(GONE);
-
+            // Set icon for weather type.
+            Drawable drawable = PAWSAPI.getWeatherDrawable(this, weatherCurrentJSON.getString("icon"));
             ImageView img = findViewById(R.id.imgWeatherIcon);
             if (drawable != null) {
                 // Display weather icon.
@@ -205,7 +205,6 @@ public class HomeActivity
             e.printStackTrace();
             return false;
         }
-
         return true;
     }
 
@@ -213,14 +212,13 @@ public class HomeActivity
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
             if (mLocation != null) {
                 // Call and await an update to the weather JSON string in prefs.
+                boolean isMetric = mSharedPref.getString("units", "metric").equals("metric");
                 LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
                 mWeatherHandler = new WeatherHandler(this);
-                if (!mWeatherHandler.updateWeather(this, latLng)) {
+                if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated.
                     initWeatherDisplay(mSharedPref.getString("last_weather_json", "{}"));
                 }
-            } else {
-                // TODO toss errors
             }
         }
 
@@ -328,8 +326,7 @@ public class HomeActivity
     protected void onAllPermissionsGranted(String[] permissions) {
         if (Arrays.asList(permissions).contains(Manifest.permission.ACCESS_COARSE_LOCATION)
         || (Arrays.asList(permissions).contains(Manifest.permission.INTERNET))) {
-            // TODO : Rewrite using LocationActivity methods
-            //initInterface(mLocationHandler.getLocation());
+            initInterface();
         }
     }
 

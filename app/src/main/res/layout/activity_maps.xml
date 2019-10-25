@@ -74,6 +74,12 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <View
+                android:id="@+id/viewFABPadding"
+                android:layout_width="@dimen/dimen_icon_large"
+                android:layout_height="@dimen/dimen_icon_large"
+                android:visibility="gone" />
+
             <!-- Map Type Popout Button. -->
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -380,7 +386,7 @@
                                 android:layout_height="wrap_content"
                                 android:adjustViewBounds="true"
                                 android:backgroundTint="@color/color_accent_alt"
-                                android:src="@drawable/ic_pawsicon" />
+                                android:src="@drawable/ic_paws_icon" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -397,6 +403,12 @@
 
                 </LinearLayout>
 
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -406,7 +418,7 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnMapTracking"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/height_buttons_block"
                         android:backgroundTint="@color/color_accent"
                         android:padding="@dimen/padding_buttons"
                         android:textSize="@dimen/text_size_button_large"
