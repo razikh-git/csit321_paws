@@ -162,11 +162,8 @@ public class MapsActivity
                 RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
             if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                     RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
-                if (checkHasPermissions(RequestCode.PERMISSION_LOCATION_BACKGROUND,
-                        RequestCode.REQUEST_PERMISSIONS_BACKGROUND)) {
-                    // Continue with the activity.
-                    initActivity();
-                }
+                // Continue with the activity.
+                initActivity();
             }
         }
 

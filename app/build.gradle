@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\alex\\.android\\KeyStore\\CSIT321_KeyStore.jks')
+            storePassword 'CSit321!'
+            keyAlias = 'PAWSReleaseKey'
+            keyPassword 'CSit321!'
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
     defaultConfig {

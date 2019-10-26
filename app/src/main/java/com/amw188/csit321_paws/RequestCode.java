@@ -15,7 +15,8 @@ interface RequestCode {
     };
     String[] REQUEST_PERMISSIONS_LOCATION = {
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION};
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION};
     String[] REQUEST_PERMISSIONS_NETWORK = {
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE};
