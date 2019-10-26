@@ -20,6 +20,17 @@
         android:supportsRtl="true"
         android:theme="@style/mainAppTheme">
 
+        <service
+            android:name=".FetchAddressIntentService"
+            android:exported="false" />
+
+        <service
+            android:name=".TrackingService"
+            android:foregroundServiceType="location"
+            android:label="@string/label_service"
+            android:enabled="true"
+            android:exported="true" />
+
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -80,17 +91,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
-        <service
-            android:name=".FetchAddressIntentService"
-            android:exported="false" />
-
-        <service
-            android:name=".TrackingService"
-            android:foregroundServiceType="location"
-            android:label="@string/label_service"
-            android:enabled="true"
-            android:exported="true" />
 
     </application>
 

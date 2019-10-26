@@ -36,6 +36,7 @@
     <dimen name="dimen_icon_large">48dp</dimen>
     <dimen name="dimen_icon_medium">36dp</dimen>
     <dimen name="dimen_icon_small">24dp</dimen>
+    <dimen name="dimen_icon_tiny">18dp</dimen>
     <dimen name="dimen_icon_survey_progress">23dp</dimen>
 
     <dimen name="text_size_immense">48sp</dimen>

@@ -200,26 +200,6 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
         startActivityForResult(intent, RequestCode.SURVEY_CONTINUE);
     }
 
-    public void onClickReset(View view) {
-        // Prompt confirmation with a popout.
-
-        // TODO : remove and reimplement profile clear functionality
-        mSharedEditor.putBoolean("app_init", false);
-        mSharedEditor.putBoolean("facebook_init", false);
-
-        // Reset all survey profile data.
-        for (int i = 0; i < getResources().getInteger(R.integer.survey_question_count); ++i)
-            mSharedEditor.putInt("survey_answer_" + i, 0);
-        mSharedEditor.putInt("survey_last_question", 0);
-        mSharedEditor.putLong("profile_time_completed", 0);
-        mSharedEditor.apply();
-
-        Snackbar snackbar = Snackbar.make(view, R.string.se_snack_result, Snackbar.LENGTH_SHORT);
-
-        // Reinitialise the interface.
-        initInterface();
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);

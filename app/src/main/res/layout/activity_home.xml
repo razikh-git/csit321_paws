@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layRoot"
@@ -11,444 +11,434 @@
     tools:context=".HomeActivity"
     tools:showIn="@layout/activity_home" >
 
-    <LinearLayout
-        android:id="@+id/layHome"
+    <!-- Contextual Survey Incomplete Banner. -->
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardWarningBanner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="2dp"
-        tools:layout_editor_absoluteY="2dp" >
-
-        <!-- Contextual Survey Incomplete Banner. -->
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardWarningBanner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/color_error"
-            android:visibility="gone"
-            app:cardElevation="@dimen/elevation_banners"
-            app:cardCornerRadius="0dp" >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal" >
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/dimen_icon_huge"
-                    android:padding="@dimen/padding_buttons"
-                    android:layout_marginStart="@dimen/app_spacing"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/ic_warning"
-                    android:tint="@color/color_on_primary"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/app_padding_half"
-                    android:gravity="center"
-                    android:orientation="vertical" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/home_warning_title"
-                        android:gravity="center"
-                        android:textAlignment="center"
-                        android:textColor="@color/color_on_primary"
-                        android:textAppearance="@style/TextAppearance.Paws.Title" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/home_warning_subtitle"
-                        android:gravity="center"
-                        android:textAlignment="center"
-                        android:textColor="@color/color_on_primary"
-                        android:textAppearance="@style/TextAppearance.Paws.Caption" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Weather Preview Card. -->
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardWeather"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="0dp" >
-
-            <!-- Weather Metadata Banner. -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical" >
-
-                <!-- Weather Title. -->
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardCornerRadius="0dp" >
-
-                    <LinearLayout
-                        android:id="@+id/layWeatherHeader"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="@dimen/app_gutter"
-                        android:paddingEnd="@dimen/app_gutter"
-                        android:paddingTop="@dimen/app_gutter"
-                        android:paddingBottom="@dimen/app_padding"
-                        android:background="@color/color_primary_alt"
-                        android:orientation="vertical" >
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal" >
-
-                            <TextView
-                                android:id="@+id/txtCity"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:maxLines="1"
-                                android:textColor="@color/color_on_primary"
-                                android:textAppearance="@style/TextAppearance.Paws.Huge"
-                                android:shadowColor="@color/color_ref_black"
-                                android:shadowDx="2"
-                                android:shadowDy="2"/>
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/txtWeatherTimestamp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Paws.Small"
-                            android:textColor="@color/color_on_primary"
-                            android:shadowColor="@color/color_ref_black"
-                            android:shadowDx="2"
-                            android:shadowDy="2" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Weather Icon and Description. -->
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardCornerRadius="0dp" >
-
-                    <LinearLayout
-                        android:id="@+id/layWeatherDescription"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="@dimen/app_padding_half"
-                        android:paddingBottom="@dimen/app_padding_half"
-                        android:paddingStart="@dimen/app_gutter"
-                        android:paddingEnd="@dimen/app_gutter"
-                        android:background="@color/color_primary"
-                        android:orientation="horizontal" >
-
-                        <ImageView
-                            android:id="@+id/imgWeatherIcon"
-                            android:layout_width="@dimen/dimen_icon_medium"
-                            android:layout_height="@dimen/dimen_icon_medium"
-                            android:gravity="start"
-                            android:visibility="gone" />
-
-                        <ProgressBar
-                            android:id="@+id/barWeatherIcon"
-                            style="@style/Widget.Paws.ProgressBar.Circular"
-                            android:layout_width="@dimen/dimen_icon_medium"
-                            android:layout_height="@dimen/dimen_icon_medium"
-                            android:layout_gravity="center"
-                            android:indeterminate="true"
-                            android:padding="8dp" />
-
-                        <TextView
-                            android:id="@+id/txtWeatherDescription"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginStart="@dimen/app_padding"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Paws.Large"
-                            android:textColor="@color/color_on_primary" />
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Weather Data. -->
-
-                <LinearLayout
-                    android:id="@+id/layWeatherDataColumns"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/app_spacing_half"
-                    android:paddingBottom="@dimen/app_spacing_half"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false" >
-
-                    <!-- Wind Data. -->
-
-                    <LinearLayout
-                        android:id="@+id/layWeatherDataWind"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:padding="@dimen/app_padding"
-                        android:gravity="center"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:id="@+id/txtWindSpeed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Paws.Large" />
-
-                        <TextView
-                            android:id="@+id/txtWindBearing"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Paws.Medium" />
-
-                    </LinearLayout>
-
-                    <!-- Temperature. -->
-
-                    <LinearLayout
-                        android:id="@+id/layWeatherDataTemp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:id="@+id/txtTempCurrent"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Paws.Immense" />
-
-                    </LinearLayout>
-
-                    <!-- Precipitation and Humidity. -->
-
-                    <LinearLayout
-                        android:id="@+id/layWeatherDataPrecip"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:id="@+id/txtPrecipAuxData1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Paws.Large" />
-
-                        <TextView
-                            android:id="@+id/txtPrecipAuxData2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:maxLines="1"
-                            android:textAppearance="@style/TextAppearance.Paws.Medium" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
+        android:backgroundTint="@color/color_error"
+        android:visibility="gone"
+        app:cardElevation="@dimen/elevation_banners"
+        app:cardCornerRadius="0dp" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/app_gutter"
-            android:layout_marginEnd="@dimen/app_gutter"
-            android:clipChildren="false"
-            android:orientation="vertical" >
+            android:gravity="center"
+            android:orientation="horizontal" >
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardSurveys"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/height_home_cards"
-                android:layout_marginTop="@dimen/app_spacing"
-                app:cardBackgroundColor="@color/color_primary">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="horizontal" >
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="@string/home_card_surveys"
-                        android:textAlignment="center"
-                        android:textAppearance="@style/TextAppearance.Paws.Button.Large" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="horizontal" >
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@color/color_card"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Maps Button. -->
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardMaps"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/height_home_cards"
-                android:layout_marginTop="@dimen/app_spacing"
-                app:cardBackgroundColor="@color/color_primary">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="horizontal" >
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:maxLines="1"
-                        android:text="@string/home_card_maps"
-                        android:textAlignment="center"
-                        android:textAppearance="@style/TextAppearance.Paws.Button.Large" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="horizontal" >
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@color/color_card"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Settings and Profile Container. -->
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:layout_marginBottom="@dimen/app_spacing"
-                app:cardBackgroundColor="@color/color_card">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:orientation="horizontal" >
-
-                    <!-- Settings Button. -->
-
-                    <ImageButton
-                        android:id="@+id/btnSettings"
-                        android:layout_width="@dimen/height_home_cards"
-                        android:layout_height="@dimen/height_home_cards"
-                        android:layout_margin="@dimen/app_padding"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/color_primary"
-                        android:tint="@color/color_on_primary"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_settings_box" />
-
-                    <!-- Profile Button. -->
-
-                    <ImageButton
-                        android:id="@+id/btnProfile"
-                        android:layout_width="@dimen/height_home_cards"
-                        android:layout_height="@dimen/height_home_cards"
-                        android:layout_margin="@dimen/app_padding"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/color_primary"
-                        android:tint="@color/color_on_primary"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_account_box" />
-
-                    <!-- Help Button. -->
-
-                    <ImageButton
-                        android:id="@+id/btnHelp"
-                        android:layout_width="@dimen/height_home_cards"
-                        android:layout_height="@dimen/height_home_cards"
-                        android:layout_margin="@dimen/app_padding"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/color_primary"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_help_box"
-                        android:tint="@color/color_on_primary" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
+            <ImageView
                 android:layout_width="wrap_content"
+                android:layout_height="@dimen/dimen_icon_huge"
+                android:padding="@dimen/padding_buttons"
+                android:layout_marginStart="@dimen/app_spacing"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_warning"
+                android:tint="@color/color_on_primary"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginBottom="@dimen/app_gutter"
+                android:padding="@dimen/app_padding_half"
                 android:gravity="center"
-                android:text="@string/home_footer"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Paws.Caption" />
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_warning_title"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:textColor="@color/color_on_primary"
+                    android:textAppearance="@style/TextAppearance.Paws.Title" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_warning_subtitle"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:textColor="@color/color_on_primary"
+                    android:textAppearance="@style/TextAppearance.Paws.Caption" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-</androidx.core.widget.NestedScrollView>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fitsSystemWindows="true" >
+
+        <LinearLayout
+            android:id="@+id/layHome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="2dp"
+            tools:layout_editor_absoluteY="2dp" >
+
+            <!-- Weather Preview Card. -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWeather"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="0dp" >
+
+                <!-- Weather Metadata Banner. -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <!-- Weather Title. -->
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="0dp" >
+
+                        <LinearLayout
+                            android:id="@+id/layWeatherHeader"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="@dimen/app_gutter"
+                            android:paddingEnd="@dimen/app_gutter"
+                            android:paddingTop="@dimen/app_gutter"
+                            android:paddingBottom="@dimen/app_padding"
+                            android:background="@color/color_primary_alt"
+                            android:orientation="vertical" >
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal" >
+
+                                <TextView
+                                    android:id="@+id/txtCity"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:maxLines="1"
+                                    android:textColor="@color/color_on_primary"
+                                    android:textAppearance="@style/TextAppearance.Paws.Huge"
+                                    android:shadowColor="@color/color_ref_black"
+                                    android:shadowDx="2"
+                                    android:shadowDy="2"/>
+
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/txtWeatherTimestamp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Small"
+                                android:textColor="@color/color_on_primary"
+                                android:shadowColor="@color/color_ref_black"
+                                android:shadowDx="2"
+                                android:shadowDy="2" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Weather Icon and Description. -->
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="0dp" >
+
+                        <LinearLayout
+                            android:id="@+id/layWeatherDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/app_padding_half"
+                            android:paddingBottom="@dimen/app_padding_half"
+                            android:paddingStart="@dimen/app_gutter"
+                            android:paddingEnd="@dimen/app_gutter"
+                            android:background="@color/color_primary"
+                            android:orientation="horizontal" >
+
+                            <ImageView
+                                android:id="@+id/imgWeatherIcon"
+                                android:layout_width="@dimen/dimen_icon_medium"
+                                android:layout_height="@dimen/dimen_icon_medium"
+                                android:gravity="start"
+                                android:visibility="gone" />
+
+                            <ProgressBar
+                                android:id="@+id/barWeatherIcon"
+                                style="@style/Widget.Paws.ProgressBar.Circular"
+                                android:layout_width="@dimen/dimen_icon_medium"
+                                android:layout_height="@dimen/dimen_icon_medium"
+                                android:layout_gravity="center"
+                                android:indeterminate="true"
+                                android:padding="8dp" />
+
+                            <TextView
+                                android:id="@+id/txtWeatherDescription"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginStart="@dimen/app_padding"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Large"
+                                android:textColor="@color/color_on_primary" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Weather Data. -->
+
+                    <LinearLayout
+                        android:id="@+id/layWeatherDataColumns"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="@dimen/app_spacing_half"
+                        android:paddingBottom="@dimen/app_spacing_half"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false" >
+
+                        <!-- Wind Data. -->
+
+                        <LinearLayout
+                            android:id="@+id/layWeatherDataWind"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:padding="@dimen/app_padding"
+                            android:gravity="center"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/txtWindSpeed"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Large" />
+
+                            <TextView
+                                android:id="@+id/txtWindBearing"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                        </LinearLayout>
+
+                        <!-- Temperature. -->
+
+                        <LinearLayout
+                            android:id="@+id/layWeatherDataTemp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/txtTempCurrent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Immense" />
+
+                        </LinearLayout>
+
+                        <!-- Precipitation and Humidity. -->
+
+                        <LinearLayout
+                            android:id="@+id/layWeatherDataPrecip"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/txtPrecipAuxData1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Large" />
+
+                            <TextView
+                                android:id="@+id/txtPrecipAuxData2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:orientation="vertical" >
+
+                <!-- Mapping Button. -->
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardMaps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/app_spacing">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical" >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="@dimen/app_gutter"
+                            android:paddingEnd="@dimen/app_gutter"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:background="@color/color_primary" >
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:padding="@dimen/app_spacing"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/home_card_maps"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Button.Large" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:paddingTop="@dimen/app_spacing"
+                            android:paddingStart="@dimen/app_spacing"
+                            android:paddingEnd="@dimen/app_spacing"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/home_card_maps_subtitle_large"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:text="@string/home_card_maps_subtitle_small"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Settings and Profile Container. -->
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/app_spacing"
+                    android:layout_marginBottom="@dimen/app_spacing"
+                    app:cardBackgroundColor="@color/color_card">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="@dimen/app_gutter"
+                        android:layout_marginEnd="@dimen/app_gutter"
+                        android:layout_gravity="center"
+                        android:orientation="horizontal" >
+
+                        <!-- Settings Button. -->
+
+                        <ImageButton
+                            android:id="@+id/btnSettings"
+                            android:layout_width="@dimen/height_home_cards"
+                            android:layout_height="@dimen/height_home_cards"
+                            android:layout_margin="@dimen/app_padding"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/color_primary"
+                            android:tint="@color/color_on_primary"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_settings_box" />
+
+                        <!-- Profile Button. -->
+
+                        <ImageButton
+                            android:id="@+id/btnProfile"
+                            android:layout_width="@dimen/height_home_cards"
+                            android:layout_height="@dimen/height_home_cards"
+                            android:layout_margin="@dimen/app_padding"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/color_primary"
+                            android:tint="@color/color_on_primary"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_account_box" />
+
+                        <!-- Help Button. -->
+
+                        <ImageButton
+                            android:id="@+id/btnHelp"
+                            android:layout_width="@dimen/height_home_cards"
+                            android:layout_height="@dimen/height_home_cards"
+                            android:layout_margin="@dimen/app_padding"
+                            android:layout_weight="1"
+                            android:backgroundTint="@color/color_primary"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/ic_help_box"
+                            android:tint="@color/color_on_primary" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="@dimen/app_gutter"
+                    android:gravity="center"
+                    android:text="@string/home_footer"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.Paws.Caption" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</FrameLayout>

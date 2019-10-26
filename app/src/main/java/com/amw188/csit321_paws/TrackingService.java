@@ -5,12 +5,14 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.util.Log;
 
 import android.app.NotificationChannel;
@@ -20,10 +22,10 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 
 public class TrackingService extends Service {
 
@@ -36,19 +38,13 @@ public class TrackingService extends Service {
 	static final String ACTION_BROADCAST = PACKAGE_NAME + ".action.BROADCAST";
 
 	// Notifications
-	private static Notifications instance = null;
 	private NotificationCompat.Builder mBuilder;
 	private NotificationManager mManager;
 	private boolean mCompatibilityMode;
-	private static NotificationChannel[] mChannels;
-	private static final String[] mChannelIDs = {
-			"paws_chan_none",
-			"paws_chan_low",
-			"paws_chan_default",
-			"paws_chan_high",
-			"paws_chan_max"
-	};
-	private static final String mForegroundChannel = "paws_chan_foreground";
+	private static NotificationChannel mChannel;
+	private static final String mChannelID = "paws_chan_default";
+	private static NotificationChannel mForegroundChannel;
+	private static final String mForegroundChannelID = "paws_chan_foreground";
 
 	// Tracking
 	private final IBinder mBinder = new LocalBinder();
@@ -74,7 +70,6 @@ public class TrackingService extends Service {
 
 	@Override
 	public void onCreate() {
-		mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 		mLocationRequestCallback = new LocationCallback() {
 			@Override
 			public void onLocationResult(LocationResult locationResult) {
@@ -87,7 +82,7 @@ public class TrackingService extends Service {
 			}
 		};
 
-		HandlerThread handlerThread = new HandlerThread(TAG);
+		HandlerThread handlerThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_FOREGROUND);
 		handlerThread.start();
 		mServiceHandler = new Handler(handlerThread.getLooper());
 
@@ -95,135 +90,161 @@ public class TrackingService extends Service {
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			CharSequence name = getString(R.string.app_name);
-			NotificationChannel mChannel =
-					new NotificationChannel(mForegroundChannel, name,
+			mForegroundChannel = new NotificationChannel(mForegroundChannelID, name,
 							NotificationManager.IMPORTANCE_HIGH);
-			mManager.createNotificationChannel(mChannel);
+			mManager.createNotificationChannel(mForegroundChannel);
 		}
 	}
 
-	public void setHostListener(LocationResultListener listener) {
+	public void init(FusedLocationProviderClient fusedClient, LocationResultListener listener) {
+		mFusedLocationClient = fusedClient;
 		mHostListener = listener;
+		initNotifications();
 	}
 
 	public void startTracking(LocationRequest locationRequest) {
 		// Start receiving updates.
-		Log.d(TAG, "Starting tracking.");
+		Log.i(TAG, "Starting tracking.");
 		mFusedLocationClient.requestLocationUpdates(
 				locationRequest,
 				mLocationRequestCallback,
 				Looper.getMainLooper());
 	}
 
-	public void stopTracking() {
-		Log.d(TAG, "Stopping tracking.");
-		mFusedLocationClient.removeLocationUpdates(mLocationRequestCallback);
+	public void stopTracking(FusedLocationProviderClient fusedClient) {
+		Log.i(TAG, "Stopping tracking.");
+		fusedClient.removeLocationUpdates(mLocationRequestCallback);
 		stopSelf();
 	}
 
-	void initNotifications(Context ctx) {
-		mManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+	void initNotifications() {
+		mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 		// Create notification channels.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			mChannels = new NotificationChannel[NotificationManager.IMPORTANCE_HIGH];
-			for (int i = NotificationManager.IMPORTANCE_NONE; i < NotificationManager.IMPORTANCE_HIGH; i++) {
-				CharSequence name;
-				String desc;
-				// Can't initialise translatable strings to static arrays aaa
-				switch (i) {
-					case 1:
-						name = ctx.getString(R.string.noti_chan_name_low);
-						desc = ctx.getString(R.string.noti_chan_desc_low);
-						break;
-					case 2:
-						name = ctx.getString(R.string.noti_chan_name_default);
-						desc = ctx.getString(R.string.noti_chan_desc_default);
-						break;
-					case 3:
-						name = ctx.getString(R.string.noti_chan_name_high);
-						desc = ctx.getString(R.string.noti_chan_desc_high);
-						break;
-					default:
-						name = ctx.getString(R.string.noti_chan_name_unused);
-						desc = ctx.getString(R.string.noti_chan_desc_unused);
-						break;
-				}
+			CharSequence name = getString(R.string.noti_chan_name_default);
+			String desc = getString(R.string.noti_chan_desc_default);
 
-				mChannels[i] = new NotificationChannel(
-						mChannelIDs[i], name, i);
-				mChannels[i].setDescription(desc);
-				mManager.createNotificationChannel(mChannels[i]);
-			}
+			mChannel = new NotificationChannel(
+					mChannelID, name, NotificationManager.IMPORTANCE_HIGH);
+			mChannel.setDescription(desc);
+			mChannel.enableLights(true);
+			mChannel.enableVibration(true);
+			mChannel.setLightColor(
+					ContextCompat.getColor(this, R.color.color_error));
+			mChannel.setVibrationPattern(new long[] { 500, 500, 500, 500, 500, 500 });
+			mChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+			mManager.createNotificationChannel(mChannel);
 		} else {
+			Log.i(TAG, "Ignoring channels. " +
+					"System is in compatibility mode for OS below Android O.");
 			mCompatibilityMode = true;
 		}
 	}
 
-	private void buildNotification(Context ctx, int priority) {
-		Intent intent = new Intent(ctx, TrackingService.class);
+	private boolean buildNotification(int priority) {
+		Intent intent = new Intent(this, TrackingService.class);
 
 		// Extra to help us figure out if we arrived in onStartCommand via the notification or not.
 		intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
 
-		PendingIntent servicePendingIntent = PendingIntent.getService(ctx, 0, intent,
-				PendingIntent.FLAG_UPDATE_CURRENT);
-		PendingIntent activityPendingIntent = PendingIntent.getActivity(ctx, 0,
-				new Intent(ctx, MapsActivity.class), 0);
+		// View the Mapping activity.
+		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+				new Intent(this, MapsActivity.class), 0);
 
-		mBuilder.addAction(R.drawable.ic_paws_icon, "HELLO HELLO",
-						activityPendingIntent)
-				.addAction(R.drawable.ic_gps_off, "GOODBYE",
-						servicePendingIntent)
-				.setContentText("YOU SAY GOODBYE")
-				.setContentTitle("I DONT KNOW WHY YOU SAY GOODBYE")
-				.setOngoing(true)
+		String title, subtitle, text;
+		int priorityAdjusted = mCompatibilityMode ? priority - 3 : priority;
+		switch (priorityAdjusted) {
+			case Notification.PRIORITY_MIN:
+				return false;
+			case Notification.PRIORITY_LOW:
+				title = getString(R.string.noti_title_risk_low);
+				subtitle = getString(R.string.noti_subtitle_risk_low);
+				text = getString(R.string.noti_text_risk_low);
+				break;
+			case Notification.PRIORITY_DEFAULT:
+				title = getString(R.string.noti_title_risk_med);
+				subtitle = getString(R.string.noti_subtitle_risk_med);
+				text = getString(R.string.noti_text_risk_med);
+				break;
+			default:
+				title = getString(R.string.noti_title_risk_high);
+				subtitle = getString(R.string.noti_subtitle_risk_high);
+				text = getString(R.string.noti_text_risk_high);
+				break;
+		}
+
+		mBuilder.addAction(R.drawable.ic_paws_icon, getString(R.string.noti_action_view),
+				pendingIntent)
+				.setContentText(subtitle)
+				.setContentTitle(title)
+				.setOngoing(false)
+				.setCategory(Notification.CATEGORY_ALARM)
 				.setPriority(Notification.PRIORITY_HIGH)
+				.setFullScreenIntent(pendingIntent, true)
+				.setStyle(new NotificationCompat.BigTextStyle().bigText(text))
 				.setSmallIcon(R.drawable.ic_paws_logo)
-				.setTicker("I SAY HELLO")
+				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+				.setTicker(getString(R.string.noti_title))
 				.setWhen(System.currentTimeMillis());
 		if (!mCompatibilityMode)
-			mBuilder.setChannelId(mChannelIDs[priority]);
+			mBuilder.setChannelId(mChannelID);
+		return true;
 	}
 
-	synchronized void notify(Context ctx, int priority) {
+	synchronized void notify(int priority) {
 		if (!mCompatibilityMode)
+			// Convert from PRIORITY to IMPORTANCE
 			priority += 3;
-		mBuilder = new NotificationCompat.Builder(ctx, mChannelIDs[priority]);
-		buildNotification(ctx, priority);
-
-		Log.d(TAG, "Notifications show : Pushing notification, priority " + priority + ".");
-		NotificationManagerCompat notificationManager = NotificationManagerCompat.from(ctx);
-		notificationManager.notify(priority, mBuilder.build());
+		mBuilder = new NotificationCompat.Builder(this, mChannelID);
+		if (!buildNotification(priority)) {
+			Log.i(TAG, "Notifications show : Aborting notification, priority " + priority + ".");
+		} else {
+			Log.i(TAG, "Notifications show : Pushing notification, priority " + priority + ".");
+			NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+			notificationManager.notify(priority, mBuilder.build());
+		}
 	}
 
 	public Notification startForegroundNotification(TrackingService trackingService) {
+		Log.i(TAG, "Starting foreground notification.");
+
 		Intent intent = new Intent(trackingService, TrackingService.class);
 		intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
 
-		// Starts the Tracking service.
+		// Ends the Tracking service.
 		PendingIntent servicePendingIntent = PendingIntent.getService(trackingService,
 				0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		// Returns to Mapping activity.
-		PendingIntent activityPendingIntent = PendingIntent.getActivity(trackingService,
+		PendingIntent pendingIntent = PendingIntent.getActivity(trackingService,
 				0, new Intent(trackingService, MapsActivity.class), 0);
 
-		mBuilder = new NotificationCompat.Builder(trackingService, mForegroundChannel)
-				.addAction(R.drawable.ic_paws_logo, "HELLO HELLO",
-						activityPendingIntent)
-				.addAction(R.drawable.ic_gps_off, "GOODBYE",
+		// Build the foreground watchdog.
+		mBuilder = new NotificationCompat.Builder(trackingService, mForegroundChannelID)
+				.addAction(R.drawable.ic_paws_icon, getString(R.string.noti_action_view),
+						pendingIntent)
+				.addAction(R.drawable.ic_gps_off, getString(R.string.noti_action_dismiss),
 						servicePendingIntent)
-				.setContentText("YOU SAY GOODBYE")
-				.setContentTitle("I DONT KNOW WHY YOU SAY GOODBYE")
+				.setContentText(getString(R.string.noti_desc_foreground))
+				.setContentTitle(getString(R.string.noti_name_foreground))
 				.setCategory(Notification.CATEGORY_SERVICE)
 				.setOngoing(true)
-				.setPriority(Notification.PRIORITY_MAX)
-				.setSmallIcon(R.mipmap.ic_launcher)
-				.setTicker("I SAY HELLO")
-				.setWhen(System.currentTimeMillis());
-		if (!mCompatibilityMode)
-			mBuilder.setChannelId(mForegroundChannel);
+				.setPriority(Notification.PRIORITY_HIGH)
+				.setSmallIcon(R.drawable.ic_paws_icon)
+				.setTicker(getString(R.string.noti_title))
+				.setWhen(System.currentTimeMillis())
+				.setChannelId(mForegroundChannelID);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			Log.i(TAG, "Managing channels for foreground notification.");
+			mForegroundChannel.enableLights(true);
+			mForegroundChannel.enableVibration(true);
+			mForegroundChannel.setLightColor(
+					ContextCompat.getColor(this, R.color.color_primary));
+			mForegroundChannel.setVibrationPattern(new long[] { 500, 500, 500, 500 });
+			mForegroundChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+		}
 
 		return mBuilder.build();
 	}
@@ -264,10 +285,11 @@ public class TrackingService extends Service {
 				EXTRA_STARTED_FROM_NOTIFICATION, false);
 
 		if (startedFromNotification) {
-			stopTracking();
-			stopSelf();
+			stopTracking(mFusedLocationClient);
+			// Tells the system to not try to recreate the service after it has been killed.
+			return START_NOT_STICKY;
 		}
-		// Tells the system to not try to recreate the service after it has been killed.
-		return START_NOT_STICKY;
+
+		return START_STICKY;
 	}
 }

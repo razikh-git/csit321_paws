@@ -33,7 +33,6 @@ class LocationActivity extends PermissionActivity {
 			if (error.equals(""))
 				mAddress = resultData.getParcelableArrayList(FetchAddressCode.RESULT_ADDRESSLIST_KEY);
 			else
-				// TODO : provide onError functionality
 				return;
 			// Update the interface with the new location.
 			onAddressReceived();

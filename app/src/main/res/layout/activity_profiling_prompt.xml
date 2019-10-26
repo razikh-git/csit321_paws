@@ -20,7 +20,7 @@
         <ImageView
             android:id="@+id/imgLogoCombo"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="90dp"
             android:layout_marginStart="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
             android:layout_marginEnd="@dimen/app_gutter"
@@ -31,26 +31,68 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardInfo"
             android:layout_width="match_parent"
-            android:layout_height="350dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/app_gutter"
             android:layout_marginTop="@dimen/app_spacing"
             android:layout_marginEnd="@dimen/app_gutter" >
 
-            <ScrollView
-                android:id="@+id/scrlInfo"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="true"
-                android:padding="@dimen/app_padding"
-                android:scrollbarThumbVertical="@color/color_primary" >
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/txtInfo"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.Paws.Small" />
+                    android:padding="@dimen/app_padding"
+                    android:background="@color/color_primary"
+                    android:orientation="vertical">
 
-            </ScrollView>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pp_welcome"
+                        android:textColor="@color/color_on_primary"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.Paws.Title" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/app_padding"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="@dimen/app_padding"
+                        android:text="@string/pp_desc_1"
+                        android:textAppearance="@style/TextAppearance.Paws.Small" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:padding="@dimen/padding_weathericon"
+                        android:orientation="horizontal" >
+
+                        <LinearLayout
+                            android:id="@+id/layProgressContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:padding="@dimen/padding_weathericon"
+                            android:orientation="horizontal" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -68,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@string/pp_prompt"
-                android:textAppearance="@style/TextAppearance.Paws.Large"
+                android:textAppearance="@style/TextAppearance.Paws.Medium"
                 android:textAlignment="center"
                 android:padding="@dimen/app_padding" />
 
@@ -91,6 +133,7 @@
                 android:layout_height="@dimen/height_buttons_small"
                 android:layout_marginEnd="@dimen/app_spacing"
                 android:layout_weight="1"
+                android:textColor="@color/color_midtone"
                 android:text="@string/pp_btn_decline" />
 
             <com.google.android.material.button.MaterialButton

@@ -64,7 +64,7 @@
     <string name="app_btn_submit">submit</string>
     <string name="app_btn_continue">continue</string>
     <string name="app_btn_return">return</string>
-    <string name="app_btn_reset">reset</string>
+    <string name="app_btn_reset">reset profile data</string>
     <string name="app_btn_optin">opt-in</string>
     <string name="app_btn_optout">opt-out</string>
     <string name="app_btn_perm_grant">accept</string>
@@ -102,6 +102,9 @@
     <!--                              -->
     <!--       Activity strings       -->
 
+    <!-- App. -->
+    <string name="app_reset_result">All profile data has been reset.</string>
+
     <!-- Home Screen Activity. -->
     <string name="home_warning_title">Survey incomplete</string>
     <string name="home_warning_subtitle">Some personalisation features are not enabled.</string>
@@ -112,7 +115,15 @@
 
     <string name="home_weather_timestamp">Updated</string>
     <string name="home_card_surveys">Surveys</string>
-    <string name="home_card_maps">Maps</string>
+    <string name="home_card_maps">Maps and Tracking</string>
+    <string name="home_card_maps_subtitle_large">
+        "Plan your journey ahead of time.\n"
+        "Enable the tracking companion to receive updates over the course of your trip.\n"
+    </string>
+    <string name="home_card_maps_subtitle_small">
+        "Monitor your battery levels at all times. Location services may occupy your resources.\n"
+        "You may change usage settings at any time in Preferences.\n"
+    </string>
     <string name="home_card_profile">Profile</string>
     <string name="home_card_settings">Settings</string>
     <string name="home_card_help">Help</string>
@@ -122,9 +133,27 @@
     </string>
 
     <!-- Profiling Prompt Activity. -->
-    <string name="pp_prompt">Begin profiling?</string>
+    <string name="pp_welcome">
+        Welcome to the Persuasive Avalanche Warning System
+    </string>
+    <string name="pp_prompt">
+        Continue to profiling?
+    </string>
     <string name="pp_btn_decline">later</string>
     <string name="pp_btn_accept">proceed</string>
+
+    <string name="pp_desc_1">
+        "Journeys through slopes and wilderness may prove challenging even for experienced travellers and sportspeople alike.\n\n"
+        "Misadventure can arise at any moment, and changing weather conditions may scatter a known trail with hazards and change the environment to better suit disaster."
+    </string>
+    <string name="pp_desc_2">
+        "This companion suite is designed to help plan your journeys ahead of time with an all-in-one set of weather and mapping tools to help you visualise adverse weather conditions before they strike.\n\n"
+        "Use the Drawing tool to demarcate areas of elevated risk before your expedition, and the system will notify you accordingly should you stray into them."
+    </string>
+    <string name="pp_desc_3">
+        "Our system is based on cooperation between itself and the user: your honesty in profiling determines the effectiveness and accuracy of our knowledge system, and can help us best support you while you request it.\n\n"
+        "Please complete the survey resources truthfully, as the safety of yourself and your companions may depend on it."
+    </string>
 
     <!-- Profiling Menu Activity. -->
     <string name="pm_title">Personalisation Hub</string>
@@ -142,14 +171,9 @@
         "Use Facebook integration to weight results with your profile"
     </string>
 
-    <!-- TODO: fill in description of 'this is designed to calibrate personalisation features' etc -->
-
     <!-- Self-Analysis Activity. -->
     <string name="sa_title">Self-Analysis</string>
     <string name="sa_subtitle">Two-point quick-start form</string>
-    <string name="sa_description">
-        placeholder description
-    </string>
 
     <string name="sa_risk_question">
         Which of these personal profiles would you say best describes your day-to-day self?
@@ -191,7 +215,6 @@
     <string name="se_in_progress">Survey not yet complete.</string>
     <string name="se_results_label">last completed survey</string>
     <string name="se_fallback">No existing profile found.</string>
-    <string name="se_snack_result">All profile data has been reset.</string>
 
     <!-- Survey Question Activity. -->
     <string name="sq_title">Question</string>
@@ -234,7 +257,7 @@
     <!-- Mapping Activity. -->
     <string name="ma_wind">Wind</string>
     <string name="ma_precip">Precipitation</string>
-    <string name="ma_risk">Polygons</string>
+    <string name="ma_risk">Drawings</string>
     <string name="ma_tracking_enable">Start tracking my journey</string>
     <string name="ma_tracking_disable">End tracking</string>
     <string name="ma_search_hint">Search</string>
@@ -243,12 +266,20 @@
     <string name="ma_satellite">Satellite</string>
     <string name="ma_terrain">Terrain</string>
 
+    <string name="ma_location_usage_disabled">
+        "Location usage is currently disabled.\n"
+        "You may change this in Preferences."
+    </string>
+
     <!-- Fetch Address ServiceIntent. -->
     <string name="sv_fa_service_unavailable">The service encountered a critical error.</string>
     <string name="sv_fa_invalid_lat_lng">An invalid lat/long value pair was provided.</string>
     <string name="sv_fa_no_address">No address was found for the given coordinates.</string>
     <string name="sv_fa_geocoder_unavailable">The service geocoder was unavailable.</string>
     <string name="title_activity_settings">Settings</string>
+
+    <!--                              -->
+    <!--      Preferences Strings     -->
 
     <!-- Preference Titles. -->
     <string name="pref_header_general">General</string>
@@ -261,5 +292,60 @@
     <!-- Location Preferences. -->
     <string name="pref_title_location_usage">Location precision</string>
     <string name="pref_title_location_rate">Location update rate</string>
+
+    <!--                              -->
+    <!--     Notifications Strings    -->
+
+    <string name="noti_title">PAWS</string>
+
+    <string name="noti_name_foreground">
+        PAWS Tracking Service
+    </string>
+    <string name="noti_desc_foreground">
+        The location tracking service is resource-intensive.
+        Be sure to manage your usage carefully while oudoors.
+    </string>
+
+    <string name="noti_action_view">MAPPING</string>
+    <string name="noti_action_dismiss">STOP TRACKING</string>
+
+    <string name="noti_title_risk_low">
+        Adverse conditions identified
+    </string>
+    <string name="noti_subtitle_risk_low">
+        You may want to review your journey.
+    </string>
+    <string name="noti_text_risk_low">
+        "Travel conditions may be compromised in this area, and navigation may be impaired.\n\n"
+
+        "You should reorient yourself if you feel these conditions are unsuitable for you and your partners. "
+        "Be ready to alter course at any time."
+    </string>
+
+    <string name="noti_title_risk_med">
+        BE AWARE: You are entering dangerous territory.
+    </string>
+    <string name="noti_subtitle_risk_med">
+        Local conditions are threatening the safety of those in this area.
+    </string>
+    <string name="noti_text_risk_med">
+        "Be aware of your surroundings and group members at all times.\n\n"
+
+        "Take note of your environment, and identify which features may be either advantageous or dangerous. "
+        "Sudden disaster can occur at any time, even in areas without any apparent threat."
+    </string>
+
+    <string name="noti_title_risk_high">
+        WARNING: STOP. YOUR SAFETY IS AT RISK.
+    </string>
+    <string name="noti_subtitle_risk_high">
+        Stop immediately and review your course.
+    </string>
+    <string name="noti_text_risk_high">
+        "Conditions in this area are incompatible with survival. For your own safety, and the safety of others, "
+        "reconsider your journey. Relocate to a safe area away from threatening features, such as avalanche "
+        "runout corridors and steep inclines, and plan a new course out of this area using the terrain "
+        "to your advantage.\n\n"
+    </string>
 
 </resources>

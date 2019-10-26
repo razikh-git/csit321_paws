@@ -60,12 +60,11 @@ public class HomeActivity
     private boolean initButtons() {
         // Button functionality.
         try {
-            findViewById(R.id.cardWarningBanner).setOnClickListener((view) -> onClickSurveys(view));
+            findViewById(R.id.cardWarningBanner).setOnClickListener((view) -> onClickProfiling(view));
             findViewById(R.id.cardWeather).setOnClickListener((view) -> onClickWeather(view));
-            findViewById(R.id.cardSurveys).setOnClickListener((view) -> onClickSurveys(view));
             findViewById(R.id.cardMaps).setOnClickListener((view) -> onClickMaps(view));
             findViewById(R.id.btnSettings).setOnClickListener((view) -> onClickSettings(view));
-            findViewById(R.id.btnProfile).setOnClickListener((view) -> onClickProfile(view));
+            findViewById(R.id.btnProfile).setOnClickListener((view) -> onClickProfiling(view));
             findViewById(R.id.btnHelp).setOnClickListener((view) -> onClickHelp(view));
             return true;
         } catch (Exception e) {
@@ -76,13 +75,16 @@ public class HomeActivity
 
     private void initInterface() {
         // Initialise home screen banners.
-        if (mSharedPref.getInt("survey_last_question", 1) < getResources().getInteger(R.integer.survey_question_count))
+        if (mSharedPref.getInt("survey_last_question", 1) < getResources().getInteger(R.integer.survey_question_count)) {
             findViewById(R.id.cardWarningBanner).setVisibility(VISIBLE);
+            float pad = getResources().getDimension(R.dimen.height_banners_contextual);
+            findViewById(R.id.layHome).setPadding(0, (int)pad, 0, 0);
+        }
 
         // Attempt to initialise location elements.
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                 RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
-            Log.println(Log.DEBUG, "snowpaws", "HomeActivity.initInterface.hasPermssions TRUE");
+            Log.i("snowpaws", "HomeActivity.initInterface.hasPermssions TRUE");
             fetchLocation();
         }
     }
@@ -292,28 +294,22 @@ public class HomeActivity
         startActivity(intent);
     }
 
-    private void onClickSurveys(View view) {
-        // Redirect to Profiling Launchpad Activity
-        Intent intent = new Intent(this, ProfilingMenuActivity.class);
-        startActivity(intent);
-    }
-
     private void onClickSettings(View view) {
         // Redirect to App Settings Activity
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
-    private void onClickProfile(View view) {
-        // Redirect to Profile Details Activity
-        //Intent intent = new Intent(this, ProfileActivity.class);
-        //startActivity(intent);
+    private void onClickProfiling(View view) {
+        // Redirect to Profiling Menu Activity
+        Intent intent = new Intent(this, ProfilingMenuActivity.class);
+        startActivity(intent);
     }
 
     private void onClickHelp(View view) {
-        // Redirect to Help Page Activity
-        //Intent intent = new Intent(this, HelpActivity.class);
-        //startActivity(intent);
+        // Redirect to First-Launch Info Page Activity
+        Intent intent = new Intent(this, ProfilingPromptActivity.class);
+        startActivity(intent);
     }
 
     @Override

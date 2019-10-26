@@ -17,6 +17,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -199,7 +200,7 @@ public class MapsActivity
 
     private void onMapPolyDrawClick(View view) {
 
-        // TODO change button styles and not have it be deprecated
+        // TODO Change button styles (this solution is deprecated).
 
         if (mMap != null) {
             if (mIsPolyDrawing) {
@@ -236,7 +237,7 @@ public class MapsActivity
 
     private void onMapPolyEraseClick(View view) {
 
-        // TODO : selective removal of polygons
+        // TODO : Selective removal of polygons.
 
         // Clear all screen polygons and polylines
         mPolyLine.setPoints(new ArrayList<>());
@@ -733,8 +734,10 @@ public class MapsActivity
                 SettingsActivity.KEY_PREF_LOCATION_PRIORITY,
                 Integer.toString(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)))
                 == LocationRequest.PRIORITY_NO_POWER) {
-            // TODO : Error popout, usage is set to none
-            Log.d(TAG, "Location usage is set to Disabled.");
+            Log.i(TAG, "Location usage is set to Disabled.");
+            Toast.makeText(this,
+                    R.string.ma_location_usage_disabled,
+                    Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -752,20 +755,6 @@ public class MapsActivity
                 startLocationRequests(locationRequest);
             }
         });
-        /* // TODO : Implement dialogue popout for resolvable settings mismatches
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    try {
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(this,
-                                REQUEST_CHECK_SETTINGS);
-                    } catch (IntentSender.SendIntentException es) {}
-                }
-            }
-        });
-        */
     }
 
     private void startLocationRequests(LocationRequest locationRequest) {
@@ -822,16 +811,18 @@ public class MapsActivity
                     // make it work
                     priority = NotificationCompat.PRIORITY_HIGH;
 
+                    // todo tood it still doesnt work
+
                     // Consider additional risk weighting.
                     int riskWeight = mSharedPref.getInt("selfanalysis_risk", 0);
                     priority = Math.min(NotificationCompat.PRIORITY_HIGH,
                             priority + (riskWeight != -1 ? riskWeight : 0));
 
-                    // TODO : Customise cooldown timers per priority level
+                    // TODO : Customise cooldown timers per priority level doot
                     if (!mIsCooldown) {
                         mIsCooldown = true;
                         //Notifications.getInstance().show(this, priority);
-                        mTrackingService.notify(this, priority);
+                        mTrackingService.notify(priority);
                         mCooldownTimer.schedule(
                                 new TimerTask(){@Override public void run(){mIsCooldown = false;}},
                                 NOTIFICATION_COOLDOWN_INTERVAL);
@@ -843,7 +834,8 @@ public class MapsActivity
 
     private void stopLocationRequests() {
         mMap.setMyLocationEnabled(false);
-        mTrackingService.stopTracking();
+        mIsTrackingLocation = false;
+        mTrackingService.stopTracking(mFusedLocationClient);
     }
 
     // Monitors the state of the connection to the service.
@@ -852,7 +844,7 @@ public class MapsActivity
         public void onServiceConnected(ComponentName name, IBinder service) {
             TrackingService.LocalBinder binder = (TrackingService.LocalBinder) service;
             mTrackingService = binder.getService();
-            mTrackingService.setHostListener(MapsActivity.this);
+            mTrackingService.init(mFusedLocationClient, MapsActivity.this);
             mBound = true;
         }
         @Override
@@ -894,7 +886,7 @@ public class MapsActivity
         super.onRestoreInstanceState(savedInstanceState);
         mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
         mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-        mIsTrackingLocation = savedInstanceState.getBoolean(ISTRACKING_KEY); // TODO test this
+        mIsTrackingLocation = savedInstanceState.getBoolean(ISTRACKING_KEY);
         if (mIsTrackingLocation)
             checkToStartLocationRequests();
     }
