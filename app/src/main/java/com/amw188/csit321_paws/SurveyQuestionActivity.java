@@ -145,7 +145,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         try {
             // Fill the matching progress bubble.
             ImageView img = findViewById(R.id.layProgressContainer)
-                    .findViewWithTag(TAG_PROGRESS + mIndex);
+                    .findViewWithTag(TAG_PROGRESS + (mIndex - 1));
             img.setImageDrawable(getDrawable(R.drawable.ic_radiobutton_checked));
             img.setColorFilter(ContextCompat.getColor(this, R.color.color_primary));
 

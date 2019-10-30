@@ -696,6 +696,7 @@ public class MapsActivity
         ((TextView)findViewById(R.id.txtSheetTitle)).setText("");
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText("");
         if (mAddress != null) {
+            // TODO fix out of bounds exception for null address length.....
             str = mAddress.get(0).getAddressLine(0).split(", ", 3)[1];
             ((TextView)findViewById(R.id.txtSheetTitle)).setText(str);
 

@@ -55,9 +55,11 @@ public class FetchAddressIntentService extends IntentService {
                     1);
         } catch (IOException e) {
             error = getString(R.string.sv_fa_service_unavailable);
+            e.printStackTrace();
             Log.e("snowpaws_sv_fa", error);
         } catch (IllegalArgumentException e) {
             error = getString(R.string.sv_fa_invalid_lat_lng);
+            e.printStackTrace();
             Log.e("snowpaws_sv_fa", error);
         }
 

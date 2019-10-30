@@ -74,7 +74,7 @@ class WeatherHandler {
                 if (isMetric != lastWeather.getBoolean("is_metric")) {
                     Log.d(TAG, "Units of measurement differ and an update will be retrieved.");
                 } else if (Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng").getDouble("latitude")) < LOC_CERTAINTY
-                && Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng").getDouble("longitude")) < LOC_CERTAINTY) {
+                && Math.abs(latLng.longitude - lastWeather.getJSONObject("lat_lng").getDouble("longitude")) < LOC_CERTAINTY) {
                     Log.d(TAG, "Location differs significantly enough to warrant an update.");
 
                     // Don't request new data if the current data was received in the last 3 hours.

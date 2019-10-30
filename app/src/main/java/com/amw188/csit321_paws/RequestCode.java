@@ -8,15 +8,10 @@ interface RequestCode {
     int PERMISSION_LOCATION_COARSE = 2;
     int PERMISSION_INTERNET = 3;
     int PERMISSION_NETWORK_STATE = 4;
-    int PERMISSION_LOCATION_BACKGROUND = 5;
 
-    String[] REQUEST_PERMISSIONS_BACKGROUND = {
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-    };
     String[] REQUEST_PERMISSIONS_LOCATION = {
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION};
+            Manifest.permission.ACCESS_COARSE_LOCATION};
     String[] REQUEST_PERMISSIONS_NETWORK = {
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE};
