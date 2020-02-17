@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         ImageLoader.getInstance().init(config);
 
         // Initilise notifications subsystem.
-        Notifications.getInstance().init(this);
+        //Notifications.getInstance().init(this);
 
         // Load global preferences.
         SharedPreferences sharedPref = this.getSharedPreferences(

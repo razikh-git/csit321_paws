@@ -137,16 +137,16 @@ public class SelfAnalysisActivity extends BottomNavBarActivity {
         // Continue to the completed splash.
         if (view.getId() == R.id.btnSubmit) {
             setResult(RESULT_OK, new Intent().putExtra(
-                    AnalysisEntryCode.EXTRA_KEY, ResultCode.RESULT_COMPLETE));
+                    AnalysisEntryCodes.EXTRA_KEY, ResultCode.RESULT_COMPLETE));
             finish();
         } else{
             setResult(RESULT_CANCELED, new Intent().putExtra(
-                    AnalysisEntryCode.EXTRA_KEY, ResultCode.RESULT_INCOMPLETE));
+                    AnalysisEntryCodes.EXTRA_KEY, ResultCode.RESULT_INCOMPLETE));
             finish();
             return;
         }
         Intent intent = new Intent(this, SurveyCompleteActivity.class);
-        intent.putExtra(AnalysisEntryCode.EXTRA_KEY, AnalysisEntryCode.ENTRY_SELF_ANALYSIS);
+        intent.putExtra(AnalysisEntryCodes.EXTRA_KEY, AnalysisEntryCodes.ENTRY_SELF_ANALYSIS);
         startActivity(intent);
     }
 }

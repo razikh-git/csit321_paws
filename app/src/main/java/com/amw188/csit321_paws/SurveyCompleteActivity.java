@@ -15,7 +15,7 @@ public class SurveyCompleteActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            int activityCode = extras.getInt(AnalysisEntryCode.EXTRA_KEY);
+            int activityCode = extras.getInt(AnalysisEntryCodes.EXTRA_KEY);
             new Handler().postDelayed(() ->
                     {endSurveyCompleteSplash(activityCode);},
                     10000);
@@ -26,11 +26,11 @@ public class SurveyCompleteActivity extends AppCompatActivity {
         finish();
         Intent intent;
         switch (activityCode) {
-            case AnalysisEntryCode.ENTRY_SURVEY:
+            case AnalysisEntryCodes.ENTRY_SURVEY:
                 intent = new Intent(SurveyCompleteActivity.this,
                         SurveyEntryActivity.class);
                 break;
-            case AnalysisEntryCode.ENTRY_FACEBOOK:
+            case AnalysisEntryCodes.ENTRY_FACEBOOK:
                 intent = new Intent(SurveyCompleteActivity.this,
                         FacebookEntryActivity.class);
                 break;

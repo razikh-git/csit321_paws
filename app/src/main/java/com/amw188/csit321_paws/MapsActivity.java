@@ -1,7 +1,6 @@
 package com.amw188.csit321_paws;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -37,7 +35,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Gap;
-import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -51,7 +48,6 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.maps.model.UrlTileProvider;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -124,18 +120,11 @@ public class MapsActivity
 
     // PAWS Location Service
     private TrackingService mTrackingService;
-    private TrackingReceiver mTrackingReceiver;
+    private NotificationBroadcastReceiver mTrackingReceiver;
     private boolean mBound;
     private boolean mIsTrackingLocation;
     private boolean mIsCooldown;
     private Timer mCooldownTimer;
-
-    private class TrackingReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Location location = intent.getParcelableExtra(TrackingService.EXTRA_LOCATION);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,7 +167,7 @@ public class MapsActivity
         initButtons();
 
         // Prepare PAWS location tracking.
-        mTrackingReceiver = new TrackingReceiver();
+        mTrackingReceiver = new NotificationBroadcastReceiver();
         mCooldownTimer = new Timer(TIMER_KEY);
 
         // Prepare the map.
@@ -770,11 +759,9 @@ public class MapsActivity
 
     private void initLocationRequestServices() {
         // Bind to the tracking service.
-
-        /*
-        bindService(new Intent(this, TrackingService.class),
-                mServiceConnection, Context.BIND_AUTO_CREATE);
-        */
+        if (!mBound)
+            bindService(new Intent(this, TrackingService.class),
+                    mServiceConnection, Context.BIND_AUTO_CREATE);
 
         // Check to continue tracking from the previous app use.
         if (mIsTrackingLocation)
@@ -877,7 +864,7 @@ public class MapsActivity
 
                         Log.d("snowpaws", "Pushing location notification.");
 
-                        Notifications.getInstance().show(this, priority);
+                        //Notifications.getInstance().show(this, priority);
 
                         if (mTrackingService != null)
                             mTrackingService.notify(priority);
@@ -905,6 +892,7 @@ public class MapsActivity
             TrackingService.LocalBinder binder = (TrackingService.LocalBinder) service;
             mTrackingService = binder.getService();
             mTrackingService.init(mFusedLocationClient, MapsActivity.this);
+
             mBound = true;
         }
         @Override

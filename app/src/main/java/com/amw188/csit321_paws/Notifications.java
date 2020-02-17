@@ -87,7 +87,6 @@ class Notifications {
 		} else {
 			mCompatibilityMode = true;
 		}
-
 	}
 
 	private void fetchContent(Context ctx, int priority) {

@@ -208,10 +208,10 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
             // Continue to the completed splash.
             setResult(RESULT_OK, new Intent().putExtra(
-                    AnalysisEntryCode.EXTRA_KEY, ResultCode.RESULT_COMPLETE));
+                    AnalysisEntryCodes.EXTRA_KEY, ResultCode.RESULT_COMPLETE));
             finish();
             Intent intent = new Intent(this, SurveyCompleteActivity.class);
-            intent.putExtra(AnalysisEntryCode.EXTRA_KEY, AnalysisEntryCode.ENTRY_SURVEY);
+            intent.putExtra(AnalysisEntryCodes.EXTRA_KEY, AnalysisEntryCodes.ENTRY_SURVEY);
             startActivity(intent);
         }
     }
