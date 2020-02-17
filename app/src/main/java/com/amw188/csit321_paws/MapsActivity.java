@@ -37,9 +37,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Gap;
+import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PointOfInterest;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -76,7 +78,9 @@ public class MapsActivity
                 LocationActivity
         implements
                 OnMapReadyCallback,
-                TrackingService.LocationResultListener
+        TrackingService.LocationResultListener,
+                GoogleMap.OnPoiClickListener,
+                GoogleMap.OnMarkerClickListener
 {
     SharedPreferences mSharedPref;
 
@@ -430,11 +434,15 @@ public class MapsActivity
                                 // Change polygon style.
                                 if (polygon.getStrokeColor() == ContextCompat.getColor(
                                         this, R.color.color_risk_low)) {
-                                    strokeColor = ContextCompat.getColor(this, R.color.color_risk_med);
-                                    fillColor = ContextCompat.getColor(this, R.color.color_risk_med_fill);
+                                    strokeColor = ContextCompat.getColor(
+                                            this, R.color.color_risk_med);
+                                    fillColor = ContextCompat.getColor(
+                                            this, R.color.color_risk_med_fill);
                                 } else {
-                                    strokeColor = ContextCompat.getColor(this, R.color.color_risk_high);
-                                    fillColor = ContextCompat.getColor(this, R.color.color_risk_high_fill);
+                                    strokeColor = ContextCompat.getColor(
+                                            this, R.color.color_risk_high);
+                                    fillColor = ContextCompat.getColor(
+                                            this, R.color.color_risk_high_fill);
                                     break;
                                 }
                             }
@@ -610,6 +618,7 @@ public class MapsActivity
         googleMap.setOnCameraMoveListener(() -> {onCameraMove();});
 
         // Initialise click event listeners.
+        googleMap.setOnPoiClickListener(this);
         googleMap.setOnMapClickListener((latLng) -> {
             onMapDefaultClick(latLng);});
         googleMap.setOnMapLongClickListener((latLng) -> {
@@ -644,12 +653,55 @@ public class MapsActivity
             fetchLocation();
             initLocationRequestServices();
         } else {
-            checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_LOCATION);
+            checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
+                    RequestCode.REQUEST_PERMISSIONS_LOCATION);
         }
+    }
+
+    @Override
+    public void onPoiClick(PointOfInterest poi) {
+        if (poi.name.toLowerCase().endsWith("beach")) {
+            Toast.makeText(this,
+                    "POI: " + poi.name,
+                    Toast.LENGTH_LONG).show();
+
+            // On click:
+            /*
+                Redirect to a new content view for the beach
+
+                Display:
+                    Name
+                    Town
+                    Region, State
+
+                    Update Timestamp
+
+                    Marine
+                        Temp
+                        Swell
+                        Tide
+                        Hours
+                        Warnings
+                        Hazards
+
+                Options:
+                    Favourite
+                    Directions
+
+             */
+        }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Toast.makeText(this, "Marker: " + marker.getTitle() + " (" + marker.getId() + ")",
+                Toast.LENGTH_LONG).show();
+        return true;
     }
 
     private void onCameraMove() {
         mCameraPosition = mMap.getCameraPosition();
+
     }
 
     private void initLocationData() {
@@ -718,8 +770,11 @@ public class MapsActivity
 
     private void initLocationRequestServices() {
         // Bind to the tracking service.
+
+        /*
         bindService(new Intent(this, TrackingService.class),
                 mServiceConnection, Context.BIND_AUTO_CREATE);
+        */
 
         // Check to continue tracking from the previous app use.
         if (mIsTrackingLocation)
@@ -747,19 +802,16 @@ public class MapsActivity
                 .addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                startLocationRequests(locationRequest);
-            }
-        });
+        task.addOnSuccessListener(this,
+                locationSettingsResponse -> startLocationRequests(locationRequest));
     }
 
     private void startLocationRequests(LocationRequest locationRequest) {
         // Begin location operations.
         mIsTrackingLocation = true;
         mMap.setMyLocationEnabled(true);
-        mTrackingService.startTracking(locationRequest);
+        if (mTrackingService != null)
+            mTrackingService.startTracking(locationRequest);
 
         // Change element styling.
         findViewById(R.id.viewFABPadding).setVisibility(View.VISIBLE);
@@ -789,6 +841,8 @@ public class MapsActivity
     }
 
     public void onLocationResultReceived(LocationResult locationResult) {
+        Log.d("snowpaws", "Location result received.");
+
         for (Location location : locationResult.getLocations()) {
             for (Polygon polygon : mPolyList) {
                 if (PolyUtil.containsLocation(location.getLatitude(), location.getLongitude(),
@@ -798,9 +852,11 @@ public class MapsActivity
                     // we finally made it
 
                     int priority = 0;
-                    if (polygon.getStrokeColor() == ContextCompat.getColor(this, R.color.color_risk_high)) {
+                    if (polygon.getStrokeColor() == ContextCompat.getColor(
+                            this, R.color.color_risk_high)) {
                         priority = NotificationCompat.PRIORITY_HIGH;
-                    } else if (polygon.getStrokeColor() == ContextCompat.getColor(this, R.color.color_risk_med)) {
+                    } else if (polygon.getStrokeColor() == ContextCompat.getColor(
+                            this, R.color.color_risk_med)) {
                         priority = NotificationCompat.PRIORITY_DEFAULT;
                     } else {
                         priority = NotificationCompat.PRIORITY_LOW;
@@ -818,9 +874,15 @@ public class MapsActivity
 
                     // TODO : Customise cooldown timers per priority level doot
                     if (!mIsCooldown) {
+
+                        Log.d("snowpaws", "Pushing location notification.");
+
+                        Notifications.getInstance().show(this, priority);
+
+                        if (mTrackingService != null)
+                            mTrackingService.notify(priority);
+
                         mIsCooldown = true;
-                        //Notifications.getInstance().show(this, priority);
-                        mTrackingService.notify(priority);
                         mCooldownTimer.schedule(
                                 new TimerTask(){@Override public void run(){mIsCooldown = false;}},
                                 NOTIFICATION_COOLDOWN_INTERVAL);

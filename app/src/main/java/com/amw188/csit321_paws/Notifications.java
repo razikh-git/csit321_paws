@@ -15,8 +15,8 @@ import androidx.core.app.NotificationManagerCompat;
 class Notifications {
 
 	/// typical usage:
-	/// MainActivity: Notifications().init();
-	/// HostActivity: Notifications().show(Contex this, int priority);
+	/// MainActivity: Notifications.init();
+	/// HostActivity: Notifications.show(Contex this, int priority);
 
 	private static final String TAG = "snowpaws_no";
 
@@ -38,7 +38,7 @@ class Notifications {
 	};
 	private static final String mForegroundChannel = "paws_chan_foreground";
 
-	private Notifications() {};
+	private Notifications() {}
 
 	static synchronized Notifications getInstance() {
 		if (instance == null)
