@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
@@ -20,7 +21,7 @@ import com.google.android.gms.location.LocationResult;
 
 import androidx.core.app.NotificationCompat;
 
-public class TrackingService extends Service {
+public class NotificationService extends Service {
 
 	// Logging
 	private static final String TAG = "snowpaws_ts";
@@ -31,45 +32,43 @@ public class TrackingService extends Service {
 			".extra.STARTED_FROM_NOTIFICATION";
 	static final String EXTRA_LOCATION = PACKAGE_NAME + ".extra.LOCATION";
 	static final String ACTION_BROADCAST = PACKAGE_NAME + ".action.BROADCAST";
+	static final String ACTION_RECEIVE = PACKAGE_NAME + ".action.RECEIVE";
+
+	// Binder
+	private final IBinder binder = new LocalBinder();
+	public class LocalBinder extends Binder {
+		NotificationService getService() {
+			return NotificationService.this;
+		}
+	}
+
+	// Broadcasts
+	//private BroadcastReceiver _broadcastReceiver;
 
 	// Notifications
-	private static final String NOTIFICATION_CHANNEL_ID = "paws_notif_channel";
 	private static final int NOTIFICATION_ID = 1337;
+	private static final String NOTIFICATION_CHANNEL_ID = "paws_notif_channel";
 
 	// Locations
-	private boolean _requestingLocationUpdates;
-	private FusedLocationProviderClient _locationClient;
-	private LocationCallback _locationCallback;
-	private LocationResultListener _hostListener;
-	private LocationRequest _locationRequest;
+	private boolean mIsRequestingLocationUpdates;
+	private FusedLocationProviderClient mLocationClient;
+	private LocationCallback mLocationCallback;
+	private LocationResultListener mHostListener;
+	private LocationRequest mLocationRequest;
 	interface LocationResultListener {
 		void onLocationResultReceived(LocationResult locationResult);
 	}
 
 
-	public TrackingService() {}
+	public NotificationService() {}
 
 	/* Binder Methods */
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.i(TAG, "in onBind()");
-		stopForeground(true);
-		return null;
-	}
-
-	@Override
-	public void onRebind(Intent intent) {
-		Log.i(TAG, "in onRebind()");
-		stopForeground(true);
-		super.onRebind(intent);
-	}
-
-	@Override
-	public boolean onUnbind(Intent intent) {
-		Log.i(TAG, "in onUnbind()");
-		startForeground(NOTIFICATION_ID, null);
-		return true;
+		//stopForeground(true);
+		return binder;
 	}
 
 	/* Service Methods */
@@ -88,6 +87,8 @@ public class TrackingService extends Service {
 	@Override
 	public void onDestroy() {
 		Log.i(TAG, "in onDestroy()");
+		//LocalBroadcastManager.getInstance(this).unregisterReceiver();
+		super.onDestroy();
 	}
 
 	/**
@@ -111,7 +112,7 @@ public class TrackingService extends Service {
 			return START_NOT_STICKY;
 		}
 
-		startLocationUpdates();
+		// todo: load up on actions here
 
 		Log.i(TAG, "Service started from activity");
 		return START_STICKY;
@@ -126,12 +127,12 @@ public class TrackingService extends Service {
 	private void init() {
 		Log.i(TAG, "in init()");
 
-		_locationCallback = new LocationCallback() {
+		mLocationCallback = new LocationCallback() {
 			@Override
 			public void onLocationResult(LocationResult locationResult) {
 				super.onLocationResult(locationResult);
-				if (locationResult != null && _hostListener != null) {
-					_hostListener.onLocationResultReceived(locationResult);
+				if (locationResult != null && mHostListener != null) {
+					mHostListener.onLocationResultReceived(locationResult);
 				} else {
 					Log.e(TAG, "Listener or location failed to catch location callback.");
 				}
@@ -196,22 +197,22 @@ public class TrackingService extends Service {
 
 	/* Custom Location Methods */
 
-	private void startLocationUpdates() {
+	public void startLocationUpdates() {
 		Log.i(TAG, "in startLocationUpdates()");
 
-		if (_requestingLocationUpdates) {
+		if (mIsRequestingLocationUpdates) {
 			Log.i(TAG, "Will not start location updates.");
 			return;
 		}
-		_requestingLocationUpdates = true;
-		_locationClient.requestLocationUpdates(
-				_locationRequest, _locationCallback, Looper.getMainLooper());
+		mIsRequestingLocationUpdates = true;
+		mLocationClient.requestLocationUpdates(
+				mLocationRequest, mLocationCallback, Looper.getMainLooper());
 	}
 
-	private void stopLocationUpdates() {
+	public void stopLocationUpdates() {
 		Log.i(TAG, "in stopLocationUpdates()");
 
-		_requestingLocationUpdates = false;
-		_locationClient.removeLocationUpdates(_locationCallback);
+		mIsRequestingLocationUpdates = false;
+		mLocationClient.removeLocationUpdates(mLocationCallback);
 	}
 }

@@ -13,6 +13,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -46,10 +50,24 @@ public class HomeActivity
         mSharedPref = this.getSharedPreferences(
                 getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
 
-        // Initialise vanity and interactive interface elements.
+        // Initialise vanity and interactive interface elements
         initStringMaps();
         initButtons();
         initInterface();
+
+        // todo: resolve daily weather notifications
+        /*
+        // Queue up daily weather notifications for the user
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                .build();
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(
+                DailyWeatherWorker.class)
+                .setConstraints(constraints)
+                .set
+                .build();
+        WorkManager.getInstance(this).enqueue(workRequest);
+        */
     }
 
     @Override
@@ -74,22 +92,22 @@ public class HomeActivity
     }
 
     private void initInterface() {
-        // Initialise home screen banners.
+        // Initialise home screen banners
         if (mSharedPref.getInt("survey_last_question", 1) < getResources().getInteger(R.integer.survey_question_count)) {
             findViewById(R.id.cardWarningBanner).setVisibility(VISIBLE);
             float pad = getResources().getDimension(R.dimen.height_banners_contextual);
             findViewById(R.id.layHome).setPadding(0, (int)pad, 0, 0);
         }
 
-        // Attempt to initialise location elements.
+        // Attempt to initialise location elements
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                 RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
-            Log.i("snowpaws", "HomeActivity.initInterface.hasPermssions TRUE");
+            Log.i(TAG, "HomeActivity.initInterface.hasPermssions TRUE");
             fetchLocation();
         }
     }
 
-    // Initialise weather conditions fields.
+    // Initialise weather conditions fields
     private boolean initWeatherDisplay(String response) {
         try {
             boolean isMetric = mSharedPref.getString("units", "metric")
@@ -113,17 +131,17 @@ public class HomeActivity
                 return false;
             }
 
-            // Hide progress bar.
+            // Hide progress bar
             findViewById(R.id.barWeatherIcon).setVisibility(GONE);
-            // Set icon for weather type.
+            // Set icon for weather type
             Drawable drawable = PAWSAPI.getWeatherDrawable(this, weatherCurrentJSON.getString("icon"));
             ImageView img = findViewById(R.id.imgWeatherIcon);
             if (drawable != null) {
-                // Display weather icon.
+                // Display weather icon
                 img.setVisibility(VISIBLE);
                 img.setImageDrawable(drawable);
             } else {
-                // Display error icon.
+                // Display error icon
                 img.setVisibility(VISIBLE);
                 img.setColorFilter(ContextCompat.getColor(
                         this, R.color.color_on_primary));
@@ -145,7 +163,7 @@ public class HomeActivity
                                     weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                                             .getLong("dt") * 1000).toString());
 
-            // Fill in body data.
+            // Fill in body data
 
             // Temperature (current)
             dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
@@ -211,15 +229,18 @@ public class HomeActivity
     }
 
     private boolean initLocationDisplay() {
-        if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
+        if (checkHasPermissions(
+                RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
             if (mLocation != null) {
-                // Call and await an update to the weather JSON string in prefs.
-                boolean isMetric = mSharedPref.getString("units", "metric").equals("metric");
+                // Call and await an update to the weather JSON string in prefs
+                boolean isMetric = mSharedPref.getString(
+                        "units", "metric").equals("metric");
                 LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
                 mWeatherHandler = new WeatherHandler(this);
                 if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
-                    // Initialise weather displays with last best values if none are being updated.
-                    initWeatherDisplay(mSharedPref.getString("last_weather_json", "{}"));
+                    // Initialise weather displays with last best values if none are being updated
+                    initWeatherDisplay(
+                            mSharedPref.getString("last_weather_json", "{}"));
                 }
             }
         }
@@ -229,7 +250,7 @@ public class HomeActivity
 
     private boolean initStringMaps() {
         try {
-            // Initialise map of request and permission codes.
+            // Initialise map of request and permission codes
             mCodeMap = new HashMap<>();
             // Location
             mCodeMap.put(Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -245,7 +266,7 @@ public class HomeActivity
             // Render immutable
             mCodeMap = Collections.unmodifiableMap(mCodeMap);
 
-            // Initialise map of title messages.
+            // Initialise map of title messages
             mTitleMap = new HashMap<>();
             // Location
             mTitleMap.put(Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -260,7 +281,7 @@ public class HomeActivity
             // Render immutable
             mTitleMap = Collections.unmodifiableMap(mTitleMap);
 
-            // Initialise map of request messages.
+            // Initialise map of request messages
             mMessageMap = new HashMap<>();
             // Location
             mMessageMap.put(Manifest.permission.ACCESS_COARSE_LOCATION,

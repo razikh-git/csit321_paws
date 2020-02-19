@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
+// todo: deprecate and delete
+
 public class NotificationBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Location location = intent.getParcelableExtra(TrackingService.EXTRA_LOCATION);
+        Location location = intent.getParcelableExtra(NotificationService.EXTRA_LOCATION);
     }
 }

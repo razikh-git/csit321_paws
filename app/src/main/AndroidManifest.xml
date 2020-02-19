@@ -25,7 +25,7 @@
             android:exported="false" />
 
         <service
-            android:name=".TrackingService"
+            android:name=".NotificationService"
             android:foregroundServiceType="location"
             android:label="@string/label_service"
             android:enabled="true"

@@ -17,24 +17,28 @@ public class MainActivity extends AppCompatActivity {
         setTheme(R.style.mainAppTheme);
         super.onCreate(savedInstanceState);
 
-        // Initialise config for image downloader.
+        // Initialise config for image downloader
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
 
-        // Initilise notifications subsystem.
-        //Notifications.getInstance().init(this);
+        // todo: be aware: notification service instantiated here
 
-        // Load global preferences.
+        // Initilise notifications subsystem
+        Context context = getApplicationContext();
+        Intent intent = new Intent(context, NotificationService.class);
+        context.startService(intent);
+
+        // Load global preferences
         SharedPreferences sharedPref = this.getSharedPreferences(
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
-        // Handle first-time launches.
+        // Handle first-time launches
         if (sharedPref.getBoolean("app_init", false)) {
-            // Proceed straight to the home screen.
+            // Proceed straight to the home screen
             enterHome();
         } else {
-            // Initialise all preferences.
+            // Initialise all preferences
             sharedEditor.putInt("survey_last_question", 0);
             sharedEditor.putLong("survey_time_completed", 0);
             sharedEditor.putLong("selfanalysis_time_completed", 0);
@@ -42,19 +46,19 @@ public class MainActivity extends AppCompatActivity {
             sharedEditor.putBoolean("app_init", true);
             sharedEditor.apply();
 
-            // Display a prompt for the user to begin profiling.
+            // Display a prompt for the user to begin profiling
             enterProfilingPrompt();
         }
     }
 
     private void enterProfilingPrompt() {
-        // Redirect to user profiling prompt and  information screen.
+        // Redirect to user profiling prompt and  information screen
         Intent intent = new Intent(this, ProfilingPromptActivity.class);
         startActivity(intent);
     }
 
     private void enterHome() {
-        // Redirect to app landing screen.
+        // Redirect to app landing screen
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
     }

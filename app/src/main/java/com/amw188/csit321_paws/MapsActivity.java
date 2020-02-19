@@ -1,21 +1,15 @@
 package com.amw188.csit321_paws;
 
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -24,16 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -54,10 +40,8 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.maps.model.UrlTileProvider;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import com.google.android.gms.location.LocationServices;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -73,7 +57,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
+
+// todo: request permissions for FOREGROUND_SERVICE in APIs 28+
 
 public class MapsActivity
         extends
@@ -111,7 +96,7 @@ public class MapsActivity
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
 
-    // Map Elements
+    // Map elements
     private Marker mMarker;
     private boolean mIsPolyDrawing;
     private Polyline mPolyLine;
@@ -123,13 +108,37 @@ public class MapsActivity
     private Map<String, TileProvider> mTileProviderMap = new HashMap<>();
     private Map<String, TileOverlayOptions> mTileOverlayOptionsMap = new HashMap<>();
 
-    // PAWS Location Service
-    private TrackingService mTrackingService;
-    private NotificationBroadcastReceiver mTrackingReceiver;
-    private boolean mBound;
-    private boolean mIsTrackingLocation;
-    private boolean mIsCooldown;
+    // Notification services
+    private NotificationService mNotificationService;
+    private NotificationBroadcastReceiver mNotificationReceiver;
+    private boolean mIsBound;
+    private boolean mIsReceivingLocationUpdates;
+    private boolean mIsNotificationOnCooldown;
     private Timer mCooldownTimer;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.i(TAG, "in onServiceConnected()");
+            NotificationService.LocalBinder binder = (NotificationService.LocalBinder) service;
+            mNotificationService = binder.getService();
+            mIsBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.i(TAG, "in onServiceDisconnected()");
+            mIsBound = false;
+        }
+    };
+
+    /*
+    protected BroadcastReceiver _receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    }
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,7 +154,7 @@ public class MapsActivity
             mBundle = savedInstanceState.getBundle(BUNDLE_KEY);
             mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
             mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-            mIsTrackingLocation = savedInstanceState.getBoolean(ISTRACKING_KEY);
+            mIsReceivingLocationUpdates = savedInstanceState.getBoolean(ISTRACKING_KEY);
         }
 
         // Load the activity layout.
@@ -172,7 +181,7 @@ public class MapsActivity
         initButtons();
 
         // Prepare PAWS location tracking.
-        mTrackingReceiver = new NotificationBroadcastReceiver();
+        mNotificationReceiver = new NotificationBroadcastReceiver();
         mCooldownTimer = new Timer(TIMER_KEY);
 
         // Prepare the map.
@@ -487,7 +496,7 @@ public class MapsActivity
 
     private void onMapTrackingButtonClick(View view) {
         // Start or end the location tracking service.
-        if (mIsTrackingLocation) {
+        if (mIsReceivingLocationUpdates) {
             // Change element styling.
             findViewById(R.id.viewFABPadding).setVisibility(View.GONE);
             findViewById(R.id.laySheetHeader).setBackgroundColor(
@@ -498,12 +507,12 @@ public class MapsActivity
                     ContextCompat.getColor(this, R.color.color_primary_alt));
 
             // End the location tracking service.
-            mIsTrackingLocation = false;
-            endNotificationService();
+            mIsReceivingLocationUpdates = false;
+            stopReceivingLocationUpdates();
 
         } else {
             // Attempt to start the location tracking service.
-            startNotificationService();
+            startReceivingLocationUpdates();
         }
     }
 
@@ -760,13 +769,15 @@ public class MapsActivity
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
     }
 
-    private void startNotificationService() {
-        Context c = getApplicationContext();
-        Intent i = new Intent(c, TrackingService.class);
-        c.startService(i);
+    private void startReceivingLocationUpdates() {
+        /*
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
+        manager.registerReceiver(_receiver, new IntentFilter(NotificationService.ACTION_RECEIVE));
+        manager.sendBroadcast(new Intent(NotificationService.ACTION_BROADCAST));
+         */
     }
 
-    private void endNotificationService() {
+    private void stopReceivingLocationUpdates() {
         // todo: this
     }
 
@@ -791,7 +802,7 @@ public class MapsActivity
             outState.putBundle(BUNDLE_KEY, bundle);
             outState.putParcelable(LOCATION_KEY, mLocation);
             outState.putParcelable(CAMERA_KEY, mMap.getCameraPosition());
-            outState.putBoolean(ISTRACKING_KEY, mIsTrackingLocation);
+            outState.putBoolean(ISTRACKING_KEY, mIsReceivingLocationUpdates);
         }
         if (mMapView != null)
             mMapView.onSaveInstanceState(bundle);
@@ -802,9 +813,9 @@ public class MapsActivity
         super.onRestoreInstanceState(savedInstanceState);
         mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
         mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-        mIsTrackingLocation = savedInstanceState.getBoolean(ISTRACKING_KEY);
-        if (mIsTrackingLocation)
-            startNotificationService();
+        mIsReceivingLocationUpdates = savedInstanceState.getBoolean(ISTRACKING_KEY);
+        if (mIsReceivingLocationUpdates)
+            startReceivingLocationUpdates();
     }
 
     @Override
@@ -812,8 +823,6 @@ public class MapsActivity
         super.onResume();
         if (mMapView != null)
             mMapView.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mTrackingReceiver,
-                new IntentFilter(TrackingService.ACTION_BROADCAST));
     }
 
     @Override
@@ -828,10 +837,18 @@ public class MapsActivity
         super.onStart();
         if (mMapView != null)
             mMapView.onStart();
+
+        // Bind to the notification service
+        Intent intent = new Intent(this, NotificationService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
+        // Unbind the notification service
+        unbindService(mConnection);
+        mIsBound = false;
+
         if (mMapView != null)
             mMapView.onStop();
         super.onStop();
