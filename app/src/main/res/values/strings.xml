@@ -57,7 +57,7 @@
     <string name="label_maps">Mapping</string>
     <string name="label_weather">Weather</string>
     <string name="label_surveys">Profiling</string>
-    <string name="label_service">PAWS Location Service</string>
+    <string name="label_service">PAWS Manager Services</string>
 
     <!-- Generic button strings. -->
     <string name="app_btn_start">start</string>

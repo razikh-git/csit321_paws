@@ -37,7 +37,8 @@ class LocationActivity extends PermissionActivity {
 				return;
 			String error = resultData.getString(FetchAddressCode.RESULT_DATA_KEY);
 			if (error.equals(""))
-				mAddress = resultData.getParcelableArrayList(FetchAddressCode.RESULT_ADDRESSLIST_KEY);
+				mAddress = resultData.getParcelableArrayList(
+						FetchAddressCode.RESULT_ADDRESSLIST_KEY);
 			else
 				return;
 			// Update the interface with the new location.
@@ -66,9 +67,11 @@ class LocationActivity extends PermissionActivity {
 						try {
 							// TODO remove debug functionality
 							SharedPreferences sharedPref = this.getSharedPreferences(
-									getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+									getResources().getString(R.string.app_global_preferences),
+									Context.MODE_PRIVATE);
 							JSONObject lastWeather = new JSONObject(
-									sharedPref.getString("last_weather_json", "{}"));
+									sharedPref.getString(
+											"last_weather_json", "{}"));
 							mLocation = new Location(LocationManager.GPS_PROVIDER);
 							mLocation.setLatitude(
 									Float.parseFloat(

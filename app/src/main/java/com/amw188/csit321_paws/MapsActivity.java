@@ -1,6 +1,10 @@
 package com.amw188.csit321_paws;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -23,6 +28,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -74,7 +80,6 @@ public class MapsActivity
                 LocationActivity
         implements
                 OnMapReadyCallback,
-        TrackingService.LocationResultListener,
                 GoogleMap.OnPoiClickListener,
                 GoogleMap.OnMarkerClickListener
 {
@@ -340,7 +345,8 @@ public class MapsActivity
              */
 
             // Toggle bottomsheet visibility.
-            BottomSheetBehavior sheetBehavior = BottomSheetBehavior.from(findViewById(R.id.sheetView));
+            BottomSheetBehavior sheetBehavior = BottomSheetBehavior.from(
+                    findViewById(R.id.sheetView));
             if (sheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
                 // Show the bottom sheet
                 sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -413,8 +419,10 @@ public class MapsActivity
                     // Generate a new polygon from the points.
                     PolygonOptions polyOptions = new PolygonOptions();
                     polyOptions.strokeWidth(POLY_STROKE_WIDTH);
-                    int strokeColor = ContextCompat.getColor(this, R.color.color_risk_low);
-                    int fillColor = ContextCompat.getColor(this, R.color.color_risk_low_fill);
+                    int strokeColor = ContextCompat.getColor(
+                            this, R.color.color_risk_low);
+                    int fillColor = ContextCompat.getColor(
+                            this, R.color.color_risk_low_fill);
 
                     // Check for bounding box overlaps.
                     for (LatLng polyPoint : polyPoints) {
@@ -491,11 +499,11 @@ public class MapsActivity
 
             // End the location tracking service.
             mIsTrackingLocation = false;
-            stopLocationRequests();
+            endNotificationService();
 
         } else {
             // Attempt to start the location tracking service.
-            checkToStartLocationRequests();
+            startNotificationService();
         }
     }
 
@@ -585,7 +593,7 @@ public class MapsActivity
             initTileOverlayMaps(str);
 
         } catch (NullPointerException e) {
-            Log.println(Log.DEBUG, TAG, "No tile overlay was returned by provider for " + str + ".");
+            Log.e(TAG, "No tile overlay was returned by provider for " + str + ".");
             e.printStackTrace();
         }
     }
@@ -640,7 +648,6 @@ public class MapsActivity
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             fetchLocation();
-            initLocationRequestServices();
         } else {
             checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                     RequestCode.REQUEST_PERMISSIONS_LOCATION);
@@ -683,19 +690,14 @@ public class MapsActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        Toast.makeText(this, "Marker: " + marker.getTitle() + " (" + marker.getId() + ")",
+        Toast.makeText(this,
+                "Marker: " + marker.getTitle() + " (" + marker.getId() + ")",
                 Toast.LENGTH_LONG).show();
         return true;
     }
 
     private void onCameraMove() {
         mCameraPosition = mMap.getCameraPosition();
-
-    }
-
-    private void initLocationData() {
-        fetchLocation();
-        initLocationRequestServices();
     }
 
     @Override
@@ -723,7 +725,8 @@ public class MapsActivity
         if (mMarker == null)
             // Reposition the camera, and zoom in to a reasonably broad scope.
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), DEFAULT_ZOOM));
+                    new LatLng(mLocation.getLatitude(), mLocation.getLongitude()),
+                    DEFAULT_ZOOM));
         else
             mMarker.remove();
 
@@ -745,8 +748,8 @@ public class MapsActivity
             str = new DecimalFormat("#.##").format(mAddress.get(0).getLongitude());
             str += " " + new DecimalFormat("#.##").format(mAddress.get(0).getLatitude());
             ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
-
         }
+
         // Set the coordinates display.
         double lng = mAddress.get(0).getLongitude();
         double lat = mAddress.get(0).getLatitude();
@@ -757,150 +760,15 @@ public class MapsActivity
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
     }
 
-    private void initLocationRequestServices() {
-        // Bind to the tracking service.
-        if (!mBound)
-            bindService(new Intent(this, TrackingService.class),
-                    mServiceConnection, Context.BIND_AUTO_CREATE);
-
-        // Check to continue tracking from the previous app use.
-        if (mIsTrackingLocation)
-            checkToStartLocationRequests();
+    private void startNotificationService() {
+        Context c = getApplicationContext();
+        Intent i = new Intent(c, TrackingService.class);
+        c.startService(i);
     }
 
-    public void checkToStartLocationRequests() {
-        // Check for enabled location usage.
-        if (Integer.parseInt(mSharedPref.getString(
-                SettingsActivity.KEY_PREF_LOCATION_PRIORITY,
-                Integer.toString(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)))
-                == LocationRequest.PRIORITY_NO_POWER) {
-            Log.i(TAG, "Location usage is set to Disabled.");
-            Toast.makeText(this,
-                    R.string.ma_location_usage_disabled,
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // Generate a new location request.
-        LocationRequest locationRequest = createLocationRequest();
-
-        // Check whether required location settings are enabled.
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
-        SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-        task.addOnSuccessListener(this,
-                locationSettingsResponse -> startLocationRequests(locationRequest));
+    private void endNotificationService() {
+        // todo: this
     }
-
-    private void startLocationRequests(LocationRequest locationRequest) {
-        // Begin location operations.
-        mIsTrackingLocation = true;
-        mMap.setMyLocationEnabled(true);
-        if (mTrackingService != null)
-            mTrackingService.startTracking(locationRequest);
-
-        // Change element styling.
-        findViewById(R.id.viewFABPadding).setVisibility(View.VISIBLE);
-        findViewById(R.id.laySheetHeader).setBackgroundColor(
-                ContextCompat.getColor(this, R.color.color_error));
-        ((MaterialButton)findViewById(R.id.btnMapTracking)).setText(
-                getString(R.string.ma_tracking_disable));
-        findViewById(R.id.btnMapTracking).setBackgroundColor(
-                ContextCompat.getColor(this, R.color.color_error));
-    }
-
-    protected LocationRequest createLocationRequest() {
-        // Inverse floating-point Preferences string-array workarounds
-        int updatePriority = Integer.parseInt(mSharedPref.getString(
-                SettingsActivity.KEY_PREF_LOCATION_PRIORITY,
-                Integer.toString(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)));
-        int updateInterval = Integer.parseInt(mSharedPref.getString(
-                SettingsActivity.KEY_PREF_LOCATION_RATE,
-                Integer.toString(LOCATION_REQUEST_DEFAULT_INTERVAL)));
-
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setFastestInterval(updateInterval);
-        locationRequest.setInterval(updateInterval + LOCATION_REQUEST_DEFAULT_INTERVAL);
-        locationRequest.setPriority(updatePriority);
-
-        return locationRequest;
-    }
-
-    public void onLocationResultReceived(LocationResult locationResult) {
-        Log.d("snowpaws", "Location result received.");
-
-        for (Location location : locationResult.getLocations()) {
-            for (Polygon polygon : mPolyList) {
-                if (PolyUtil.containsLocation(location.getLatitude(), location.getLongitude(),
-                        polygon.getPoints(), false)) {
-                    // TODO : Send notification!!!!!! wow!
-                    // this is literally the whole app
-                    // we finally made it
-
-                    int priority = 0;
-                    if (polygon.getStrokeColor() == ContextCompat.getColor(
-                            this, R.color.color_risk_high)) {
-                        priority = NotificationCompat.PRIORITY_HIGH;
-                    } else if (polygon.getStrokeColor() == ContextCompat.getColor(
-                            this, R.color.color_risk_med)) {
-                        priority = NotificationCompat.PRIORITY_DEFAULT;
-                    } else {
-                        priority = NotificationCompat.PRIORITY_LOW;
-                    }
-
-                    // make it work
-                    priority = NotificationCompat.PRIORITY_HIGH;
-
-                    // todo tood it still doesnt work
-
-                    // Consider additional risk weighting.
-                    int riskWeight = mSharedPref.getInt("selfanalysis_risk", 0);
-                    priority = Math.min(NotificationCompat.PRIORITY_HIGH,
-                            priority + (riskWeight != -1 ? riskWeight : 0));
-
-                    // TODO : Customise cooldown timers per priority level doot
-                    if (!mIsCooldown) {
-
-                        Log.d("snowpaws", "Pushing location notification.");
-
-                        //Notifications.getInstance().show(this, priority);
-
-                        if (mTrackingService != null)
-                            mTrackingService.notify(priority);
-
-                        mIsCooldown = true;
-                        mCooldownTimer.schedule(
-                                new TimerTask(){@Override public void run(){mIsCooldown = false;}},
-                                NOTIFICATION_COOLDOWN_INTERVAL);
-                    }
-                }
-            }
-        }
-    }
-
-    private void stopLocationRequests() {
-        mMap.setMyLocationEnabled(false);
-        mIsTrackingLocation = false;
-        mTrackingService.stopTracking(mFusedLocationClient);
-    }
-
-    // Monitors the state of the connection to the service.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            TrackingService.LocalBinder binder = (TrackingService.LocalBinder) service;
-            mTrackingService = binder.getService();
-            mTrackingService.init(mFusedLocationClient, MapsActivity.this);
-
-            mBound = true;
-        }
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mTrackingService = null;
-            mBound = false;
-        }
-    };
 
     @Override
     protected void onPermissionGranted(String perm) {}
@@ -936,7 +804,7 @@ public class MapsActivity
         mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
         mIsTrackingLocation = savedInstanceState.getBoolean(ISTRACKING_KEY);
         if (mIsTrackingLocation)
-            checkToStartLocationRequests();
+            startNotificationService();
     }
 
     @Override
@@ -960,19 +828,10 @@ public class MapsActivity
         super.onStart();
         if (mMapView != null)
             mMapView.onStart();
-
-        // Bind to the service. If the service is in foreground mode, this signals to the service
-        // that since this activity is in the foreground, the service can exit foreground mode.
-        bindService(new Intent(this, TrackingService.class), mServiceConnection,
-                Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
-        if (mBound) {
-            unbindService(mServiceConnection);
-            mBound = false;
-        }
         if (mMapView != null)
             mMapView.onStop();
         super.onStop();
