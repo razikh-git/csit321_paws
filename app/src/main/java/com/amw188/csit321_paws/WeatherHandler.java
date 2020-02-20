@@ -37,20 +37,21 @@ class WeatherHandler {
     }
 
     boolean updateWeather(Context ctx, LatLng latLng, boolean isMetric) {
-        // Generate URL and request OWM data.
+        // Generate URL and request OWM data
         try {
             SharedPreferences sharedPref = ctx.getSharedPreferences(
                     ctx.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
 
-            // Decide whether to update current weather data.
+            // Decide whether to update current weather data
             JSONObject lastWeather = new JSONObject(
                     sharedPref.getString("last_weather_json", "{}"));
 
+            /*
             if (lastWeather == null || lastWeather.toString().equals("{}") || lastWeather.length() == 0) {
                 Log.d(TAG,
                         "Fetching new weather data: Last weather data does not exist.");
             } else {
-                // Embed dummy data in exceptional circumstances.
+                // Embed dummy data in exceptional circumstances
                 if (!lastWeather.has("lat_lng")) {
                     lastWeather.put("lat_lng", new JSONObject(
                             "{"
@@ -70,14 +71,14 @@ class WeatherHandler {
                         + "json: " + new DecimalFormat("#.###").format(lastWeather.getJSONObject("lat_lng").getDouble("latitude"))
                         + " " + new DecimalFormat("#.###").format(lastWeather.getJSONObject("lat_lng").getDouble("longitude")));
 
-                // Request new data if the location has changed.
+                // Request new data if the location has changed
                 if (isMetric != lastWeather.getBoolean("is_metric")) {
                     Log.d(TAG, "Units of measurement differ and an update will be retrieved.");
                 } else if (Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng").getDouble("latitude")) < LOC_CERTAINTY
                 && Math.abs(latLng.longitude - lastWeather.getJSONObject("lat_lng").getDouble("longitude")) < LOC_CERTAINTY) {
                     Log.d(TAG, "Location differs significantly enough to warrant an update.");
 
-                    // Don't request new data if the current data was received in the last 3 hours.
+                    // Don't request new data if the current data was received in the last 3 hours
                     long timestamp = lastWeather.getJSONArray("list").getJSONObject(0)
                             .getLong("dt") * 1000;
 
@@ -91,7 +92,7 @@ class WeatherHandler {
                         return false;
                     }
 
-                    // Use the coordinates from the last weather data if the location hasn't changed.
+                    // Use the coordinates from the last weather data if the location hasn't changed
                     Log.d(TAG, "Last weather data for this location exists, and is outdated.");
                     latLng = new LatLng(lastWeather.getJSONObject("city").getJSONObject("coord")
                             .getDouble("lat"),
@@ -99,12 +100,13 @@ class WeatherHandler {
                                     .getDouble("lon"));
                 }
             }
+             */
 
-            // Fetch the complete weather data.
+            // Fetch the complete weather data
             getWeather(ctx, latLng, isMetric);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (JSONException ex) {
+            ex.printStackTrace();
         }
         return true;
     }
@@ -115,7 +117,7 @@ class WeatherHandler {
                 ctx.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
-        // Generate URL and request queue.
+        // Generate URL and request queue
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String url = ctx.getResources().getString(R.string.app_url_owm_weather_root)
                 + "data/2.5/"
@@ -133,7 +135,7 @@ class WeatherHandler {
 
                     mHostListener.onWeatherReceived(latLng, response, isMetric);
 
-                    // Embed the current latitude/longitude into the JSON.
+                    // Embed the current latitude/longitude into the JSON
                     try {
                         JSONObject json = new JSONObject(response);
                         json.put("lat_lng", new JSONObject(
@@ -144,19 +146,19 @@ class WeatherHandler {
                         ));
                         json.put("is_metric", isMetric);
                         response = json.toString();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    } catch (JSONException ex) {
+                        ex.printStackTrace();
                     }
 
-                    // Save the weather dictionary to local data.
+                    // Save the weather dictionary to local data
                     sharedEditor.putString("last_weather_json", response);
                     sharedEditor.apply();
                 },
-                (error) -> {
+                (ex) -> {
                     Log.println(Log.ERROR, TAG, "stringRequest.onErrorResponse");
 
                     // olive oil didn't work
-                    error.printStackTrace();
+                    ex.printStackTrace();
                 });
 
         queue.add(stringRequest);
