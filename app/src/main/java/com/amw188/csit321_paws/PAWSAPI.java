@@ -2,8 +2,12 @@ package com.amw188.csit321_paws;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 final class PAWSAPI {
     private PAWSAPI() {}
@@ -91,5 +95,18 @@ final class PAWSAPI {
             default:
                 return null;
         }
+    }
+
+    static double getHours(long milliseconds) {
+        double hours = (double) milliseconds / 1000 / 60;
+        return (hours / 60) % hours;
+    }
+
+    static long getTimeUntil(long now, long hour, long minute) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(now);
+        long timeDelay = (hour - calendar.get(Calendar.HOUR_OF_DAY)) * 1000 * 60 * 60
+                        + (minute - calendar.get(Calendar.MINUTE)) * 1000 * 60;
+        return timeDelay;
     }
 }

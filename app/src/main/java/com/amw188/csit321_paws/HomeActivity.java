@@ -1,6 +1,9 @@
 package com.amw188.csit321_paws;
 
 import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,7 +16,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -23,10 +28,13 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -38,7 +46,6 @@ public class HomeActivity
     private static final String TAG = "snowpaws_home";
 
     private SharedPreferences mSharedPref;
-
     WeatherHandler mWeatherHandler;
 
     @Override
@@ -46,37 +53,26 @@ public class HomeActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Load global preferences.
         mSharedPref = this.getSharedPreferences(
                 getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
-
-        // Initialise vanity and interactive interface elements
-        initStringMaps();
-        initButtons();
-        initInterface();
-
-        // todo: resolve daily weather notifications
-        /*
-        // Queue up daily weather notifications for the user
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                .build();
-        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(
-                DailyWeatherWorker.class)
-                .setConstraints(constraints)
-                .set
-                .build();
-        WorkManager.getInstance(this).enqueue(workRequest);
-        */
+        if (!init()) {
+            Log.e(TAG, "Failed to completely initialise HomeActivity.");
+        }
     }
 
-    @Override
-    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
-        initWeatherDisplay(response);
+    /**
+     * Initialise interactive and vanity interface elements.
+     * @return Operation success.
+     */
+    private boolean init() {
+        return initStringMaps() && initButtons() && initInterface();
     }
 
+    /**
+     * Adds button functionalities.
+     * @return Operation success.
+     */
     private boolean initButtons() {
-        // Button functionality.
         try {
             findViewById(R.id.cardWarningBanner).setOnClickListener((view) -> onClickProfiling(view));
             findViewById(R.id.cardWeather).setOnClickListener((view) -> onClickWeather(view));
@@ -85,13 +81,19 @@ public class HomeActivity
             findViewById(R.id.btnProfile).setOnClickListener((view) -> onClickProfiling(view));
             findViewById(R.id.btnHelp).setOnClickListener((view) -> onClickHelp(view));
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
     }
 
-    private void initInterface() {
+    /**
+     * Called from onCreate.
+     * Adds contextual banners and displays.
+     * Parses location data into the actiity via fetchlocation => initLocationDisplay.
+     * @return Operation success.
+     */
+    private boolean initInterface() {
         // Initialise home screen banners
         if (mSharedPref.getInt("survey_last_question", 1) < getResources().getInteger(R.integer.survey_question_count)) {
             findViewById(R.id.cardWarningBanner).setVisibility(VISIBLE);
@@ -105,9 +107,16 @@ public class HomeActivity
             Log.i(TAG, "HomeActivity.initInterface.hasPermssions TRUE");
             fetchLocation();
         }
+        return true;
     }
 
-    // Initialise weather conditions fields
+    /**
+     * Called from onWeatherReceived (WeatherActivity.WeatherReceivedListener)
+     * and initLocationInterface.
+     * Parses a forecast string into data strings and displays in the activity.
+     * @param response Incredibly long string containing weather 5-day forecast.
+     * @return Operation success.
+     */
     private boolean initWeatherDisplay(String response) {
         try {
             boolean isMetric = mSharedPref.getString("units", "metric")
@@ -126,8 +135,8 @@ public class HomeActivity
                 weatherCurrentJSON = (JSONObject)(weatherForecastJSON.getJSONArray("list")
                         .getJSONObject(index)
                         .getJSONArray("weather").get(0));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            } catch (JSONException ex) {
+                ex.printStackTrace();
                 return false;
             }
 
@@ -221,33 +230,45 @@ public class HomeActivity
                             getString(R.string.home_precip_label));
                     break;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
         return true;
     }
 
+    /**
+     * Called from onLocationReceived after LocationActivity.fetchLocation.
+     * Updates location strings in activity with latest results.
+     * Calls initWeatherDisplay if data in strings is out of date.
+     * @return Operation success.
+     */
     private boolean initLocationDisplay() {
         if (checkHasPermissions(
                 RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
             if (mLocation != null) {
                 // Call and await an update to the weather JSON string in prefs
+                boolean success = true;
                 boolean isMetric = mSharedPref.getString(
                         "units", "metric").equals("metric");
                 LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
                 mWeatherHandler = new WeatherHandler(this);
                 if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
-                    initWeatherDisplay(
+                    success = initWeatherDisplay(
                             mSharedPref.getString("last_weather_json", "{}"));
                 }
+                return success;
             }
         }
-
         return false;
     }
 
+    /**
+     * Called in onCreate.
+     * Populates hashmaps of functional request/permission codes and vanity strings.
+     * @return Operation success.
+     */
     private boolean initStringMaps() {
         try {
             // Initialise map of request and permission codes
@@ -296,11 +317,63 @@ public class HomeActivity
             // Render immutable
             mMessageMap = Collections.unmodifiableMap(mMessageMap);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    /**
+     * Schedule periodic weather notifications starting at a certain coming hour.
+     */
+    private void scheduleWeatherNotifications() {
+        // todo: add an hour/minute picker in settings activity
+        // todo: ensure time intervals is a denominator of 24
+        // eg. once a day, twice a day, four times a day, every two days, every four days
+
+        String[] timeInitial = mSharedPref.getString("weather_notification_time_start",
+                getResources().getString(
+                        R.string.app_default_weather_notif_time_start))
+                .split(":");
+        int timeInterval = mSharedPref.getInt("weather_notification_interval",
+                getResources().getInteger(
+                        R.integer.app_default_weather_notif_hours_interval));
+
+        long timeNow = System.currentTimeMillis();
+        long timeDelay = PAWSAPI.getTimeUntil(
+                timeNow, Long.parseLong(timeInitial[0]), Long.parseLong(timeInitial[1]));
+
+        if (timeDelay < 0)
+            timeDelay += 1000 * 60 * 60 * 24;
+
+        int hours = (int)Math.floor(PAWSAPI.getHours(timeDelay));
+        int minutes = (int)(PAWSAPI.getHours(timeDelay) % hours * 60);
+
+        Log.d(TAG, "Current time: " +
+                new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
+                        .format(timeNow));
+        Log.d(TAG, "Target time:  " +
+                new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
+                        .format(timeNow + timeDelay));
+        Log.d(TAG, "Scheduling notifications starting in "
+                + hours + " hrs " + minutes + " minutes.");
+
+        // Queue up daily weather notifications for the user
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                .build();
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
+                DailyWeatherWorker.class, timeInterval, TimeUnit.HOURS)
+                .setConstraints(constraints)
+                //.setInitialDelay(timeDelay, TimeUnit.MILLISECONDS)
+                .addTag(DailyWeatherWorker.WORK_TAG)
+                .build();
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                DailyWeatherWorker.WORK_TAG, ExistingPeriodicWorkPolicy.REPLACE,
+                periodicWorkRequest);
+
+        // todo: re-enqueue the work from settings activity when initial/interval time is changed
     }
 
     private void onClickWeather(View view) {
@@ -347,9 +420,30 @@ public class HomeActivity
         }
     }
 
+    /**
+     * Override of WeatherHandler.WeatherReceivedListener.
+     * Called from WeatherHandler.getWeather in WeatherHandler.updateWeather.
+     * Acts on the weather forecast for the coming week.
+     * Updates weather display fields in the activity, and handles
+     * weather update notifictions from the service.
+     * @param latLng Latitude/longitude of weather data batch.
+     * @param response Incredibly long string containing weather 5-day forecast.
+     * @param isMetric Metric or imperial measurements.
+     */
+    @Override
+    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
+        initWeatherDisplay(response);
+        if (mSharedPref.getBoolean("weather_notifications_allowed", true))
+            scheduleWeatherNotifications();
+    }
+
+    /**
+     * Override of LocationActivity.onLocationReceived.
+     * Called from LocationActivity.fetchLocation.
+     * Redirects to initLocationDisplay to update data displays in the activity.
+     */
     @Override
     protected void onLocationReceived() {
-        // Reinitialise all relevant fields.
         initLocationDisplay();
     }
 }

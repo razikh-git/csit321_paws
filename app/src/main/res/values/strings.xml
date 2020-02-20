@@ -43,6 +43,10 @@
     <string name="noti_chan_desc_high">paws_notification_channel</string>
     <string name="noti_chan_desc_max">paws_notification_channel</string>
 
+    <!-- Weather notifications. -->
+    <string name="app_default_weather_notif_time_start">08:00</string>
+    <string name="app_default_weather_notif_time_end">20:00</string>
+
     <!--                              -->
     <!--        Vanity strings        -->
     <!--                              -->
@@ -296,14 +300,18 @@
     <!--                              -->
     <!--     Notifications Strings    -->
 
-    <string name="noti_title">PAWS</string>
-
-    <string name="noti_name_foreground">
-        PAWS Tracking Service
+    <string name="notif_name_foreground">
+        PAWS Manager Services
     </string>
-    <string name="noti_desc_foreground">
-        The location tracking service is resource-intensive.
-        Be sure to manage your usage carefully while oudoors.
+    <string name="notif_desc_foreground">
+        Ongoing services for PAWS
+    </string>
+
+    <string name="notif_name_weather">
+        Weather Channel
+    </string>
+    <string name="notif_desc_weather">
+        Updates on local weather conditions
     </string>
 
     <string name="noti_action_view">MAPPING</string>

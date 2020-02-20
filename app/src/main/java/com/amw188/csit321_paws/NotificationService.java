@@ -24,13 +24,15 @@ import androidx.core.app.NotificationCompat;
 public class NotificationService extends Service {
 
 	// Logging
-	private static final String TAG = "snowpaws_ts";
+	private static final String TAG = "snowpaws_service";
 
 	// Intent extras
 	private static final String PACKAGE_NAME = "com.amw188.csit321_paws";
+
 	private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
 			".extra.STARTED_FROM_NOTIFICATION";
 	static final String EXTRA_LOCATION = PACKAGE_NAME + ".extra.LOCATION";
+
 	static final String ACTION_BROADCAST = PACKAGE_NAME + ".action.BROADCAST";
 	static final String ACTION_RECEIVE = PACKAGE_NAME + ".action.RECEIVE";
 
@@ -41,9 +43,6 @@ public class NotificationService extends Service {
 			return NotificationService.this;
 		}
 	}
-
-	// Broadcasts
-	//private BroadcastReceiver _broadcastReceiver;
 
 	// Notifications
 	private static final int NOTIFICATION_ID = 1337;
@@ -139,23 +138,30 @@ public class NotificationService extends Service {
 			}
 		};
 
-		// Initialise notification channel
+		// Create notification channel
 		NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		if (manager == null) {
 			Log.e(TAG, "Notification manager failed to initialise.");
 			return;
 		}
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			CharSequence name = getString(R.string.app_name);
-			NotificationChannel channel = new NotificationChannel(
-					NOTIFICATION_CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
-			manager.createNotificationChannel(channel);
-		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			createNotificationChannel(manager);
 
 		// Generate service notification
 		Notification notif = getServiceNotification();
 		startForeground(NOTIFICATION_ID, notif);
+	}
+
+	@TargetApi(26)
+	private void createNotificationChannel(NotificationManager manager) {
+		CharSequence name = getString(R.string.notif_name_foreground);
+		String desc = getString(R.string.notif_desc_foreground);
+		int importance = NotificationManager.IMPORTANCE_DEFAULT;
+		NotificationChannel channel = new NotificationChannel(
+				NOTIFICATION_CHANNEL_ID, name, importance);
+		channel.setDescription(desc);
+		manager.createNotificationChannel(channel);
 	}
 
 	/**
@@ -168,21 +174,15 @@ public class NotificationService extends Service {
 				this, 0, new Intent(
 						this, this.getClass()
 				), PendingIntent.FLAG_UPDATE_CURRENT);
-		PendingIntent contentPendingIntent = PendingIntent.getBroadcast(
-				this, 1, new Intent(
-						this, NotificationBroadcastReceiver.class
-				), PendingIntent.FLAG_UPDATE_CURRENT);
 
 		// Generate a notification with a simple template of content
 		NotificationCompat.Builder builder;
 		builder = new NotificationCompat.Builder(
-				this, NOTIFICATION_CHANNEL_ID);
-		builder
+				this, NOTIFICATION_CHANNEL_ID)
 				.addAction(R.drawable.ic_paws_icon, "HELLO HELLO",
 						servicePendingIntent)
 				.setContentText("YOU SAY GOODBYE")
 				.setContentTitle("I DONT KNOW WHY YOU SAY GOODBYE")
-				.setContentIntent(contentPendingIntent)
 				.setOngoing(true)
 				.setPriority(Notification.PRIORITY_HIGH)
 				.setSmallIcon(R.drawable.ic_paws_logo)

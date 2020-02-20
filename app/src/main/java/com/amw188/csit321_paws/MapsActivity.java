@@ -110,7 +110,6 @@ public class MapsActivity
 
     // Notification services
     private NotificationService mNotificationService;
-    private NotificationBroadcastReceiver mNotificationReceiver;
     private boolean mIsBound;
     private boolean mIsReceivingLocationUpdates;
     private boolean mIsNotificationOnCooldown;
@@ -145,11 +144,11 @@ public class MapsActivity
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
 
-        // Load global preferences.
+        // Load global preferences
         mSharedPref = this.getSharedPreferences(
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
 
-        // Load saved state.
+        // Load saved state
         if (savedInstanceState != null) {
             mBundle = savedInstanceState.getBundle(BUNDLE_KEY);
             mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
@@ -157,19 +156,19 @@ public class MapsActivity
             mIsReceivingLocationUpdates = savedInstanceState.getBoolean(ISTRACKING_KEY);
         }
 
-        // Load the activity layout.
+        // Load the activity layout
         setContentView(R.layout.activity_maps);
 
-        // Bottom navigation bar functionality.
+        // Bottom navigation bar functionality
         BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        // Beg for permissions. Block all further functionality without them.
+        // Beg for permissions. Block all further functionality without them
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                 RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
             if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                     RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
-                // Continue with the activity.
+                // Continue with the activity
                 initActivity();
             }
         }
@@ -177,14 +176,13 @@ public class MapsActivity
     }
 
     private void initActivity() {
-        // Initialise buttons.
+        // Initialise buttons
         initButtons();
 
-        // Prepare PAWS location tracking.
-        mNotificationReceiver = new NotificationBroadcastReceiver();
+        // Prepare PAWS location tracking
         mCooldownTimer = new Timer(TIMER_KEY);
 
-        // Prepare the map.
+        // Prepare the map
         mTileOverlayURL = getString(R.string.app_url_owm_map_root)
                 +"%s/%s/%d/%d.png?appid=%s";
         mMapView = findViewById(R.id.mapView);
@@ -193,7 +191,7 @@ public class MapsActivity
     }
 
     private void onMapWeatherRedirectClick(View view) {
-        // Redirect to weather screen with data from the current marker.
+        // Redirect to weather screen with data from the current marker
         Intent intent = new Intent(this, WeatherActivity.class);
         if (mLocation != null) {
             intent.putExtra(RequestCode.EXTRA_LATLNG,
@@ -208,27 +206,27 @@ public class MapsActivity
 
         if (mMap != null) {
             if (mIsPolyDrawing) {
-                // Clear polylines in progress.
+                // Clear polylines in progress
                 mPolyLine.setPoints(new ArrayList<>());
-                // Reset interface layout.
+                // Reset interface layout
                 findViewById(R.id.btnMapPolyDraw).setBackgroundColor(
                         ContextCompat.getColor(this, R.color.color_on_primary));
                 findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
                         getDrawable(R.drawable.ic_draw_selected));
                 findViewById(R.id.btnMapPolyErase).setVisibility(View.GONE);
                 findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.VISIBLE);
-                // Reset click event listeners.
+                // Reset click event listeners
                 mMap.setOnMapClickListener((latLng) -> { onMapDefaultClick(latLng);});
                 mMap.setOnMapLongClickListener((latLng) -> { onMapDefaultLongClick(latLng);});
             } else {
-                // Show contextual interface.
+                // Show contextual interface
                 findViewById(R.id.btnMapPolyDraw).setBackgroundColor(
                         ContextCompat.getColor(this, R.color.color_primary_alt));
                 findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
                         getDrawable(R.drawable.ic_draw));
                 findViewById(R.id.btnMapPolyErase).setVisibility(View.VISIBLE);
                 findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
-                // Use click event listeners for live drawing.
+                // Use click event listeners for live drawing
                 mMap.setOnMapClickListener((latLng) -> {
                     onMapDrawingClick(latLng);});
                 mMap.setOnMapLongClickListener((latLng) -> {
@@ -309,9 +307,9 @@ public class MapsActivity
     private void onMapOverlayButtonClick(View view) {
         String str = null;
 
-        // Toggle visibility of the additional map tile overlays.
+        // Toggle visibility of the additional map tile overlays
         switch (view.getId()) {
-            // Only one OpenWeatherMaps overlay may be visible at a time.
+            // Only one OpenWeatherMaps overlay may be visible at a time
             case R.id.btnMapOverlayWind: {
                 str = getString(R.string.app_url_map_layer_wind);
                 break;
@@ -331,21 +329,21 @@ public class MapsActivity
                 break;
             }
         }
-        // Toggle tile overlay.
+        // Toggle tile overlay
         if (str != null && mTileOverlayMap.containsKey(str)) {
             mTileOverlayMap.get(str).setVisible(!mTileOverlayMap.get(str).isVisible());
         }
     }
 
     private void onMapDefaultClick(LatLng latLng) {
-        // Toggle map type popout menu visibility.
+        // Toggle map type popout menu visibility
         if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
-            // Hide the map type picker popout and show the popout button.
+            // Hide the map type picker popout and show the popout button
             togglePopoutButton();
         }
         else
         {
-            // Toggle searchbar visibility.
+            // Toggle searchbar visibility
             /*
             if (findViewById(R.id.cardSearch).getVisibility() != View.VISIBLE)
                 findViewById(R.id.cardSearch).setVisibility(View.VISIBLE);
@@ -353,7 +351,7 @@ public class MapsActivity
                 findViewById(R.id.cardSearch).setVisibility(View.GONE);
              */
 
-            // Toggle bottomsheet visibility.
+            // Toggle bottomsheet visibility
             BottomSheetBehavior sheetBehavior = BottomSheetBehavior.from(
                     findViewById(R.id.sheetView));
             if (sheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
@@ -364,15 +362,15 @@ public class MapsActivity
     }
 
     private void onMapDefaultLongClick(LatLng latLng) {
-        // Remove old markers.
+        // Remove old markers
         if (mMarker != null)
             mMarker.remove();
 
-        // Place a new marker on the held location and move the camera.
+        // Place a new marker on the held location and move the camera
         mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
-        // Reinitialise the location information.
+        // Reinitialise the location information
         mLocation = new Location(LocationManager.GPS_PROVIDER);
         mLocation.setLongitude(latLng.longitude);
         mLocation.setLatitude(latLng.latitude);
@@ -383,7 +381,7 @@ public class MapsActivity
         List<LatLng> polyPoints = mPolyLine.getPoints();
 
         if (polyPoints.size() > 0) {
-            // Identify whether the user closed the polygon.
+            // Identify whether the user closed the polygon
             LatLng startPoint = polyPoints.get(0);
             float[] distance = new float[1];
             Location.distanceBetween(latLng.latitude, latLng.longitude,
@@ -425,7 +423,7 @@ public class MapsActivity
 
             if (distance[0] < range) {
                 if (polyPoints.size() > 2) {
-                    // Generate a new polygon from the points.
+                    // Generate a new polygon from the points
                     PolygonOptions polyOptions = new PolygonOptions();
                     polyOptions.strokeWidth(POLY_STROKE_WIDTH);
                     int strokeColor = ContextCompat.getColor(
@@ -433,11 +431,11 @@ public class MapsActivity
                     int fillColor = ContextCompat.getColor(
                             this, R.color.color_risk_low_fill);
 
-                    // Check for bounding box overlaps.
+                    // Check for bounding box overlaps
                     for (LatLng polyPoint : polyPoints) {
                         for (Polygon polygon : mPolyList) {
                             if (PolyUtil.containsLocation(polyPoint, polygon.getPoints(), false)) {
-                                // Change polygon style.
+                                // Change polygon style
                                 if (polygon.getStrokeColor() == ContextCompat.getColor(
                                         this, R.color.color_risk_low)) {
                                     strokeColor = ContextCompat.getColor(
@@ -462,14 +460,14 @@ public class MapsActivity
                     }
                     mPolyList.add(mMap.addPolygon(polyOptions));
 
-                    // Clear the polyline from the map.
+                    // Clear the polyline from the map
                     mPolyLine.setPoints(new ArrayList<>());
                     return;
                 }
             }
         }
 
-        // Add another coordinate point to the polyline.
+        // Add another coordinate point to the polyline
         polyPoints.add(latLng);
         mPolyLine.setPoints(polyPoints);
     }
@@ -477,9 +475,9 @@ public class MapsActivity
     private void onMapDrawingLongClick(LatLng latLng) {
         List<LatLng> polyPoints = mPolyLine.getPoints();
         if (polyPoints.size() > 0) {
-            // Pop the last point on the polyline.
+            // Pop the last point on the polyline
             polyPoints.remove(polyPoints.size() - 1);
-            // Clear the list if there are no lines visible.
+            // Clear the list if there are no lines visible
             if (polyPoints.size() == 1)
                 polyPoints.remove(0);
             mPolyLine.setPoints(polyPoints);
@@ -495,9 +493,9 @@ public class MapsActivity
     }
 
     private void onMapTrackingButtonClick(View view) {
-        // Start or end the location tracking service.
+        // Start or end the location tracking service
         if (mIsReceivingLocationUpdates) {
-            // Change element styling.
+            // Change element styling
             findViewById(R.id.viewFABPadding).setVisibility(View.GONE);
             findViewById(R.id.laySheetHeader).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_primary_alt));
@@ -506,36 +504,36 @@ public class MapsActivity
             findViewById(R.id.btnMapTracking).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_primary_alt));
 
-            // End the location tracking service.
+            // End the location tracking service
             mIsReceivingLocationUpdates = false;
             stopReceivingLocationUpdates();
 
         } else {
-            // Attempt to start the location tracking service.
+            // Attempt to start the location tracking service
             startReceivingLocationUpdates();
         }
     }
 
     private void togglePopoutButton() {
         if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
-            // Change button style.
+            // Change button style
             ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_primary_alt));
             ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setImageDrawable(
                     getDrawable(R.drawable.ic_eye_settings));
 
-            // Reveal other FABs and hide the map type picker popout.
+            // Reveal other FABs and hide the map type picker popout
             findViewById(R.id.btnMapPolyDraw).setVisibility(View.VISIBLE);
             findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.VISIBLE);
             findViewById(R.id.cardMapType).setVisibility(View.GONE);
         } else {
-            // Change button style.
+            // Change button style
             ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_on_primary));
             ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setImageDrawable(
                     getDrawable(R.drawable.ic_eye_settings_outline));
 
-            // Hide other FABs and show the map type picker popout.
+            // Hide other FABs and show the map type picker popout
             mIsPolyDrawing = true;
             onMapPolyDrawClick(null);
             findViewById(R.id.btnMapPolyDraw).setVisibility(View.GONE);
@@ -545,7 +543,7 @@ public class MapsActivity
     }
 
     private boolean initButtons() {
-        // Button functionality.
+        // Button functionality
         try {
             //findViewById(R.id.cardSearch).setOnClickListener((view) -> {onSearchClick(view);});
             findViewById(R.id.laySheetHeader).setOnClickListener((view) -> { onSheetHeaderClick(view); });
@@ -619,27 +617,27 @@ public class MapsActivity
 
         mMap = googleMap;
 
-        // Camera event listener.
+        // Camera event listener
         mCameraPosition = mMap.getCameraPosition();
         googleMap.setOnCameraMoveListener(() -> {onCameraMove();});
 
-        // Initialise click event listeners.
+        // Initialise click event listeners
         googleMap.setOnPoiClickListener(this);
         googleMap.setOnMapClickListener((latLng) -> {
             onMapDefaultClick(latLng);});
         googleMap.setOnMapLongClickListener((latLng) -> {
             onMapDefaultLongClick(latLng);});
 
-        // Highlight elements for the default map type.
+        // Highlight elements for the default map type
         int pad = BTN_STROKE_WIDTH;
         findViewById(R.id.btnMapTypeDefault).setPadding(pad, pad, pad, pad);
         ((TextView)findViewById(R.id.txtMapTypeDefault)).setTextColor(
                 ContextCompat.getColor(this, R.color.color_accent_alt));
 
-        // Set the map type.
+        // Set the map type
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-        // Setup map polyline graphics.
+        // Setup map polyline graphics
         PolylineOptions polyOptions = new PolylineOptions();
         polyOptions.color(ContextCompat.getColor(this, R.color.color_error));
         polyOptions.pattern(Arrays.asList(
@@ -649,10 +647,10 @@ public class MapsActivity
         polyOptions.endCap(new RoundCap());
         mPolyLine = mMap.addPolyline(polyOptions);
 
-        // Setup map overlays.
+        // Setup map overlays
         initTileOverlays();
 
-        // Setup location services.
+        // Setup location services
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -711,7 +709,7 @@ public class MapsActivity
 
     @Override
     protected void onLocationReceived() {
-        // Request an address from the current location.
+        // Request an address from the current location
         fetchAddress();
     }
 
@@ -724,7 +722,7 @@ public class MapsActivity
         Log.d(TAG, "updateLocationDisplay");
         String str = null;
 
-        // Debug print the full address.
+        // Debug print the full address
         for (Address address : mAddress) {
             for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                 Log.d(TAG, address.getAddressLine(i));
@@ -732,14 +730,14 @@ public class MapsActivity
         }
 
         if (mMarker == null)
-            // Reposition the camera, and zoom in to a reasonably broad scope.
+            // Reposition the camera, and zoom in to a reasonably broad scope
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mLocation.getLatitude(), mLocation.getLongitude()),
                     DEFAULT_ZOOM));
         else
             mMarker.remove();
 
-        // Place a marker at the current or chosen location.
+        // Place a marker at the current or chosen location
         mMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(mLocation.getLatitude(), mLocation.getLongitude())));
 
@@ -789,7 +787,7 @@ public class MapsActivity
 
     @Override
     protected void onAllPermissionsGranted(String[] permissions) {
-        // Reinitialise the activity.
+        // Reinitialise the activity
         initActivity();
     }
 
