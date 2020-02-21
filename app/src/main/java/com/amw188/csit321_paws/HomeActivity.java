@@ -324,58 +324,6 @@ public class HomeActivity
         return true;
     }
 
-    /**
-     * Schedule periodic weather notifications starting at a certain coming hour.
-     */
-    private void scheduleWeatherNotifications() {
-        // todo: add an hour/minute picker in settings activity
-        // todo: ensure time intervals is a denominator of 24
-        // eg. once a day, twice a day, four times a day, every two days, every four days
-
-        String[] timeInitial = mSharedPref.getString("weather_notification_time_start",
-                getResources().getString(
-                        R.string.app_default_weather_notif_time_start))
-                .split(":");
-        int timeInterval = mSharedPref.getInt("weather_notification_interval",
-                getResources().getInteger(
-                        R.integer.app_default_weather_notif_hours_interval));
-
-        long timeNow = System.currentTimeMillis();
-        long timeDelay = PAWSAPI.getTimeUntil(
-                timeNow, Long.parseLong(timeInitial[0]), Long.parseLong(timeInitial[1]));
-
-        if (timeDelay < 0)
-            timeDelay += 1000 * 60 * 60 * 24;
-
-        int hours = (int)Math.floor(PAWSAPI.getHours(timeDelay));
-        int minutes = (int)(PAWSAPI.getHours(timeDelay) % hours * 60);
-
-        Log.d(TAG, "Current time: " +
-                new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
-                        .format(timeNow));
-        Log.d(TAG, "Target time:  " +
-                new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
-                        .format(timeNow + timeDelay));
-        Log.d(TAG, "Scheduling notifications starting in "
-                + hours + " hrs " + minutes + " minutes.");
-
-        // Queue up daily weather notifications for the user
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                .build();
-        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
-                DailyWeatherWorker.class, timeInterval, TimeUnit.HOURS)
-                .setConstraints(constraints)
-                //.setInitialDelay(timeDelay, TimeUnit.MILLISECONDS)
-                .addTag(DailyWeatherWorker.WORK_TAG)
-                .build();
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                DailyWeatherWorker.WORK_TAG, ExistingPeriodicWorkPolicy.REPLACE,
-                periodicWorkRequest);
-
-        // todo: re-enqueue the work from settings activity when initial/interval time is changed
-    }
-
     private void onClickWeather(View view) {
         // Redirect to Weather Activity
         Intent intent = new Intent(this, WeatherActivity.class);
@@ -433,8 +381,6 @@ public class HomeActivity
     @Override
     public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
         initWeatherDisplay(response);
-        if (mSharedPref.getBoolean("weather_notifications_allowed", true))
-            scheduleWeatherNotifications();
     }
 
     /**

@@ -46,7 +46,6 @@ class WeatherHandler {
             JSONObject lastWeather = new JSONObject(
                     sharedPref.getString("last_weather_json", "{}"));
 
-            /*
             if (lastWeather == null || lastWeather.toString().equals("{}") || lastWeather.length() == 0) {
                 Log.d(TAG,
                         "Fetching new weather data: Last weather data does not exist.");
@@ -100,7 +99,6 @@ class WeatherHandler {
                                     .getDouble("lon"));
                 }
             }
-             */
 
             // Fetch the complete weather data
             getWeather(ctx, latLng, isMetric);
