@@ -105,8 +105,7 @@ final class PAWSAPI {
     static long getTimeUntil(long now, long hour, long minute) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(now);
-        long timeDelay = (hour - calendar.get(Calendar.HOUR_OF_DAY)) * 1000 * 60 * 60
-                        + (minute - calendar.get(Calendar.MINUTE)) * 1000 * 60;
-        return timeDelay;
+        return (hour - calendar.get(Calendar.HOUR_OF_DAY)) * 1000 * 60 * 60
+                + (minute - calendar.get(Calendar.MINUTE)) * 1000 * 60;
     }
 }

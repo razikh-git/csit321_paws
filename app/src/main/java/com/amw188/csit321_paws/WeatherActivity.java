@@ -509,7 +509,6 @@ public class WeatherActivity
                 }
             }
 
-
             // Fill in other weather details.
 
             // TODO : Guarantee sunrise/sunset uses local timezone rather than system timezone.
