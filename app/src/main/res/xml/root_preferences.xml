@@ -14,9 +14,10 @@
   ~ limitations under the License.
   -->
 
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory app:title="@string/pref_header_general">
+    <PreferenceCategory app:title="@string/pref_heading_general">
 
         <ListPreference
             app:defaultValue="metric"
@@ -28,7 +29,19 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/pref_header_usage">
+    <PreferenceCategory app:title="@string/pref_heading_notifications">
+
+        <Preference
+            app:key="notif_time_start"
+            app:title="Notification start time" />
+
+        <Preference
+            app:key="notif_time_end"
+            app:title="Notification end time" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/pref_heading_usage">
 
         <ListPreference
             app:defaultValue="100"

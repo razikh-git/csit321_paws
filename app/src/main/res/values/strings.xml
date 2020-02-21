@@ -286,12 +286,18 @@
     <!--      Preferences Strings     -->
 
     <!-- Preference Titles. -->
-    <string name="pref_header_general">General</string>
-    <string name="pref_header_usage">Data and Battery Usage</string>
+    <string name="pref_heading_general">General</string>
+    <string name="pref_heading_usage">Data and Battery Usage</string>
+    <string name="pref_heading_notifications">Notifications</string>
 
     <!-- Units Preferences. -->
     <string name="pref_title_units">Units of measurement</string>
     <string name="pref_title_time">Time format</string>
+
+    <!-- Notifications Preferences. -->
+    <string name="pref_title_time_start">Don\'t send notifications earlier than:</string>
+    <string name="pref_title_time_end">Don\'t send notifcations later than:</string>
+    <string name="pref_title_time_freq">Frequency</string>
 
     <!-- Location Preferences. -->
     <string name="pref_title_location_usage">Location precision</string>

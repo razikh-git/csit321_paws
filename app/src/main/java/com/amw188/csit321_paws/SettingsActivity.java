@@ -1,17 +1,28 @@
 package com.amw188.csit321_paws;
 
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Calendar;
+
 public class SettingsActivity extends BottomNavBarActivity {
+    private static final String TAG = "snowpaws_settings";
+
+    private static final String PACKAGE_NAME = "com.amw188.csit321_paws";
+
+    static final String TIME_START_EXTRA = PACKAGE_NAME + ".extra.TIME_START";
+    static final String TIME_END_EXTRA = PACKAGE_NAME + ".extra.TIME_END";
 
     static final String KEY_PREF_LOCATION_PRIORITY = "location_priority";
     static final String KEY_PREF_LOCATION_RATE = "location_rate";
@@ -26,7 +37,7 @@ public class SettingsActivity extends BottomNavBarActivity {
         findViewById(R.id.btnReset).setOnClickListener((view) -> onClickReset(view));
 
         // Bottom navigation bar functionality.
-        BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         getSupportFragmentManager()
@@ -44,6 +55,45 @@ public class SettingsActivity extends BottomNavBarActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+
+            // todo: add listpreference picker of notification frequency to arrays / stringperfs
+
+            // Preference click actions
+            findPreference("notif_time_start").setOnPreferenceClickListener(this::onClickNotifTime);
+            findPreference("notif_time_end").setOnPreferenceClickListener(this::onClickNotifTime);
+        }
+
+        private boolean onClickNotifTime(Preference pref) {
+            Calendar now = Calendar.getInstance();
+            int hour = now.get(Calendar.HOUR_OF_DAY);
+            int minute = now.get(Calendar.MINUTE);
+            final String key = pref.getKey();
+            TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
+                    (timePicker, dialogHour, dialogMinute) -> {
+                String timeStr = dialogHour + ":" + dialogMinute;
+                Context context = getContext();
+                SharedPreferences.Editor sharedEditor = context.getSharedPreferences(
+                        context.getString(R.string.app_global_preferences), MODE_PRIVATE).edit();
+                String prefKey = key.equals("notif_time_start")
+                        ? "weather_notif_time_start"
+                        : "weather_notif_time_end";
+                sharedEditor.putString(prefKey, timeStr);
+                sharedEditor.apply();
+
+                // todo: bind manager service, message to reschedule weather notifications
+
+                Toast.makeText(getContext(),
+                        "Time: " + timeStr + " -- " + prefKey,
+                        Toast.LENGTH_LONG)
+                        .show();
+                }, hour, minute, false);
+            timePickerDialog.setTitle(
+                    key.equals("notif_time_start")
+                            ? R.string.pref_title_time_start
+                            : R.string.pref_title_time_end);
+            timePickerDialog.show();
+
+            return true;
         }
     }
 
