@@ -295,9 +295,8 @@
     <string name="pref_title_time">Time format</string>
 
     <!-- Notifications Preferences. -->
-    <string name="pref_title_time_start">Don\'t send notifications earlier than:</string>
-    <string name="pref_title_time_end">Don\'t send notifcations later than:</string>
-    <string name="pref_title_time_freq">Frequency</string>
+    <string name="pref_title_notif_category">Suppress weather notices between:</string>
+    <string name="pref_title_notif_freq">Frequency</string>
 
     <!-- Location Preferences. -->
     <string name="pref_title_location_usage">Location precision</string>

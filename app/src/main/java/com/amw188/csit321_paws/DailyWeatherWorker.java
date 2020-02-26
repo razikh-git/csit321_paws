@@ -6,12 +6,22 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Locale;
 
 public class DailyWeatherWorker extends Worker {
     private static final String TAG = "snowpaws_dww";
@@ -22,38 +32,40 @@ public class DailyWeatherWorker extends Worker {
     static final String WORK_TAG = PACKAGE_NAME + ".daily_weather_work";
     static final String WEATHER_CHANNEL_ID = "paws_weather_channel";
 
+    private Context mContext;
+    private SharedPreferences mSharedPref;
+
+    private long mLastDailySample;
+    private ArrayList<Double> mDailyTemps;
+    private ArrayList<Double> mDailyWindSpeed;
+    private ArrayList<Double> mDailyWindBearing;
+    private ArrayList<Double> mDailyCloud;
+
     public DailyWeatherWorker(
             @NonNull Context context,
             @NonNull WorkerParameters params) {
         super(context, params);
     }
 
-    @Override
+    @Override @NonNull
     public Result doWork() {
-        Log.d(TAG, "Doing work");
-
         Result result = Result.success();
-        Context context = getApplicationContext();
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                context.getResources().getString(R.string.app_global_preferences),
+        mContext = getApplicationContext();
+        mSharedPref = mContext.getSharedPreferences(
+                mContext.getResources().getString(R.string.app_global_preferences),
                 Context.MODE_PRIVATE);
-        String[] startTime = sharedPref.getString("weather_notification_time_start",
-                context.getResources().getString(R.string.app_default_weather_notif_time_start))
-                .split(":");
-        String[] endTime = sharedPref.getString("weather_notification_time_end",
-                context.getResources().getString(R.string.app_default_weather_notif_time_end))
-                .split(":");
-        long timeNow = System.currentTimeMillis();
-        long timeUntilStart = PAWSAPI.getTimeUntil(
-                timeNow, Long.parseLong(startTime[0]), Long.parseLong(startTime[1]));
-        long timeUntilEnd = PAWSAPI.getTimeUntil(
-                timeNow, Long.parseLong(endTime[0]), Long.parseLong(endTime[1]));
+
+        final long timeNow = System.currentTimeMillis();
+        final long timeUntilStart = PAWSAPI.getTimeUntil(
+                timeNow, Integer.parseInt(getStartTime()[0]), Integer.parseInt(getStartTime()[1]));
+        final long timeUntilEnd = PAWSAPI.getTimeUntil(
+                timeNow, Integer.parseInt(getEndTime()[0]), Integer.parseInt(getEndTime()[1]));
 
         Log.d(TAG, "Time until: (start=" + timeUntilStart + " end=" + timeUntilEnd);
 
         if (timeUntilStart < 0 && timeUntilEnd > 0) {
             Log.d(TAG, "Within hourly bounds for sending notification.");
-            result = pushWeatherNotification(context);
+            result = pushWeatherNotification();
         }
 
         return result;
@@ -63,15 +75,18 @@ public class DailyWeatherWorker extends Worker {
      * Fetches and then posts a weather notification.
      * @return Operation success.
      */
-    private Result pushWeatherNotification(Context context) {
-        NotificationManager manager = (NotificationManager) context.getSystemService(
+    private Result pushWeatherNotification() {
+        final NotificationManager manager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         if (manager == null) {
             Log.e(TAG, "Notification manager failed to initialise.");
             return Result.failure();
         }
 
-        manager.notify(WEATHER_TAG, WEATHER_ID, getWeatherNotification(context));
+        final Notification notif = getWeatherNotification();
+        if (notif == null)
+            return Result.failure();
+        manager.notify(WEATHER_TAG, WEATHER_ID, notif);
         return Result.success();
     }
 
@@ -79,19 +94,105 @@ public class DailyWeatherWorker extends Worker {
      * Creates a notification containing relevant weather info for some location.
      * @return Populated notification object.
      */
-    private Notification getWeatherNotification(Context context) {
+    private Notification getWeatherNotification() {
+        Log.d(TAG, "in getWeatherNotification()");
+
         // todo: include weather information local to some place
+        // store recent and favourite places to refer to
+
+        JSONObject weatherJSON;
+        String weatherTitle = "%s forecast for %s";
+        String weatherMessage = "%s and %s\n%s to %s\n%s %s %s winds";
+        Bitmap weatherIcon = BitmapFactory.decodeResource(mContext.getResources(),
+                R.drawable.ic_paws_logo);
+        try {
+            // Fetch the last best weather forecast from storage
+            weatherJSON = new JSONObject(mSharedPref.getString(
+                    "last_weather_json", "{}"));
+
+            // Choose the next best forecast 3hr time block
+            final long now = System.currentTimeMillis();
+            int whichTime = 0;
+            while (whichTime < weatherJSON.getJSONArray("list").length()
+                    && weatherJSON.getJSONArray("list")
+                    .getJSONObject(whichTime).getLong("dt") * 1000 < now) {
+                whichTime++;
+            }
+            Log.d(TAG, "Using forecast for block " + whichTime + ".");
+            JSONObject timeJSON = weatherJSON.getJSONArray("list")
+                    .getJSONObject(whichTime);
+
+            // Update the daily weather values when the day passes
+            // todo: ensure this is called for all common interval settings and notice time ranges
+            if (mDailyTemps == null || now - mLastDailySample >= 1000 * 60 * 60 * 24) {
+                final long startTime = mDailyTemps != null
+                        ? now + PAWSAPI.getTimeUntil(now, 0, 0)
+                        : now;
+                mDailyTemps = PAWSAPI.getDailyTemperatures(
+                        startTime, weatherJSON.getJSONArray("list"));
+                mLastDailySample = now;
+            }
+
+            // Set the notification icon for the coming weather conditions
+            PAWSAPI.getWeatherDrawable(mContext,
+                    timeJSON.getJSONArray("weather").getJSONObject(0)
+                    .getString("icon"));
+
+            // Format the notification with the coming weather data
+            final boolean isMetric = mSharedPref.getString("units", "metric")
+                    .equals("metric");
+            weatherTitle = String.format(Locale.getDefault(), weatherTitle,
+                    DateFormat.format(
+                            "h a", timeJSON.getLong("dt") * 1000),
+                    weatherJSON.getJSONObject("city").getString("name"));
+            weatherMessage = String.format(Locale.getDefault(), weatherMessage,
+                    // Weather summary
+                    PAWSAPI.getTemperatureString(
+                            timeJSON.getJSONObject("main").getDouble("temp")),
+                    timeJSON.getJSONArray("weather").getJSONObject(0)
+                            .getString("description"),
+                    // Temperature range
+                    PAWSAPI.getTemperatureString(
+                            Collections.max(mDailyTemps)),
+                    PAWSAPI.getTemperatureString(
+                            Collections.min(mDailyTemps), isMetric),
+                    // Precipitation information
+
+                    // Wind data
+                    "windy",
+                    "woosh",
+                    "woah"
+                    );
+            Log.d(TAG, "Finished building notification.");
+        } catch (JSONException ex) {
+            Log.e(TAG, "Failed to initialise weather JSON object.");
+            ex.printStackTrace();
+            return null;
+        }
 
         PendingIntent contentIntent = PendingIntent.getActivity(
-                context, 0, new Intent(context, WeatherActivity.class),
+                mContext, 0, new Intent(mContext, WeatherActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
-                context, WEATHER_CHANNEL_ID)
+                mContext, WEATHER_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_paws_icon)
                 .setContentIntent(contentIntent)
-                .setContentText("CONTENT TEXT, HELLO HELLO")
-                .setContentTitle("Weather over {AREA}: {0}")
+                .setContentTitle(weatherTitle)
+                .setContentText(weatherMessage)
+                .setLargeIcon(weatherIcon)
                 .setPriority(Notification.PRIORITY_DEFAULT);
         return builder.build();
+    }
+
+    private String[] getStartTime() {
+        return mSharedPref.getString("weather_notification_time_start",
+                mContext.getResources().getString(R.string.app_default_weather_notif_time_start))
+                .split(":");
+    }
+
+    private String[] getEndTime() {
+        return mSharedPref.getString("weather_notification_time_end",
+                mContext.getResources().getString(R.string.app_default_weather_notif_time_end))
+                .split(":");
     }
 }

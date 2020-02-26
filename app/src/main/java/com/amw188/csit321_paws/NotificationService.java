@@ -165,18 +165,24 @@ public class NotificationService extends Service {
 		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
 				getString(R.string.app_global_preferences), MODE_PRIVATE);
 		if (sharedPref.getBoolean("weather_notifications_allowed", true)) {
-			String[] timeInitial = sharedPref.getString("weather_notification_time_start",
+			final String[] timeInitial = sharedPref.getString("weather_notification_time_start",
 					getResources().getString(
 							R.string.app_default_weather_notif_time_start))
 					.split(":");
-			int timeInterval = sharedPref.getInt("weather_notification_interval",
+			final int timeInterval = sharedPref.getInt("weather_notification_interval",
 					getResources().getInteger(
 							R.integer.app_default_weather_notif_hours_interval));
 			scheduleWeatherNotifications(
-					Long.parseLong(timeInitial[0]), Long.parseLong(timeInitial[1]), timeInterval);
+					Integer.parseInt(timeInitial[0]), Integer.parseInt(timeInitial[1]),
+					timeInterval);
 		}
 	}
 
+	/**
+	 * Generates or updates notification channels for this app.
+	 * Channels persist for each installed lifetime of the app on the device.
+	 * @param manager Notification manager object generating channels.
+	 */
 	@TargetApi(26)
 	private void createNotificationChannels(NotificationManager manager) {
 		CharSequence name;
@@ -205,6 +211,7 @@ public class NotificationService extends Service {
 
 	/**
 	 * Generates the notification the foreground service is tied to.
+	 * @return Foreground service notification object.
 	 */
 	@TargetApi(23)
 	private Notification getServiceNotification() {
@@ -257,21 +264,23 @@ public class NotificationService extends Service {
 
 	/**
 	 * Schedule periodic weather notifications starting at a certain coming hour.
+	 * @param hour Hour where notifications may begin to be sent.
+	 * @param minute Minute of the hour where notifications may begin to be sent.
+	 * @param interval Hours between each notification.
 	 */
-	private void scheduleWeatherNotifications(long hour, long minute, int interval) {
+	private void scheduleWeatherNotifications(int hour, int minute, int interval) {
 		// todo: add an hour/minute picker in settings activity
 		// todo: ensure time intervals is a denominator of 24
 		// eg. once a day, twice a day, four times a day, every two days, every four days
 
 		long timeNow = System.currentTimeMillis();
-		long timeDelay = PAWSAPI.getTimeUntil(
-				timeNow, hour, minute);
+		long timeDelay = PAWSAPI.getTimeUntil(timeNow, hour, minute);
 
 		if (timeDelay < 0)
 			timeDelay += 1000 * 60 * 60 * 24;
 
-		int hours = (int)Math.floor(PAWSAPI.getHours(timeDelay));
-		int minutes = (int)(PAWSAPI.getHours(timeDelay) % hours * 60);
+		double hours = PAWSAPI.msToHours(timeDelay);
+		int minutes = PAWSAPI.minuteOfHour(hours);
 
 		Log.d(TAG, "Current time: " +
 				new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault())
@@ -282,7 +291,7 @@ public class NotificationService extends Service {
 
 		Toast.makeText(getApplicationContext(),
 				"Scheduling notifications starting in "
-						+ hours + " hrs " + minutes + " minutes.",
+						+ (int)Math.floor(hours) + " hrs " + minutes + " minutes.",
 				Toast.LENGTH_LONG).show();
 
 		// Queue up daily weather notifications for the user

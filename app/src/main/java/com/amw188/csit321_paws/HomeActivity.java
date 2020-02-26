@@ -97,7 +97,7 @@ public class HomeActivity
         // Initialise home screen banners
         if (mSharedPref.getInt("survey_last_question", 1) < getResources().getInteger(R.integer.survey_question_count)) {
             findViewById(R.id.cardWarningBanner).setVisibility(VISIBLE);
-            float pad = getResources().getDimension(R.dimen.height_banners_contextual);
+            final float pad = getResources().getDimension(R.dimen.height_banners_contextual);
             findViewById(R.id.layHome).setPadding(0, (int)pad, 0, 0);
         }
 
@@ -119,7 +119,7 @@ public class HomeActivity
      */
     private boolean initWeatherDisplay(String response) {
         try {
-            boolean isMetric = mSharedPref.getString("units", "metric")
+            final boolean isMetric = mSharedPref.getString("units", "metric")
                     .equals("metric");
 
             int index = 0;
@@ -177,7 +177,7 @@ public class HomeActivity
             // Temperature (current)
             dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                             .getJSONObject("main").getDouble("temp");
-            str = PAWSAPI.getTemperatureString(isMetric, dbl, true);
+            str = PAWSAPI.getTemperatureString(dbl, isMetric);
             ((TextView)findViewById(R.id.txtTempCurrent)).setText(str);
 
             // Wind (speed)
@@ -249,7 +249,7 @@ public class HomeActivity
             if (mLocation != null) {
                 // Call and await an update to the weather JSON string in prefs
                 boolean success = true;
-                boolean isMetric = mSharedPref.getString(
+                final boolean isMetric = mSharedPref.getString(
                         "units", "metric").equals("metric");
                 LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
                 mWeatherHandler = new WeatherHandler(this);

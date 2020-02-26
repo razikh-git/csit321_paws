@@ -32,12 +32,13 @@
     <PreferenceCategory app:title="@string/pref_heading_notifications">
 
         <Preference
-            app:key="notif_time_start"
-            app:title="Notification start time" />
+            app:title="Notification end time" />
 
         <Preference
-            app:key="notif_time_end"
-            app:title="Notification end time" />
+            app:key="notif_time_start" />
+
+        <Preference
+            app:key="notif_time_end" />
 
     </PreferenceCategory>
 
