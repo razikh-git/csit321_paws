@@ -78,7 +78,6 @@ public class MapsActivity
     private static final String ISTRACKING_KEY = "MapIsTrackingKey";
 
     private static final String TIMER_KEY = "PAWSCooldown";
-    private static final long NOTIFICATION_COOLDOWN_INTERVAL = 30000;
 
     private static final int DEFAULT_ZOOM = 5;
     private static final int DASH_WIDTH = 30;
@@ -87,8 +86,6 @@ public class MapsActivity
     private static final int BTN_STROKE_WIDTH = 5;
     private static final int POLY_STROKE_WIDTH = 10;
     private static final int POLY_SELECT_RANGE = 250000;
-
-    private static final int LOCATION_REQUEST_DEFAULT_INTERVAL = 5000;
 
     // Google Maps
     private Bundle mBundle;
@@ -139,6 +136,21 @@ public class MapsActivity
     }
     */
 
+    /**
+     * Custom info window implementation for location map markers.
+     */
+    public class CustomInfoWindow implements GoogleMap.InfoWindowAdapter {
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            return null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,7 +172,7 @@ public class MapsActivity
         setContentView(R.layout.activity_maps);
 
         // Bottom navigation bar functionality
-        BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         // Beg for permissions. Block all further functionality without them
@@ -216,8 +228,8 @@ public class MapsActivity
                 findViewById(R.id.btnMapPolyErase).setVisibility(View.GONE);
                 findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.VISIBLE);
                 // Reset click event listeners
-                mMap.setOnMapClickListener((latLng) -> { onMapDefaultClick(latLng);});
-                mMap.setOnMapLongClickListener((latLng) -> { onMapDefaultLongClick(latLng);});
+                mMap.setOnMapClickListener(this::onMapDefaultClick);
+                mMap.setOnMapLongClickListener(this::onMapDefaultLongClick);
             } else {
                 // Show contextual interface
                 findViewById(R.id.btnMapPolyDraw).setBackgroundColor(
@@ -227,10 +239,8 @@ public class MapsActivity
                 findViewById(R.id.btnMapPolyErase).setVisibility(View.VISIBLE);
                 findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
                 // Use click event listeners for live drawing
-                mMap.setOnMapClickListener((latLng) -> {
-                    onMapDrawingClick(latLng);});
-                mMap.setOnMapLongClickListener((latLng) -> {
-                    onMapDrawingLongClick(latLng);});
+                mMap.setOnMapClickListener(this::onMapDrawingClick);
+                mMap.setOnMapLongClickListener(this::onMapDrawingLongClick);
             }
         }
 
@@ -254,7 +264,7 @@ public class MapsActivity
     }
 
     private void onMapTypeButtonClick(View view) {
-        int pad = BTN_STROKE_WIDTH;
+        final int pad = BTN_STROKE_WIDTH;
         int type;
         int idBtn;
         int idTxt;
@@ -382,7 +392,7 @@ public class MapsActivity
 
         if (polyPoints.size() > 0) {
             // Identify whether the user closed the polygon
-            LatLng startPoint = polyPoints.get(0);
+            final LatLng startPoint = polyPoints.get(0);
             float[] distance = new float[1];
             Location.distanceBetween(latLng.latitude, latLng.longitude,
                     startPoint.latitude, startPoint.longitude,
@@ -397,8 +407,8 @@ public class MapsActivity
                 pow = 2.5;
             else if (mCameraPosition.zoom >= 8.5)
                 pow = 2;
-            double scale = Math.pow(mCameraPosition.zoom, pow);
-            double range = POLY_SELECT_RANGE / scale;
+            final double scale = Math.pow(mCameraPosition.zoom, pow);
+            final double range = POLY_SELECT_RANGE / scale;
 
             Log.d(TAG, "onMapDrawingClick() : "
                     + "\nTap   : "
@@ -517,7 +527,7 @@ public class MapsActivity
     private void togglePopoutButton() {
         if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
             // Change button style
-            ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
+            (findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_primary_alt));
             ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setImageDrawable(
                     getDrawable(R.drawable.ic_eye_settings));
@@ -528,7 +538,7 @@ public class MapsActivity
             findViewById(R.id.cardMapType).setVisibility(View.GONE);
         } else {
             // Change button style
-            ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
+            (findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_on_primary));
             ((FloatingActionButton)findViewById(R.id.btnMapTypePopout)).setImageDrawable(
                     getDrawable(R.drawable.ic_eye_settings_outline));
@@ -545,19 +555,19 @@ public class MapsActivity
     private boolean initButtons() {
         // Button functionality
         try {
-            //findViewById(R.id.cardSearch).setOnClickListener((view) -> {onSearchClick(view);});
-            findViewById(R.id.laySheetHeader).setOnClickListener((view) -> { onSheetHeaderClick(view); });
-            findViewById(R.id.btnMapPolyDraw).setOnClickListener((view) -> { onMapPolyDrawClick(view); });
-            findViewById(R.id.btnMapPolyErase).setOnClickListener((view) -> { onMapPolyEraseClick(view); });
-            findViewById(R.id.btnMapWeatherRedirect).setOnClickListener((view) -> { onMapWeatherRedirectClick(view); });
-            findViewById(R.id.btnMapTypePopout).setOnClickListener((view) -> { onMapTypePopoutClick(view); });
-            findViewById(R.id.btnMapTypeDefault).setOnClickListener((view) -> { onMapTypeButtonClick(view); });
-            findViewById(R.id.btnMapTypeSatellite).setOnClickListener((view) -> { onMapTypeButtonClick(view); });
-            findViewById(R.id.btnMapTypeTerrain).setOnClickListener((view) -> { onMapTypeButtonClick(view); });
-            findViewById(R.id.btnMapOverlayWind).setOnClickListener((view) -> { onMapOverlayButtonClick(view); });
-            findViewById(R.id.btnMapOverlayPrecip).setOnClickListener((view) -> { onMapOverlayButtonClick(view); });
-            findViewById(R.id.btnMapOverlayRisk).setOnClickListener((view) -> { onMapOverlayButtonClick(view); });
-            findViewById(R.id.btnMapTracking).setOnClickListener((view) -> { onMapTrackingButtonClick(view);});
+            //findViewById(R.id.cardSearch).setOnClickListener(this::onSearchClick);
+            findViewById(R.id.laySheetHeader).setOnClickListener(this::onSheetHeaderClick);
+            findViewById(R.id.btnMapPolyDraw).setOnClickListener(this::onMapPolyDrawClick);
+            findViewById(R.id.btnMapPolyErase).setOnClickListener(this::onMapPolyEraseClick);
+            findViewById(R.id.btnMapWeatherRedirect).setOnClickListener(this::onMapWeatherRedirectClick);
+            findViewById(R.id.btnMapTypePopout).setOnClickListener(this::onMapTypePopoutClick);
+            findViewById(R.id.btnMapTypeDefault).setOnClickListener(this::onMapTypeButtonClick);
+            findViewById(R.id.btnMapTypeSatellite).setOnClickListener(this::onMapTypeButtonClick);
+            findViewById(R.id.btnMapTypeTerrain).setOnClickListener(this::onMapTypeButtonClick);
+            findViewById(R.id.btnMapOverlayWind).setOnClickListener(this::onMapOverlayButtonClick);
+            findViewById(R.id.btnMapOverlayPrecip).setOnClickListener(this::onMapOverlayButtonClick);
+            findViewById(R.id.btnMapOverlayRisk).setOnClickListener(this::onMapOverlayButtonClick);
+            findViewById(R.id.btnMapTracking).setOnClickListener(this::onMapTrackingButtonClick);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -619,17 +629,18 @@ public class MapsActivity
 
         // Camera event listener
         mCameraPosition = mMap.getCameraPosition();
-        googleMap.setOnCameraMoveListener(() -> {onCameraMove();});
+        googleMap.setOnCameraMoveListener(this::onCameraMove);
 
         // Initialise click event listeners
         googleMap.setOnPoiClickListener(this);
-        googleMap.setOnMapClickListener((latLng) -> {
-            onMapDefaultClick(latLng);});
-        googleMap.setOnMapLongClickListener((latLng) -> {
-            onMapDefaultLongClick(latLng);});
+        googleMap.setOnMapClickListener(this::onMapDefaultClick);
+        googleMap.setOnMapLongClickListener(this::onMapDefaultLongClick);
+
+        // Enable custom info windows
+        googleMap.setInfoWindowAdapter(new CustomInfoWindow());
 
         // Highlight elements for the default map type
-        int pad = BTN_STROKE_WIDTH;
+        final int pad = BTN_STROKE_WIDTH;
         findViewById(R.id.btnMapTypeDefault).setPadding(pad, pad, pad, pad);
         ((TextView)findViewById(R.id.txtMapTypeDefault)).setTextColor(
                 ContextCompat.getColor(this, R.color.color_accent_alt));
@@ -720,7 +731,7 @@ public class MapsActivity
 
     private void updateLocationDisplay() {
         Log.d(TAG, "updateLocationDisplay");
-        String str = null;
+        String str;
 
         // Debug print the full address
         for (Address address : mAddress) {
@@ -750,21 +761,26 @@ public class MapsActivity
             // TODO fix out of bounds exception for null address length.....
             str = mAddress.get(0).getAddressLine(0).split(", ", 3)[1];
             ((TextView)findViewById(R.id.txtSheetTitle)).setText(str);
+            mMarker.setTitle(str);
+            mMarker.setSnippet("hello");
+            mMarker.showInfoWindow();
+            // todo: change snippet to something useful
 
             // Set the coordinates display.
             str = new DecimalFormat("#.##").format(mAddress.get(0).getLongitude());
             str += " " + new DecimalFormat("#.##").format(mAddress.get(0).getLatitude());
             ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
+
+            // Set the coordinates display.
+            final double lng = mAddress.get(0).getLongitude();
+            final double lat = mAddress.get(0).getLatitude();
+            final char bearingLng = lng > 0 ? 'E' : 'W';
+            final char bearingLat = lat > 0 ? 'N' : 'S';
+            str = new DecimalFormat("#.##").format(Math.abs(lng)) + " " + bearingLng
+                    + "  " + new DecimalFormat("#.##").format(Math.abs(lat)) + " " + bearingLat;
+            ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
         }
 
-        // Set the coordinates display.
-        double lng = mAddress.get(0).getLongitude();
-        double lat = mAddress.get(0).getLatitude();
-        char bearingLng = lng > 0 ? 'E' : 'W';
-        char bearingLat = lat > 0 ? 'N' : 'S';
-        str = new DecimalFormat("#.##").format(Math.abs(lng)) + " " + bearingLng
-                + "  " + new DecimalFormat("#.##").format(Math.abs(lat)) + " " + bearingLat;
-        ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
     }
 
     private void startReceivingLocationUpdates() {
