@@ -1,6 +1,8 @@
 package com.amw188.csit321_paws;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
@@ -35,13 +37,40 @@ final class PAWSAPI {
     /**
      * Formats a string for some wind speed in appropriate units.
      * @param isMetric Value conversion and units to display for metric or non-metric preferences.
-     * @param velocity Value to show and convert.
+     * @param speed Value to show and convert.
      * @return Formatted string.
      */
-    static String getWindSpeedString(boolean isMetric, double velocity) {
+    static String getWindSpeedString(double speed, boolean isMetric) {
         return isMetric
-                ? new DecimalFormat("#").format(toKilometresPerHour(velocity)) + " km/h"
-                : new DecimalFormat("#").format(toMilesPerHour(velocity)) + " mph";
+                ? new DecimalFormat("#").format(toKilometresPerHour(speed)) + " km/h"
+                : new DecimalFormat("#").format(toMilesPerHour(speed)) + " mph";
+    }
+
+    /**
+     * Fetches a cardinal direction for some angle in degrees.
+     * @param bearing Wind bearing value in degrees.
+     * @return Cardinal direction string.
+     */
+    static String getWindBearingString(double bearing) {
+        String str = "north";
+        if (bearing < 135)
+            str = "west";
+        else if (bearing < 225)
+            str = "south";
+        else if (bearing < 315)
+            str = "east";
+        return str;
+    }
+
+    /**
+     * Fetches a cardinal direction for some angle in degrees.
+     * @param bearing Wind bearing value in degrees.
+     * @param isVerbose Whether to return the full name or an abbreviation.
+     * @return Cardinal direction string.
+     */
+    static String getWindBearingString(double bearing, boolean isVerbose) {
+        String str = getWindBearingString(bearing);
+        return isVerbose ? str : str.substring(0, 1).toUpperCase();
     }
 
     /**
@@ -62,20 +91,79 @@ final class PAWSAPI {
         return new DecimalFormat("#").format(temperature) + (isMetric ? "°C" : "°F");
     }
 
+    static int getWeatherIconId(String icon) {
+        int id = -1;
+        switch (icon) {
+            case "01":
+                id = R.drawable.w01;
+                break;
+            case "01d":
+                id = R.drawable.w01d;
+                break;
+            case "01n":
+                id = R.drawable.w01n;
+                break;
+            case "02d":
+                id = R.drawable.w02d;
+                break;
+            case "02n":
+                id = R.drawable.w02n;
+                break;
+            case "03d":
+                id = R.drawable.w03d;
+                break;
+            case "03n":
+                id = R.drawable.w03n;
+                break;
+            case "04d":
+                id = R.drawable.w04d;
+                break;
+            case "04n":
+                id = R.drawable.w04n;
+                break;
+            case "9d":
+                id = R.drawable.w09d;
+                break;
+            case "09n":
+                id = R.drawable.w09n;
+                break;
+            case "10d":
+                id = R.drawable.w10d;
+                break;
+            case "10n":
+                id = R.drawable.w10n;
+                break;
+            case "11d":
+                id = R.drawable.w11d;
+                break;
+            case "11n":
+                id = R.drawable.w11n;
+                break;
+            case "13d":
+                id = R.drawable.w13d;
+                break;
+            case "13n":
+                id = R.drawable.w13n;
+                break;
+            case "50d":
+                id = R.drawable.w50d;
+                break;
+            case "50n":
+                id = R.drawable.w50n;
+                break;
+        }
+        return id;
+    }
+
     /**
-     * Fetches a cardinal direction for some angle in degrees.
-     * @param bearing Wind bearing value in degrees.
-     * @return Cardinal direction string.
+     * Fetches a bitmap image for a weather icon code provided by OpenWeatherMaps.
+     * @param ctx Context.
+     * @param icon OWM icon code.
+     * @return Drawable for weather icon code.
      */
-    static String getWindBearingString(double bearing) {
-        String str = "north";
-        if (bearing < 135)
-            str = "west";
-        else if (bearing < 225)
-            str = "south";
-        else if (bearing < 315)
-            str = "east";
-        return str;
+    static Bitmap getWeatherBitmap(Context ctx, String icon) {
+        return BitmapFactory.decodeResource(ctx.getResources(),
+                getWeatherIconId(icon));
     }
 
     /**
@@ -85,48 +173,7 @@ final class PAWSAPI {
      * @return Drawable for weather icon code.
      */
     static Drawable getWeatherDrawable(Context ctx, String icon) {
-        switch (icon) {
-            case "01":
-                return ctx.getDrawable(R.drawable.w01);
-            case "01d":
-                return ctx.getDrawable(R.drawable.w01d);
-            case "01n":
-                return ctx.getDrawable(R.drawable.w01n);
-            case "02d":
-                return ctx.getDrawable(R.drawable.w02d);
-            case "02n":
-                return ctx.getDrawable(R.drawable.w02n);
-            case "03d":
-                return ctx.getDrawable(R.drawable.w03d);
-            case "03n":
-                return ctx.getDrawable(R.drawable.w03n);
-            case "04d":
-                return ctx.getDrawable(R.drawable.w04d);
-            case "04n":
-                return ctx.getDrawable(R.drawable.w04n);
-            case "9d":
-                return ctx.getDrawable(R.drawable.w09d);
-            case "09n":
-                return ctx.getDrawable(R.drawable.w09n);
-            case "10d":
-                return ctx.getDrawable(R.drawable.w10d);
-            case "10n":
-                return ctx.getDrawable(R.drawable.w10n);
-            case "11d":
-                return ctx.getDrawable(R.drawable.w11d);
-            case "11n":
-                return ctx.getDrawable(R.drawable.w11n);
-            case "13d":
-                return ctx.getDrawable(R.drawable.w13d);
-            case "13n":
-                return ctx.getDrawable(R.drawable.w13n);
-            case "50d":
-                return ctx.getDrawable(R.drawable.w50d);
-            case "50n":
-                return ctx.getDrawable(R.drawable.w50n);
-            default:
-                return null;
-        }
+        return ctx.getDrawable(getWeatherIconId(icon));
     }
 
     /**
@@ -184,7 +231,7 @@ final class PAWSAPI {
                         elemsPerDay = 24 / 3;
                     final int end = Math.min(weatherJSON.length(), i + elemsPerDay);
                     for (int j = i; j < end; ++j)
-                        tempList.add(weatherJSON.getJSONObject(i)
+                        tempList.add(weatherJSON.getJSONObject(j)
                                 .getJSONObject("main")
                                 .getDouble("temp"));
                     break;

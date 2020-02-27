@@ -319,46 +319,11 @@
         Updates on local weather conditions
     </string>
 
+    <string name="notif_title_weather">
+        SurfWatch Weather
+    </string>
+
     <string name="noti_action_view">MAPPING</string>
     <string name="noti_action_dismiss">STOP TRACKING</string>
-
-    <string name="noti_title_risk_low">
-        Adverse conditions identified
-    </string>
-    <string name="noti_subtitle_risk_low">
-        You may want to review your journey.
-    </string>
-    <string name="noti_text_risk_low">
-        "Travel conditions may be compromised in this area, and navigation may be impaired.\n\n"
-
-        "You should reorient yourself if you feel these conditions are unsuitable for you and your partners. "
-        "Be ready to alter course at any time."
-    </string>
-
-    <string name="noti_title_risk_med">
-        BE AWARE: You are entering dangerous territory.
-    </string>
-    <string name="noti_subtitle_risk_med">
-        Local conditions are threatening the safety of those in this area.
-    </string>
-    <string name="noti_text_risk_med">
-        "Be aware of your surroundings and group members at all times.\n\n"
-
-        "Take note of your environment, and identify which features may be either advantageous or dangerous. "
-        "Sudden disaster can occur at any time, even in areas without any apparent threat."
-    </string>
-
-    <string name="noti_title_risk_high">
-        WARNING: STOP. YOUR SAFETY IS AT RISK.
-    </string>
-    <string name="noti_subtitle_risk_high">
-        Stop immediately and review your course.
-    </string>
-    <string name="noti_text_risk_high">
-        "Conditions in this area are incompatible with survival. For your own safety, and the safety of others, "
-        "reconsider your journey. Relocate to a safe area away from threatening features, such as avalanche "
-        "runout corridors and steep inclines, and plan a new course out of this area using the terrain "
-        "to your advantage.\n\n"
-    </string>
 
 </resources>

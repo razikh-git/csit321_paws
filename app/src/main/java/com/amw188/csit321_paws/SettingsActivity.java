@@ -83,16 +83,14 @@ public class SettingsActivity extends BottomNavBarActivity {
             Calendar now = Calendar.getInstance();
             final int hour = now.get(Calendar.HOUR_OF_DAY);
             final int minute = now.get(Calendar.MINUTE);
-            final String key = pref.getKey();
             SharedPreferences sharedPref = getContext().getSharedPreferences(
                     getString(R.string.app_global_preferences), MODE_PRIVATE);
 
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
                     (timePicker, dialogHour, dialogMinute) -> {
-                String timeStr = dialogHour + ":" + dialogMinute;
-                Context context = getContext();
                 SharedPreferences.Editor sharedEditor = sharedPref.edit();
-                String prefKey = key.equals("notif_time_start")
+                final String timeStr = dialogHour + ":" + dialogMinute;
+                final String prefKey = pref.getKey().equals("notif_time_start")
                         ? "weather_notif_time_start"
                         : "weather_notif_time_end";
                 sharedEditor.putString(prefKey, timeStr);
@@ -106,13 +104,12 @@ public class SettingsActivity extends BottomNavBarActivity {
                         .show();
                 }, hour, minute, false);
             timePickerDialog.setTitle(
-                    key.equals("notif_time_start")
+                    pref.getKey().equals("notif_time_start")
                             ? sharedPref.getString("weather_notif_time_start",
                             getString(R.string.app_default_weather_notif_time_start))
                             : sharedPref.getString("weather_notif_time_start",
                             getString(R.string.app_default_weather_notif_time_end)));
             timePickerDialog.show();
-
             return true;
         }
     }

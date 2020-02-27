@@ -92,7 +92,7 @@ public class DailyWeatherWorker extends Worker {
 
     /**
      * Creates a notification containing relevant weather info for some location.
-     * @return Populated notification object.
+     * @return Assembled weather notification.
      */
     private Notification getWeatherNotification() {
         Log.d(TAG, "in getWeatherNotification()");
@@ -100,14 +100,21 @@ public class DailyWeatherWorker extends Worker {
         // todo: include weather information local to some place
         // store recent and favourite places to refer to
 
-        JSONObject weatherJSON;
-        String weatherTitle = "%s forecast for %s";
-        String weatherMessage = "%s and %s\n%s to %s\n%s %s %s winds";
-        Bitmap weatherIcon = BitmapFactory.decodeResource(mContext.getResources(),
-                R.drawable.ic_paws_logo);
+        // todo: add tide/swell information
+
+        // todo: mention whether there's a chance of rain later?
+
+        final String notifTitle = mContext.getString(R.string.notif_title_weather);
+        String weatherTitle = "%s at %s";
+        String weatherMessage = "%s and %s"
+                + "\n\nWinds are %s %s."
+                + "\nDaily high and low temperatures of %s to %s."
+                + "\nCurrently feels like %s.";
+        Bitmap weatherIcon;
+
         try {
             // Fetch the last best weather forecast from storage
-            weatherJSON = new JSONObject(mSharedPref.getString(
+            final JSONObject weatherJSON = new JSONObject(mSharedPref.getString(
                     "last_weather_json", "{}"));
 
             // Choose the next best forecast 3hr time block
@@ -118,8 +125,7 @@ public class DailyWeatherWorker extends Worker {
                     .getJSONObject(whichTime).getLong("dt") * 1000 < now) {
                 whichTime++;
             }
-            Log.d(TAG, "Using forecast for block " + whichTime + ".");
-            JSONObject timeJSON = weatherJSON.getJSONArray("list")
+            final JSONObject timeJSON = weatherJSON.getJSONArray("list")
                     .getJSONObject(whichTime);
 
             // Update the daily weather values when the day passes
@@ -131,10 +137,16 @@ public class DailyWeatherWorker extends Worker {
                 mDailyTemps = PAWSAPI.getDailyTemperatures(
                         startTime, weatherJSON.getJSONArray("list"));
                 mLastDailySample = now;
+
+                Log.d(TAG, "mDailyTemps:");
+                String debugstr = "Added: ";
+                for (double temp : mDailyTemps)
+                    debugstr += PAWSAPI.getTemperatureString(temp) + " ";
+                Log.d(TAG, debugstr);
             }
 
             // Set the notification icon for the coming weather conditions
-            PAWSAPI.getWeatherDrawable(mContext,
+            weatherIcon = PAWSAPI.getWeatherBitmap(mContext,
                     timeJSON.getJSONArray("weather").getJSONObject(0)
                     .getString("icon"));
 
@@ -142,27 +154,31 @@ public class DailyWeatherWorker extends Worker {
             final boolean isMetric = mSharedPref.getString("units", "metric")
                     .equals("metric");
             weatherTitle = String.format(Locale.getDefault(), weatherTitle,
+                    weatherJSON.getJSONObject("city").getString("name"),
                     DateFormat.format(
-                            "h a", timeJSON.getLong("dt") * 1000),
-                    weatherJSON.getJSONObject("city").getString("name"));
+                            "h a", timeJSON.getLong("dt") * 1000));
             weatherMessage = String.format(Locale.getDefault(), weatherMessage,
+
                     // Weather summary
                     PAWSAPI.getTemperatureString(
-                            timeJSON.getJSONObject("main").getDouble("temp")),
+                            timeJSON.getJSONObject("main").getDouble("temp"), isMetric),
                     timeJSON.getJSONArray("weather").getJSONObject(0)
                             .getString("description"),
+
+                    // Wind data
+                    PAWSAPI.getWindSpeedString(
+                            timeJSON.getJSONObject("wind").getDouble("speed"), isMetric),
+                    PAWSAPI.getWindBearingString(
+                            timeJSON.getJSONObject("wind").getDouble("deg"), true),
+
                     // Temperature range
                     PAWSAPI.getTemperatureString(
                             Collections.max(mDailyTemps)),
                     PAWSAPI.getTemperatureString(
-                            Collections.min(mDailyTemps), isMetric),
-                    // Precipitation information
+                            Collections.min(mDailyTemps)),
+                    PAWSAPI.getTemperatureString(
+                            timeJSON.getJSONObject("main").getDouble("feels_like"), isMetric));
 
-                    // Wind data
-                    "windy",
-                    "woosh",
-                    "woah"
-                    );
             Log.d(TAG, "Finished building notification.");
         } catch (JSONException ex) {
             Log.e(TAG, "Failed to initialise weather JSON object.");
@@ -170,6 +186,7 @@ public class DailyWeatherWorker extends Worker {
             return null;
         }
 
+        // Assemble and build the notification
         PendingIntent contentIntent = PendingIntent.getActivity(
                 mContext, 0, new Intent(mContext, WeatherActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
@@ -178,8 +195,12 @@ public class DailyWeatherWorker extends Worker {
                 .setSmallIcon(R.drawable.ic_paws_icon)
                 .setContentIntent(contentIntent)
                 .setContentTitle(weatherTitle)
-                .setContentText(weatherMessage)
+                .setContentText(weatherMessage.split("\n")[0])
                 .setLargeIcon(weatherIcon)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(weatherTitle)
+                        .setSummaryText(notifTitle)
+                        .bigText(weatherMessage))
                 .setPriority(Notification.PRIORITY_DEFAULT);
         return builder.build();
     }

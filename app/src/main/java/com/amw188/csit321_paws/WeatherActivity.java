@@ -20,8 +20,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DecimalFormat;
-
 public class WeatherActivity
         extends
                 BottomNavBarActivity
@@ -33,6 +31,8 @@ public class WeatherActivity
 
     SharedPreferences mSharedPref;
     WeatherHandler mWeatherHandler;
+
+    // todo: relocate weather calls to the foreground service
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,7 @@ public class WeatherActivity
         }
         if (latLng != null) {
             // Call and await an update to the weather JSON string in prefs
-            boolean isMetric = mSharedPref.getString("units", "metric")
+            final boolean isMetric = mSharedPref.getString("units", "metric")
                     .equals("metric");
             mWeatherHandler = new WeatherHandler(this);
             if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
@@ -190,7 +190,6 @@ public class WeatherActivity
                         dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
                                 .getJSONObject("rain").getDouble("3h");
                         str = PAWSAPI.getPrecipitationString(isMetric, dbl);
-
                     }
                 } else if (id == 800) {
                     // Clear weather, no notable measurements
@@ -394,7 +393,7 @@ public class WeatherActivity
                         dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(j)
                                 .getJSONObject("wind")
                                 .getDouble("speed");
-                    str = PAWSAPI.getWindSpeedString(isMetric, dbl / 8);
+                    str = PAWSAPI.getWindSpeedString(dbl / 8, isMetric);
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -420,11 +419,10 @@ public class WeatherActivity
                                     if (weatherForecastJSON.getJSONArray("list")
                                             .getJSONObject(j).getJSONObject("rain")
                                             .has("3h")) {
-                                        Log.println(Log.DEBUG, "snowpaws_weather",
-                                                "Sampling rain/3h from element " + j + ". ("
-                                                        + weatherForecastJSON.getJSONArray("list")
-                                                        .getJSONObject(j).getJSONObject("rain")
-                                                        .getDouble("3h") + ")");
+                                        Log.d(TAG, "Sampling rain/3h from element " + j + ". ("
+                                                + weatherForecastJSON.getJSONArray("list")
+                                                .getJSONObject(j).getJSONObject("rain")
+                                                .getDouble("3h") + ")");
                                         dbl += weatherForecastJSON.getJSONArray("list")
                                                 .getJSONObject(j)
                                                 .getJSONObject("rain").getDouble("3h");
@@ -440,11 +438,10 @@ public class WeatherActivity
                         // Cloudy weather, measurements in percentage coverage
                         dbl = 0d;
                         for (int j = i - 7; j < i; j++) {
-                            Log.println(Log.DEBUG, "snowpaws_weather",
-                                    "Sampling clouds/all from element " + j + ". ("
-                                            + weatherForecastJSON.getJSONArray("list")
-                                            .getJSONObject(j).getJSONObject("clouds")
-                                            .getInt("all") + ")");
+                            Log.d(TAG, "Sampling clouds/all from element " + j + ". ("
+                                    + weatherForecastJSON.getJSONArray("list")
+                                    .getJSONObject(j).getJSONObject("clouds")
+                                    .getInt("all") + ")");
                             dbl += Double.parseDouble(weatherForecastJSON.getJSONArray("list")
                                     .getJSONObject(j)
                                     .getJSONObject("clouds").getString("all"));
@@ -454,9 +451,8 @@ public class WeatherActivity
                     }
 
                     if (!(str.equals(""))) {
-                        Log.println(Log.DEBUG, "snowpaws_weather",
-                                "Adding additional weather data ("
-                                        + str + ") for day " + i / 8);
+                        Log.d(TAG, "Adding additional weather data ("
+                                + str + ") for day " + i / 8);
 
                         // Create a weather icon
                         img = new ImageView(this);

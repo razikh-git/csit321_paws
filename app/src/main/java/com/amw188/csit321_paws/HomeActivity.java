@@ -1,9 +1,6 @@
 package com.amw188.csit321_paws;
 
 import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,25 +13,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.work.BackoffPolicy;
-import androidx.work.Constraints;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -74,12 +61,12 @@ public class HomeActivity
      */
     private boolean initButtons() {
         try {
-            findViewById(R.id.cardWarningBanner).setOnClickListener((view) -> onClickProfiling(view));
-            findViewById(R.id.cardWeather).setOnClickListener((view) -> onClickWeather(view));
-            findViewById(R.id.cardMaps).setOnClickListener((view) -> onClickMaps(view));
-            findViewById(R.id.btnSettings).setOnClickListener((view) -> onClickSettings(view));
-            findViewById(R.id.btnProfile).setOnClickListener((view) -> onClickProfiling(view));
-            findViewById(R.id.btnHelp).setOnClickListener((view) -> onClickHelp(view));
+            findViewById(R.id.cardWarningBanner).setOnClickListener(this::onClickProfiling);
+            findViewById(R.id.cardWeather).setOnClickListener(this::onClickWeather);
+            findViewById(R.id.cardMaps).setOnClickListener(this::onClickMaps);
+            findViewById(R.id.btnSettings).setOnClickListener(this::onClickSettings);
+            findViewById(R.id.btnProfile).setOnClickListener(this::onClickProfiling);
+            findViewById(R.id.btnHelp).setOnClickListener(this::onClickHelp);
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -183,7 +170,7 @@ public class HomeActivity
             // Wind (speed)
             dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                     .getJSONObject("wind").getDouble("speed");
-            str = PAWSAPI.getWindSpeedString(isMetric, dbl);
+            str = PAWSAPI.getWindSpeedString(dbl, isMetric);
             ((TextView)findViewById(R.id.txtWindSpeed)).setText(str);
 
             // Wind (bearing)
