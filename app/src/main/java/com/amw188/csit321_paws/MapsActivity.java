@@ -43,7 +43,6 @@ import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.android.PolyUtil;
 
@@ -502,28 +501,6 @@ public class MapsActivity
             sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
-    private void onMapTrackingButtonClick(View view) {
-        // Start or end the location tracking service
-        if (mIsReceivingLocationUpdates) {
-            // Change element styling
-            findViewById(R.id.viewFABPadding).setVisibility(View.GONE);
-            findViewById(R.id.laySheetHeader).setBackgroundColor(
-                    ContextCompat.getColor(this, R.color.color_primary_alt));
-            ((MaterialButton)findViewById(R.id.btnMapTracking)).setText(
-                    getString(R.string.ma_tracking_enable));
-            findViewById(R.id.btnMapTracking).setBackgroundColor(
-                    ContextCompat.getColor(this, R.color.color_primary_alt));
-
-            // End the location tracking service
-            mIsReceivingLocationUpdates = false;
-            stopReceivingLocationUpdates();
-
-        } else {
-            // Attempt to start the location tracking service
-            startReceivingLocationUpdates();
-        }
-    }
-
     private void togglePopoutButton() {
         if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
             // Change button style
@@ -567,7 +544,6 @@ public class MapsActivity
             findViewById(R.id.btnMapOverlayWind).setOnClickListener(this::onMapOverlayButtonClick);
             findViewById(R.id.btnMapOverlayPrecip).setOnClickListener(this::onMapOverlayButtonClick);
             findViewById(R.id.btnMapOverlayRisk).setOnClickListener(this::onMapOverlayButtonClick);
-            findViewById(R.id.btnMapTracking).setOnClickListener(this::onMapTrackingButtonClick);
         } catch (Exception e) {
             e.printStackTrace();
             return false;

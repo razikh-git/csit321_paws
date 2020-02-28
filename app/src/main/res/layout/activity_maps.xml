@@ -51,7 +51,8 @@
                         android:id="@+id/imgSearch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/places_ic_search" />
+                        android:src="@drawable/places_ic_search"
+                        android:contentDescription="@string/ma_search_hint" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -176,7 +177,8 @@
                                 android:adjustViewBounds="true"
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/map_default" />
+                                android:src="@drawable/map_default"
+                                android:contentDescription="@string/ma_default" />
 
                             <TextView
                                 android:id="@+id/txtMapTypeDefault"
@@ -209,7 +211,8 @@
                                 android:adjustViewBounds="true"
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/map_satellite" />
+                                android:src="@drawable/map_satellite"
+                                android:contentDescription="@string/ma_satellite" />
 
                             <TextView
                                 android:id="@+id/txtMapTypeSatellite"
@@ -242,7 +245,8 @@
                                 android:adjustViewBounds="true"
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/map_terrain" />
+                                android:src="@drawable/map_terrain"
+                                android:contentDescription="@string/ma_terrain" />
 
                             <TextView
                                 android:id="@+id/txtMapTypeTerrain"
@@ -278,6 +282,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:focusable="true"
                 android:clickable="true"
                 android:orientation="vertical" >
 
@@ -289,8 +294,18 @@
                     android:layout_height="wrap_content"
                     android:background="@color/color_primary_alt"
                     android:orientation="vertical"
-                    android:padding="@dimen/app_padding" >
+                    android:padding="@dimen/app_spacing" >
 
+                    <!-- Notch -->
+                    <View
+                        android:layout_width="20dp"
+                        android:layout_height="3dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="?android:attr/listDivider"/>
+
+                    <!-- Address and coordinates -->
                     <TextView
                         android:id="@+id/txtSheetTitle"
                         android:layout_width="match_parent"
@@ -319,7 +334,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:orientation="horizontal" >
+                        android:orientation="horizontal"
+                        android:baselineAligned="false" >
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -400,29 +416,6 @@
                         </LinearLayout>
 
                     </LinearLayout>
-
-                </LinearLayout>
-
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="?android:attr/listDivider" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/app_gutter"
-                    android:orientation="vertical" >
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnMapTracking"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/height_buttons_block"
-                        android:backgroundTint="@color/color_accent"
-                        android:padding="@dimen/padding_buttons"
-                        android:textSize="@dimen/text_size_button_large"
-                        android:text="@string/ma_tracking_enable" />
 
                 </LinearLayout>
 
