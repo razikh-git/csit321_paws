@@ -1,5 +1,5 @@
 <resources>
-    <!-- Units Preference. -->
+    <!-- Units Preferences -->
     <string-array name="units_entries">
         <item>Metric</item>
         <item>Imperial</item>
@@ -10,18 +10,35 @@
         <item>imperial</item>
     </string-array>
 
-    <!-- Location Usage Preference. -->
+    <!-- Notifications Preferences -->
+    <string-array name="notif_interval_entries">
+        <item>Every five days</item>
+        <item>Every two days</item>
+        <item>Every day</item>
+        <item>Twice a day</item>
+        <item>Never</item>
+    </string-array>
+
+    <string-array name="notif_interval_values">
+        <item>120</item>
+        <item>48</item>
+        <item>24</item>
+        <item>12</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Location Usage Preferences -->
     <string-array name="location_priority_entries">
-        <item>Highest accuracy</item>
         <item>Balanced</item>
         <item>Lowest battery usage</item>
+        <item>Highest accuracy</item>
         <item>Disabled</item>
     </string-array>
 
     <string-array name="location_priority_values">
-        <item>100</item>    <!-- High-power -->
         <item>102</item>    <!-- Balanced -->
         <item>104</item>    <!-- Low-power -->
+        <item>100</item>    <!-- High-power -->
         <item>105</item>    <!-- Disabled -->
     </string-array>
 

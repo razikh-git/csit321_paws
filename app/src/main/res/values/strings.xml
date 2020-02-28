@@ -259,16 +259,17 @@
     <string name="wa_sunset">Sunset</string>
 
     <!-- Mapping Activity. -->
-    <string name="ma_wind">Wind</string>
-    <string name="ma_precip">Precipitation</string>
-    <string name="ma_risk">Drawings</string>
-    <string name="ma_tracking_enable">Start tracking my journey</string>
-    <string name="ma_tracking_disable">End tracking</string>
-    <string name="ma_search_hint">Search</string>
     <string name="ma_map_type">Map Type</string>
     <string name="ma_default">Default</string>
     <string name="ma_satellite">Satellite</string>
     <string name="ma_terrain">Terrain</string>
+
+    <string name="ma_layers">Weather Graphs</string>
+    <string name="ma_wind">Wind</string>
+    <string name="ma_precip">Precipitation</string>
+    <string name="ma_risk">Drawings</string>
+
+    <string name="ma_search_hint">Search</string>
 
     <string name="ma_location_usage_disabled">
         "Location usage is currently disabled.\n"
@@ -295,8 +296,11 @@
     <string name="pref_title_time">Time format</string>
 
     <!-- Notifications Preferences. -->
-    <string name="pref_title_notif_category">Suppress weather notices between:</string>
-    <string name="pref_title_notif_freq">Frequency</string>
+    <string name="pref_title_notif_heading">Show weather updates between:</string>
+    <string name="pref_title_notif_picker_start">From:</string>
+    <string name="pref_title_notif_picker_end">Until:</string>
+
+    <string name="pref_title_notif_interval">Send weather updates:</string>
 
     <!-- Location Preferences. -->
     <string name="pref_title_location_usage">Location precision</string>

@@ -4,8 +4,8 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.View;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -19,25 +19,14 @@ import java.util.Calendar;
 public class SettingsActivity extends BottomNavBarActivity {
     private static final String TAG = "snowpaws_settings";
 
-    private static final String PACKAGE_NAME = "com.amw188.csit321_paws";
-
-    static final String TIME_START_EXTRA = PACKAGE_NAME + ".extra.TIME_START";
-    static final String TIME_END_EXTRA = PACKAGE_NAME + ".extra.TIME_END";
-
-    static final String KEY_PREF_LOCATION_PRIORITY = "location_priority";
-    static final String KEY_PREF_LOCATION_RATE = "location_rate";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_settings);
 
-        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
-                getString(R.string.app_global_preferences), MODE_PRIVATE);
-
         // Button functionality.
-        findViewById(R.id.btnReset).setOnClickListener((view) -> onClickReset(view));
+        findViewById(R.id.btnReset).setOnClickListener(this::onClickReset);
 
         // Bottom navigation bar functionality.
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
@@ -64,51 +53,78 @@ public class SettingsActivity extends BottomNavBarActivity {
 
             // todo: add listpreference picker of notification frequency to arrays / stringperfs
 
-            // Update time picker preference interactions
-            Preference pref;
+			// Update time picker preference display and interactions
+			Preference pref;
+			String[] str;
+			Calendar now = Calendar.getInstance();
+
+			pref = findPreference("notif_time_heading");
+			pref.setEnabled(false);
 
             pref = findPreference("notif_time_start");
-            pref.setOnPreferenceClickListener(this::onClickNotifTime);
-            pref.setTitle(sharedPref.getString("weather_notif_time_start",
-                    getString(R.string.app_default_weather_notif_time_start)));
+            pref.setOnPreferenceClickListener(this::onClickNotifTimePreference);
+            str = sharedPref.getString("weather_notif_time_start",
+					getString(R.string.app_default_weather_notif_time_start))
+					.split(":");
+			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
+			now.set(Calendar.MINUTE, Integer.parseInt(str[1]));
+            pref.setTitle(DateFormat.format("hh:mm a", now));
 
             pref = findPreference("notif_time_end");
-            pref.setOnPreferenceClickListener(this::onClickNotifTime);
-            pref.setTitle(sharedPref.getString("weather_notif_time_end",
-                    getString(R.string.app_default_weather_notif_time_end)));
-
+            pref.setOnPreferenceClickListener(this::onClickNotifTimePreference);
+			str = sharedPref.getString("weather_notif_time_end",
+					getString(R.string.app_default_weather_notif_time_end))
+					.split(":");
+			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
+			now.set(Calendar.MINUTE, Integer.parseInt(str[1]));
+			pref.setTitle(DateFormat.format("hh:mm a", now));
         }
 
-        private boolean onClickNotifTime(Preference pref) {
-            Calendar now = Calendar.getInstance();
-            final int hour = now.get(Calendar.HOUR_OF_DAY);
-            final int minute = now.get(Calendar.MINUTE);
+        private boolean onClickNotifTimePreference(Preference pref) {
             SharedPreferences sharedPref = getContext().getSharedPreferences(
                     getString(R.string.app_global_preferences), MODE_PRIVATE);
 
+            final boolean isStartTimePref = pref.getKey().equals("notif_time_start");
+
+			String[] str = (isStartTimePref
+					? sharedPref.getString("weather_notif_time_start",
+					getString(R.string.app_default_weather_notif_time_start))
+					: sharedPref.getString("weather_notif_time_end",
+					getString(R.string.app_default_weather_notif_time_end)))
+					.split(":");
+
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
-                    (timePicker, dialogHour, dialogMinute) -> {
-                SharedPreferences.Editor sharedEditor = sharedPref.edit();
-                final String timeStr = dialogHour + ":" + dialogMinute;
-                final String prefKey = pref.getKey().equals("notif_time_start")
-                        ? "weather_notif_time_start"
-                        : "weather_notif_time_end";
-                sharedEditor.putString(prefKey, timeStr);
-                sharedEditor.apply();
+                    (timePicker, dialogHour, dialogMinute) ->
+					{
+						/* TimePicker completed action */
 
-                // todo: bind manager service, message to reschedule weather notifications
+						// Set the notification time bounds display on complete
+						Calendar now = Calendar.getInstance();
+						now.set(Calendar.HOUR_OF_DAY, dialogHour);
+						now.set(Calendar.MINUTE, dialogMinute);
+						final String timeStr = dialogHour + ":" + dialogMinute;
+						final String prefKey = isStartTimePref
+								? "weather_notif_time_start"
+								: "weather_notif_time_end";
+						pref.setTitle(DateFormat.format("hh:mm a", now));
 
-                Toast.makeText(getContext(),
-                        "Time: " + timeStr + " -- " + prefKey,
-                        Toast.LENGTH_LONG)
-                        .show();
-                }, hour, minute, false);
-            timePickerDialog.setTitle(
-                    pref.getKey().equals("notif_time_start")
-                            ? sharedPref.getString("weather_notif_time_start",
-                            getString(R.string.app_default_weather_notif_time_start))
-                            : sharedPref.getString("weather_notif_time_start",
-                            getString(R.string.app_default_weather_notif_time_end)));
+						// Push changes to shared preferences
+						SharedPreferences.Editor sharedEditor = sharedPref.edit();
+						sharedEditor.putString(prefKey, timeStr);
+						sharedEditor.apply();
+
+						// todo: bind manager service, message to reschedule weather notifications
+
+						/* TimePicker completed action */
+					},
+					// Use current existing preferences as default for the time picker
+					Integer.parseInt(str[0]),
+					Integer.parseInt(str[1]),
+					false);
+
+            timePickerDialog.setTitle(isStartTimePref
+					? getString(R.string.pref_title_notif_picker_start)
+					: getString(R.string.pref_title_notif_picker_end));
             timePickerDialog.show();
             return true;
         }

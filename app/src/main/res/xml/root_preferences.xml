@@ -31,8 +31,17 @@
 
     <PreferenceCategory app:title="@string/pref_heading_notifications">
 
+        <ListPreference
+            app:defaultValue="24"
+            app:entries="@array/notif_interval_entries"
+            app:entryValues="@array/notif_interval_values"
+            app:key="weather_notif_interval"
+            app:title="@string/pref_title_notif_interval"
+            app:useSimpleSummaryProvider="true" />
+
         <Preference
-            app:title="Notification end time" />
+            app:key="notif_time_heading"
+            app:title="@string/pref_title_notif_heading" />
 
         <Preference
             app:key="notif_time_start" />
@@ -61,5 +70,7 @@
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
+
+    <PreferenceCategory/>
 
 </PreferenceScreen>

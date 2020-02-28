@@ -4,7 +4,7 @@
     <integer name="app_default_loc_min_interval">5000</integer>
     <integer name="app_default_loc_min_distance">0</integer>
 
-    <integer name="app_default_weather_notif_hours_interval">24</integer>
+    <integer name="app_default_weather_notif_interval">24</integer>
 
     <integer name="survey_question_count">20</integer>
 
