@@ -36,17 +36,17 @@ class WeatherHandler {
         mHostListener = listener;
     }
 
-    boolean updateWeather(Context ctx, LatLng latLng, boolean isMetric) {
+    boolean updateWeather(Context context, LatLng latLng, boolean isMetric) {
         // Generate URL and request OWM data
         try {
-            SharedPreferences sharedPref = ctx.getSharedPreferences(
-                    ctx.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+            SharedPreferences sharedPref = context.getSharedPreferences(
+                    context.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
 
             // Decide whether to update current weather data
             JSONObject lastWeather = new JSONObject(
                     sharedPref.getString("last_weather_json", "{}"));
 
-            if (lastWeather == null || lastWeather.toString().equals("{}") || lastWeather.length() == 0) {
+            if (lastWeather.toString().equals("{}") || lastWeather.length() == 0) {
                 Log.d(TAG,
                         "Fetching new weather data: Last weather data does not exist.");
             } else {
@@ -101,7 +101,7 @@ class WeatherHandler {
             }
 
             // Fetch the complete weather data
-            getWeather(ctx, latLng, isMetric);
+            getWeather(context, latLng, isMetric);
 
         } catch (JSONException ex) {
             ex.printStackTrace();
@@ -109,22 +109,16 @@ class WeatherHandler {
         return true;
     }
 
-    private void getWeather(Context ctx, LatLng latLng, boolean isMetric) {
+    private void getWeather(Context context, LatLng latLng, boolean isMetric) {
 
-        SharedPreferences sharedPref = ctx.getSharedPreferences(
-                ctx.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                context.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Generate URL and request queue
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String url = ctx.getResources().getString(R.string.app_url_owm_weather_root)
-                + "data/2.5/"
-                + "forecast"
-                + "?lat=" + latLng.latitude + "&lon=" + latLng.longitude
-                + "&units=" + (isMetric ? "metric" : "imperial")
-                + "&lang=" + ctx.getResources().getConfiguration().locale.getDisplayLanguage()
-                + "&mode=" + "json"
-                + "&appid=" + ctx.getResources().getString(R.string.open_weather_maps_key);
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = OpenWeatherMapIntegration.getOWMURL(context, latLng);
+        Log.d(TAG, "URL:\n" + url);
 
         // Generate and post the request.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,

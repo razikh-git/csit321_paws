@@ -62,7 +62,6 @@ public class NotificationService extends Service {
 	private FusedLocationProviderClient mLocationClient;
 	private LocationCallback mLocationCallback;
 	private LocationResultListener mHostListener;
-	private LocationRequest mLocationRequest;
 	interface LocationResultListener {
 		void onLocationResultReceived(LocationResult locationResult);
 	}
@@ -135,10 +134,21 @@ public class NotificationService extends Service {
 	private void init() {
 		Log.i(TAG, "in init()");
 
+		// Initialise location utilities
+		mLocationClient = new FusedLocationProviderClient(getApplicationContext());
 		mLocationCallback = new LocationCallback() {
 			@Override
 			public void onLocationResult(LocationResult locationResult) {
 				super.onLocationResult(locationResult);
+
+				// debug code
+				if (locationResult != null) {
+					Log.d(TAG, "LocationCallback: "
+							+ locationResult.getLastLocation().getLatitude()
+							+ ", " + locationResult.getLastLocation().getLongitude());
+				}
+				// debug code
+
 				if (locationResult != null && mHostListener != null) {
 					mHostListener.onLocationResultReceived(locationResult);
 				} else {
@@ -164,18 +174,23 @@ public class NotificationService extends Service {
 		// Schedule regular weather notifications
 		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
 				getString(R.string.app_global_preferences), MODE_PRIVATE);
-		if (sharedPref.getBoolean("weather_notifications_allowed", true)) {
-			final String[] timeInitial = sharedPref.getString("weather_notification_time_start",
+		final int timeInterval = Integer.parseInt(
+				sharedPref.getString("weather_notif_interval",
+				Integer.toString(getResources().getInteger(
+						R.integer.app_default_weather_notif_interval))));
+		if (timeInterval > 0) {
+			final String[] timeInitial = sharedPref.getString("weather_notif_time_start",
 					getResources().getString(
 							R.string.app_default_weather_notif_time_start))
 					.split(":");
-			final int timeInterval = sharedPref.getInt("weather_notification_interval",
-					getResources().getInteger(
-							R.integer.app_default_weather_notif_hours_interval));
 			scheduleWeatherNotifications(
 					Integer.parseInt(timeInitial[0]), Integer.parseInt(timeInitial[1]),
 					timeInterval);
 		}
+
+		// debug code
+		startLocationUpdates();
+		// debug code
 	}
 
 	/**
@@ -215,44 +230,51 @@ public class NotificationService extends Service {
 	 */
 	@TargetApi(23)
 	private Notification getServiceNotification() {
-		// Routines for user interactions with buttons in the notification
+		// Generate a notification with a simple template of content
 		PendingIntent servicePendingIntent = PendingIntent.getService(
 				this, 0, new Intent(
 						this, this.getClass()),
 				PendingIntent.FLAG_UPDATE_CURRENT);
 
-		// Generate a notification with a simple template of content
 		NotificationCompat.Builder builder;
 		builder = new NotificationCompat.Builder(
 				this, NOTIFICATION_CHANNEL_ID)
-				.addAction(R.drawable.ic_paws_icon, "HELLO HELLO",
+				.addAction(R.drawable.ic_paws_icon, getString(R.string.label_service),
 						servicePendingIntent)
-				.setContentText("YOU SAY GOODBYE")
-				.setContentTitle("I DONT KNOW WHY YOU SAY GOODBYE")
 				.setOngoing(true)
 				.setPriority(Notification.PRIORITY_HIGH)
 				.setSmallIcon(R.drawable.ic_paws_logo)
-				.setTicker("I SAY HELLO")
 				.setWhen(System.currentTimeMillis());
 
 		Notification notif = builder.build();
 		notif.flags |= Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR;
-
 		return notif;
 	}
 
 	/* Custom Location Methods */
 
 	public void startLocationUpdates() {
-		Log.i(TAG, "in startLocationUpdates()");
+		Log.d(TAG, "in startLocationUpdates()");
 
 		if (mIsRequestingLocationUpdates) {
-			Log.i(TAG, "Will not start location updates.");
+			Log.d(TAG, "Will not start location updates. Already preoccupied.");
 			return;
 		}
+
+		SharedPreferences sharedPref = getSharedPreferences(
+				getString(R.string.app_global_preferences), MODE_PRIVATE);
+		LocationRequest locationRequest = new LocationRequest()
+				.setPriority(Integer.parseInt(sharedPref.getString(
+						"location_priority",
+						Integer.toString(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY))))
+				.setInterval(Integer.parseInt(sharedPref.getString(
+						"location_rate",
+						Integer.toString(R.integer.app_default_loc_min_interval))));
+
 		mIsRequestingLocationUpdates = true;
 		mLocationClient.requestLocationUpdates(
-				mLocationRequest, mLocationCallback, Looper.getMainLooper());
+				locationRequest, mLocationCallback, Looper.getMainLooper());
+		Log.d(TAG, "Started location updates.");
 	}
 
 	public void stopLocationUpdates() {

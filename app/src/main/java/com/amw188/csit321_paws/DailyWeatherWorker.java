@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.text.format.DateFormat;
 import android.util.Log;
 
@@ -15,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +67,8 @@ public class DailyWeatherWorker extends Worker {
         if (timeUntilStart < 0 && timeUntilEnd > 0) {
             Log.d(TAG, "Within hourly bounds for sending notification.");
             result = pushWeatherNotification();
+        } else {
+            Log.d(TAG, "Was not in hourly bounds for sending notification.");
         }
 
         return result;
@@ -96,6 +99,19 @@ public class DailyWeatherWorker extends Worker {
      */
     private Notification getWeatherNotification() {
         Log.d(TAG, "in getWeatherNotification()");
+
+        // debug code
+        try {
+        	final JSONObject debugJSON = new JSONObject(
+					mSharedPref.getString("last_weather_json", "{}"))
+					.getJSONObject("lat_lng");
+			final LatLng latLng = new LatLng(debugJSON.getDouble("latitude"),
+					debugJSON.getDouble("longitude"));
+			Log.d(TAG, "URL: " + OpenWeatherMapIntegration.getOWMURL(mContext, latLng));
+		} catch (JSONException ex) {
+        	Log.e(TAG, "couldnt get URL, we blew it");
+		}
+		// debug code
 
         // todo: include weather information local to some place
         // store recent and favourite places to refer to
@@ -138,11 +154,13 @@ public class DailyWeatherWorker extends Worker {
                         startTime, weatherJSON.getJSONArray("list"));
                 mLastDailySample = now;
 
+				// debug code
                 Log.d(TAG, "mDailyTemps:");
                 String debugstr = "Added: ";
                 for (double temp : mDailyTemps)
                     debugstr += PAWSAPI.getTemperatureString(temp) + " ";
                 Log.d(TAG, debugstr);
+				// debug code
             }
 
             // Set the notification icon for the coming weather conditions
@@ -206,13 +224,13 @@ public class DailyWeatherWorker extends Worker {
     }
 
     private String[] getStartTime() {
-        return mSharedPref.getString("weather_notification_time_start",
+        return mSharedPref.getString("weather_notif_time_start",
                 mContext.getResources().getString(R.string.app_default_weather_notif_time_start))
                 .split(":");
     }
 
     private String[] getEndTime() {
-        return mSharedPref.getString("weather_notification_time_end",
+        return mSharedPref.getString("weather_notif_time_end",
                 mContext.getResources().getString(R.string.app_default_weather_notif_time_end))
                 .split(":");
     }

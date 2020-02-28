@@ -44,13 +44,12 @@ public class MainActivity extends AppCompatActivity {
             sharedEditor.putLong("selfanalysis_time_completed", 0);
             sharedEditor.putBoolean("facebook_init", false);
             sharedEditor.putBoolean("app_init", true);
-            sharedEditor.putBoolean("weather_notif_allowed", true);
-            sharedEditor.putString("weather_notif_time_start", getResources().getString(
-                    R.string.app_default_weather_notif_time_start));
-            sharedEditor.putString("weather_notif_time_end", getResources().getString(
-                    R.string.app_default_weather_notif_time_end));
-            sharedEditor.putInt("weather_notif_interval", getResources().getInteger(
-                    R.integer.app_default_weather_notif_hours_interval));
+            sharedEditor.putString("weather_notif_time_start",
+                    getResources().getString(R.string.app_default_weather_notif_time_start));
+            sharedEditor.putString("weather_notif_time_end",
+                    getResources().getString(R.string.app_default_weather_notif_time_end));
+            sharedEditor.putString("weather_notif_interval", Integer.toString(
+                    getResources().getInteger(R.integer.app_default_weather_notif_interval)));
             sharedEditor.apply();
 
             // Display a prompt for the user to begin profiling
