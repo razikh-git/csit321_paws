@@ -25,8 +25,10 @@ import androidx.core.app.NotificationCompat;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -74,7 +76,6 @@ public class NotificationService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.i(TAG, "in onBind()");
-		//stopForeground(true);
 		return binder;
 	}
 
@@ -140,15 +141,6 @@ public class NotificationService extends Service {
 			@Override
 			public void onLocationResult(LocationResult locationResult) {
 				super.onLocationResult(locationResult);
-
-				// debug code
-				if (locationResult != null) {
-					Log.d(TAG, "LocationCallback: "
-							+ locationResult.getLastLocation().getLatitude()
-							+ ", " + locationResult.getLastLocation().getLongitude());
-				}
-				// debug code
-
 				if (locationResult != null && mHostListener != null) {
 					mHostListener.onLocationResultReceived(locationResult);
 				} else {
@@ -171,6 +163,9 @@ public class NotificationService extends Service {
 		Notification notif = getServiceNotification();
 		startForeground(NOTIFICATION_ID, notif);
 
+		// Push an initial weather notification
+		//pushOneTimeWeatherNotification();
+
 		// Schedule regular weather notifications
 		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
 				getString(R.string.app_global_preferences), MODE_PRIVATE);
@@ -189,7 +184,7 @@ public class NotificationService extends Service {
 		}
 
 		// debug code
-		startLocationUpdates();
+		//startLocationUpdates();
 		// debug code
 	}
 
@@ -284,6 +279,23 @@ public class NotificationService extends Service {
 		mLocationClient.removeLocationUpdates(mLocationCallback);
 	}
 
+	private Constraints getWorkConstraints() {
+		return new Constraints.Builder()
+				.setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+				.build();
+	}
+
+	/**
+	 * Post a single weather notification as soon as possible.
+	 */
+	private void pushOneTimeWeatherNotification() {
+		OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(
+				DailyWeatherWorker.class)
+				.setConstraints(getWorkConstraints())
+				.build();
+		WorkManager.getInstance(this).enqueue(workRequest);
+	}
+
 	/**
 	 * Schedule periodic weather notifications starting at a certain coming hour.
 	 * @param hour Hour where notifications may begin to be sent.
@@ -317,14 +329,11 @@ public class NotificationService extends Service {
 				Toast.LENGTH_LONG).show();
 
 		// Queue up daily weather notifications for the user
-		Constraints constraints = new Constraints.Builder()
-				.setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-				.build();
 		PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
-				//DailyWeatherWorker.class, interval, TimeUnit.HOURS)
-				DailyWeatherWorker.class, 15, TimeUnit.MINUTES)
-				.setConstraints(constraints)
-				//.setInitialDelay(timeDelay, TimeUnit.MILLISECONDS)
+				DailyWeatherWorker.class, interval, TimeUnit.HOURS)
+				//DailyWeatherWorker.class, 15, TimeUnit.MINUTES)
+				.setConstraints(getWorkConstraints())
+				.setInitialDelay(timeDelay, TimeUnit.MILLISECONDS)
 				.addTag(DailyWeatherWorker.WORK_TAG)
 				.build();
 		WorkManager.getInstance(this).enqueueUniquePeriodicWork(

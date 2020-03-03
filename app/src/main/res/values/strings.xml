@@ -73,6 +73,8 @@
     <string name="app_btn_optout">opt-out</string>
     <string name="app_btn_perm_grant">accept</string>
     <string name="app_btn_perm_deny">later</string>
+    <string name="app_btn_favorite">favorite</string>
+    <string name="app_btn_info">more info</string>
 
     <!-- Permissions popups. -->
     <string name="app_title_request_loc_coarse">Vague location data</string>
@@ -94,7 +96,7 @@
     </string>
 
     <!-- Generic text strings. -->
-    <string name="app_txt_placeholder">placeholder</string>
+    <string name="app_txt_placeholder">PLACEHOLDER TEXT</string>
     <string name="app_txt_fallback">Unable to load information at this time.</string>
 
     <!-- Bottom navigation bar. -->
@@ -270,6 +272,8 @@
     <string name="ma_risk">Drawings</string>
 
     <string name="ma_search_hint">Search</string>
+
+    <string name="ma_location_unknown">Unknown</string>
 
     <string name="ma_location_usage_disabled">
         "Location usage is currently disabled.\n"

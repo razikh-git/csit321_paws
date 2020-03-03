@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.os.ResultReceiver;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -21,13 +22,15 @@ import java.util.ArrayList;
 
 class LocationActivity extends PermissionActivity {
 
-	protected ArrayList<Address> mAddress;
+	private String TAG = "snowpaws_la";
+
+	protected ArrayList<Address> mAddressList;
 	protected MapsActivity.AddressResultReceiver mAddressReceiver;
 	protected Location mLocation;
 	protected FusedLocationProviderClient mFusedLocationClient;
 
 	class AddressResultReceiver extends ResultReceiver {
-		public AddressResultReceiver(Handler handler) {
+		AddressResultReceiver(Handler handler) {
 			super(handler);
 		}
 
@@ -36,12 +39,12 @@ class LocationActivity extends PermissionActivity {
 			if (resultData == null)
 				return;
 			String error = resultData.getString(FetchAddressCode.RESULT_DATA_KEY);
-			if (error.equals(""))
-				mAddress = resultData.getParcelableArrayList(
+			if (error == null || error.equals(""))
+				mAddressList = resultData.getParcelableArrayList(
 						FetchAddressCode.RESULT_ADDRESSLIST_KEY);
 			else
 				return;
-			// Update the interface with the new location.
+			// Update the interface with the new location
 			onAddressReceived();
 		}
 	}
@@ -53,13 +56,33 @@ class LocationActivity extends PermissionActivity {
 		mAddressReceiver = new AddressResultReceiver(new Handler());
 	}
 
+	protected String[] getAddress(ArrayList<Address> addressList) {
+		String[] addressLine = null;
+		try {
+			Log.d(TAG, "addressList: " + addressList.toString());
+			addressLine = addressList.get(0).getAddressLine(0)
+					.split(", ", 3);
+		} catch (NullPointerException ex) {
+			Log.e(TAG, "Failed to read from null address object.");
+			ex.printStackTrace();
+		}
+		return addressLine;
+	}
+
+	protected String getAbbreviatedAddress(ArrayList<Address> addressList) {
+		String[] addressLine = getAddress(addressList);
+		return addressLine.length > 0
+				? addressLine[Math.max(0, addressLine.length - 2)]
+				: null;
+	}
+
 	protected void fetchAddress() {
 		FetchAddressIntentService.startActionFetchAddress(this,
 				mAddressReceiver, mLocation);
 	}
 
 	protected void fetchLocation() {
-		// Prepare the initial location information.
+		// Prepare the initial location information
 		mFusedLocationClient.getLastLocation().addOnSuccessListener(
 				(location -> {
 					mLocation = location;
@@ -91,7 +114,8 @@ class LocationActivity extends PermissionActivity {
 						 */
 						return;
 					}
-					// Push an error message on geocoder failure.
+					// todo: push this as a dialog fragment
+					// Push an error message on geocoder failure
 					if (!Geocoder.isPresent()) {
 						Toast.makeText(this,
 								R.string.sv_fa_geocoder_unavailable,

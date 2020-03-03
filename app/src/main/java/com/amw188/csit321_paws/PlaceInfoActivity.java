@@ -20,7 +20,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WeatherActivity
+public class PlaceInfoActivity
         extends
                 BottomNavBarActivity
         implements
@@ -37,7 +37,7 @@ public class WeatherActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_weather);
+        setContentView(R.layout.activity_place_info);
 
         // Load global preferences
          mSharedPref = this.getSharedPreferences(
@@ -53,10 +53,10 @@ public class WeatherActivity
             if (savedInstanceState == null) {
                 Bundle extras = getIntent().getExtras();
                 if (extras != null) {
-                    Log.d(TAG, "WeatherActivity identified parcelable extras.");
+                    Log.d(TAG, "PlaceInfoActivity identified parcelable extras.");
                     latLng = extras.getParcelable(RequestCode.EXTRA_LATLNG);
                 } else {
-                    Log.d(TAG, "No parcelable extras bundled in call to WeatherActivity.");
+                    Log.d(TAG, "No parcelable extras bundled in call to PlaceInfoActivity.");
                 }
             }
             if (latLng == null) {
@@ -528,12 +528,12 @@ public class WeatherActivity
             str = (DateFormat.format("h:mm a",
                     weatherForecastJSON.getJSONObject("city")
                             .getLong("sunrise") * 1000)).toString();
-            ((TextView)findViewById(R.id.txtSunrise)).setText(str);
+            ((TextView)findViewById(R.id.txtSunriseTime)).setText(str);
 
             str = (DateFormat.format("h:mm a",
                     weatherForecastJSON.getJSONObject("city")
                             .getLong("sunset") * 1000)).toString();
-            ((TextView)findViewById(R.id.txtSunset)).setText(str);
+            ((TextView)findViewById(R.id.txtSunsetTime)).setText(str);
 
         } catch (JSONException e) {
             e.printStackTrace();

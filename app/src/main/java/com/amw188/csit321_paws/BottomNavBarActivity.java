@@ -45,7 +45,7 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
     public void onClickWeather() {
         // Redirect to home screen.
         this.finish();
-        Intent intent = new Intent(this, WeatherActivity.class);
+        Intent intent = new Intent(this, PlaceInfoActivity.class);
         startActivity(intent);
     }
 

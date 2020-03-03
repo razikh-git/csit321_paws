@@ -42,7 +42,7 @@ public class DailyWeatherWorker extends Worker {
     private ArrayList<Double> mDailyWindBearing;
     private ArrayList<Double> mDailyCloud;
 
-    public DailyWeatherWorker(
+    DailyWeatherWorker(
             @NonNull Context context,
             @NonNull WorkerParameters params) {
         super(context, params);
@@ -78,7 +78,7 @@ public class DailyWeatherWorker extends Worker {
      * Fetches and then posts a weather notification.
      * @return Operation success.
      */
-    private Result pushWeatherNotification() {
+    Result pushWeatherNotification() {
         final NotificationManager manager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         if (manager == null) {
@@ -206,7 +206,7 @@ public class DailyWeatherWorker extends Worker {
 
         // Assemble and build the notification
         PendingIntent contentIntent = PendingIntent.getActivity(
-                mContext, 0, new Intent(mContext, WeatherActivity.class),
+                mContext, 0, new Intent(mContext, PlaceInfoActivity.class),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(
                 mContext, WEATHER_CHANNEL_ID)

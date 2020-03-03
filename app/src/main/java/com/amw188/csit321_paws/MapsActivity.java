@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
@@ -28,6 +29,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
@@ -57,7 +59,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 
-// todo: request permissions for FOREGROUND_SERVICE in APIs 28+
+// todo: custom marker style/drawable for favourite locations
 
 public class MapsActivity
         extends
@@ -97,6 +99,7 @@ public class MapsActivity
     private boolean mIsPolyDrawing;
     private Polyline mPolyLine;
     private List<Polygon> mPolyList = new ArrayList<>();
+    private View mInfoWindow;
 
     // OpenWeatherMaps
     private String mTileOverlayURL;
@@ -138,7 +141,7 @@ public class MapsActivity
     /**
      * Custom info window implementation for location map markers.
      */
-    public class CustomInfoWindow implements GoogleMap.InfoWindowAdapter {
+    public class CustomInfoAdapter implements GoogleMap.InfoWindowAdapter {
         @Override
         public View getInfoWindow(Marker marker) {
             return null;
@@ -146,8 +149,42 @@ public class MapsActivity
 
         @Override
         public View getInfoContents(Marker marker) {
-            return null;
+            return setupInfoWindow(marker);
         }
+    }
+
+    private View setupInfoWindow(Marker marker) {
+        Log.d(TAG, "in setupInfoWindow()");
+
+        // Title - Location name
+        String[] abbreviatedAddress = getAbbreviatedAddress(mAddressList).split(" ");
+        StringBuilder title = new StringBuilder();
+        final int end = Math.max(0, abbreviatedAddress.length - 2);
+        for (int i = 0; i < end; ++i)
+            title.append(abbreviatedAddress[i]).append(' ');
+        ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).setText(
+                title);
+
+        // Subtitle - Location broader area
+        StringBuilder subtitle = new StringBuilder();
+        for (int i = end; i < abbreviatedAddress.length; ++i)
+            subtitle.append(abbreviatedAddress[i]).append(' ');
+        ((TextView)mInfoWindow.findViewById(R.id.txtInfoSubtitle)).setText(
+                subtitle);
+
+        // Body text - Place and weather summary
+        ((TextView)mInfoWindow.findViewById(R.id.txtInfoContent)).setText(
+                marker.getSnippet());
+
+        // todo: check for favourite location
+        mInfoWindow.findViewById(R.id.imgFavorite).setBackgroundResource(
+                R.drawable.ic_star);
+    	return mInfoWindow;
+	}
+
+	private void onInfoWindowClick(Marker marker) {
+        Log.d(TAG, "in onInfoWindowClick()");
+        onMapWeatherRedirectClick(mMapView);
     }
 
     @Override
@@ -170,6 +207,9 @@ public class MapsActivity
         // Load the activity layout
         setContentView(R.layout.activity_maps);
 
+        mInfoWindow = getLayoutInflater().inflate(
+        		R.layout.view_infowindow, mMapView, false);
+
         // Bottom navigation bar functionality
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -183,7 +223,6 @@ public class MapsActivity
                 initActivity();
             }
         }
-
     }
 
     private void initActivity() {
@@ -203,7 +242,7 @@ public class MapsActivity
 
     private void onMapWeatherRedirectClick(View view) {
         // Redirect to weather screen with data from the current marker
-        Intent intent = new Intent(this, WeatherActivity.class);
+        Intent intent = new Intent(this, PlaceInfoActivity.class);
         if (mLocation != null) {
             intent.putExtra(RequestCode.EXTRA_LATLNG,
                     new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
@@ -613,7 +652,8 @@ public class MapsActivity
         googleMap.setOnMapLongClickListener(this::onMapDefaultLongClick);
 
         // Enable custom info windows
-        googleMap.setInfoWindowAdapter(new CustomInfoWindow());
+        googleMap.setInfoWindowAdapter(new CustomInfoAdapter());
+        googleMap.setOnInfoWindowClickListener(this::onInfoWindowClick);
 
         // Highlight elements for the default map type
         final int pad = BTN_STROKE_WIDTH;
@@ -621,8 +661,15 @@ public class MapsActivity
         ((TextView)findViewById(R.id.txtMapTypeDefault)).setTextColor(
                 ContextCompat.getColor(this, R.color.color_accent_alt));
 
-        // Set the map type
+        // Set map type
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        // Set map style
+        final int nightMode = getResources().getConfiguration()
+                .uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (nightMode == Configuration.UI_MODE_NIGHT_YES)
+            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
+                    this, R.raw.google_maps_night_style));
 
         // Setup map polyline graphics
         PolylineOptions polyOptions = new PolylineOptions();
@@ -710,7 +757,7 @@ public class MapsActivity
         String str;
 
         // Debug print the full address
-        for (Address address : mAddress) {
+        for (Address address : mAddressList) {
             for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                 Log.d(TAG, address.getAddressLine(i));
             }
@@ -728,35 +775,40 @@ public class MapsActivity
         mMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(mLocation.getLatitude(), mLocation.getLongitude())));
 
-        // Set the location title
-        // eg. 95 Iris St, Beacon Hill NSW 2100, Australia
-        // ==> Beacon Hill NSW 2100
         ((TextView)findViewById(R.id.txtSheetTitle)).setText("");
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText("");
-        if (mAddress != null) {
-            // TODO fix out of bounds exception for null address length.....
-            str = mAddress.get(0).getAddressLine(0).split(", ", 3)[1];
-            ((TextView)findViewById(R.id.txtSheetTitle)).setText(str);
-            mMarker.setTitle(str);
-            mMarker.setSnippet("hello");
-            mMarker.showInfoWindow();
-            // todo: change snippet to something useful
+        if (mAddressList != null) {
 
-            // Set the coordinates display.
-            str = new DecimalFormat("#.##").format(mAddress.get(0).getLongitude());
-            str += " " + new DecimalFormat("#.##").format(mAddress.get(0).getLatitude());
+            // Set the location title
+            // eg. 95 Iris St, Beacon Hill NSW 2100, Australia
+            // ==> Beacon Hill NSW 2100
+            ((TextView)findViewById(R.id.txtSheetTitle)).setText(
+                    getAbbreviatedAddress(mAddressList));
+
+            // Give address to the InfoWindow view to format
+            str = mAddressList.get(0).getAddressLine(0);
+            mMarker.setTitle(str);
+
+            // todo: infowindow body text
+            // Fill out body text summary for the location
+            str = getString(R.string.app_txt_placeholder);
+            mMarker.setSnippet(str);
+            mMarker.showInfoWindow();
+
+            // Set the coordinates setupInfoWindow.
+            str = new DecimalFormat("#.##").format(mAddressList.get(0).getLongitude());
+            str += " " + new DecimalFormat("#.##").format(mAddressList.get(0).getLatitude());
             ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
 
-            // Set the coordinates display.
-            final double lng = mAddress.get(0).getLongitude();
-            final double lat = mAddress.get(0).getLatitude();
+            // Set the coordinates setupInfoWindow.
+            final double lng = mAddressList.get(0).getLongitude();
+            final double lat = mAddressList.get(0).getLatitude();
             final char bearingLng = lng > 0 ? 'E' : 'W';
             final char bearingLat = lat > 0 ? 'N' : 'S';
             str = new DecimalFormat("#.##").format(Math.abs(lng)) + " " + bearingLng
                     + "  " + new DecimalFormat("#.##").format(Math.abs(lat)) + " " + bearingLat;
             ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
         }
-
     }
 
     private void startReceivingLocationUpdates() {

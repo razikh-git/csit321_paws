@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--
     <color name="color_background">@color/color_ref_black</color>
     <color name="color_card">@color/color_ref_black</color>
 
-    <color name="color_primary">@color/color_ref_black</color>
-    <color name="color_primary_alt">@color/color_ref_black</color>
+    <color name="color_primary">@color/color_ref_black_alt</color>
+    <color name="color_primary_alt">@color/color_ref_black_alt</color>
     <color name="color_error">#D58560</color>
     <color name="color_accent">@color/color_ref_brand</color>
     <color name="color_accent_alt">@color/color_ref_brand_alt</color>
@@ -15,12 +14,5 @@
     <color name="color_on_primary">@color/color_ref_white</color>
     <color name="color_on_background">@color/color_ref_white</color>
     <color name="color_highlight">@color/color_accent</color>
-    -->
-
-    <color name="color_primary">#77D5EB</color>
-    <color name="color_primary_alt">#2DB2D4</color>
-
-    <color name="color_accent">@color/color_primary</color>
-    <color name="color_accent_alt">@color/color_primary_alt</color>
 
 </resources>

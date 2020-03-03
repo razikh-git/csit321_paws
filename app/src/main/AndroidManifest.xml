@@ -64,7 +64,7 @@
             android:label="@string/label_maps"
             android:screenOrientation="sensorPortrait" />
         <activity
-            android:name=".WeatherActivity"
+            android:name=".PlaceInfoActivity"
             android:label="@string/label_weather"
             android:screenOrientation="sensorPortrait" />
         <activity

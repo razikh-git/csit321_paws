@@ -98,7 +98,7 @@ public class HomeActivity
     }
 
     /**
-     * Called from onWeatherReceived (WeatherActivity.WeatherReceivedListener)
+     * Called from onWeatherReceived (PlaceInfoActivity.WeatherReceivedListener)
      * and initLocationInterface.
      * Parses a forecast string into data strings and displays in the activity.
      * @param response Incredibly long string containing weather 5-day forecast.
@@ -313,7 +313,7 @@ public class HomeActivity
 
     private void onClickWeather(View view) {
         // Redirect to Weather Activity
-        Intent intent = new Intent(this, WeatherActivity.class);
+        Intent intent = new Intent(this, PlaceInfoActivity.class);
         startActivity(intent);
     }
 
@@ -330,8 +330,8 @@ public class HomeActivity
     }
 
     private void onClickProfiling(View view) {
-        // Redirect to Profiling Menu Activity
-        Intent intent = new Intent(this, ProfilingMenuActivity.class);
+        // Redirect to Survey Entry Activity
+        Intent intent = new Intent(this, SurveyEntryActivity.class);
         startActivity(intent);
     }
 

@@ -5,8 +5,8 @@
     android:id="@+id/layRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WeatherActivity"
-    tools:showIn="@layout/activity_weather" >
+    tools:context=".PlaceInfoActivity"
+    tools:showIn="@layout/activity_place_info">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
         android:background="@drawable/photo1d2x"
         android:backgroundTint="@color/color_primary"
         android:backgroundTintMode="multiply"
-        android:fitsSystemWindows="true" >
+        android:fitsSystemWindows="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,7 +24,7 @@
             android:clipChildren="false"
             android:orientation="vertical"
             tools:layout_editor_absoluteX="2dp"
-            tools:layout_editor_absoluteY="2dp" >
+            tools:layout_editor_absoluteY="2dp">
 
             <!-- Today's notable weather. -->
 
@@ -35,7 +35,7 @@
                 android:layout_marginTop="@dimen/app_gutter"
                 android:textAppearance="@style/TextAppearance.Paws.Huge"
                 android:textAlignment="center"
-                android:textColor="@color/color_on_primary" />
+                android:textColor="@color/color_on_primary"/>
 
             <TextView
                 android:id="@+id/txtWeatherDescription"
@@ -44,7 +44,7 @@
                 android:layout_marginBottom="@dimen/text_spacing"
                 android:textAppearance="@style/TextAppearance.Paws.Medium"
                 android:textAlignment="center"
-                android:textColor="@color/color_on_primary" />
+                android:textColor="@color/color_on_primary"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -52,13 +52,13 @@
                 android:layout_margin="@dimen/app_spacing"
                 android:gravity="center"
                 android:layout_gravity="center"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/imgWeatherIcon"
                     android:layout_width="@dimen/dimen_icon_huge"
                     android:layout_height="@dimen/dimen_icon_huge"
-                    android:layout_marginEnd="@dimen/app_spacing" />
+                    android:layout_marginEnd="@dimen/app_spacing"/>
 
                 <TextView
                     android:id="@+id/txtTempCurrent"
@@ -66,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.Paws.Immense"
                     android:textAlignment="center"
-                    android:textColor="@color/color_on_primary" />
+                    android:textColor="@color/color_on_primary"/>
 
             </LinearLayout>
 
@@ -79,7 +79,7 @@
                 android:textAlignment="center"
                 android:layout_marginTop="@dimen/app_spacing"
                 android:text="@string/wa_today"
-                android:textColor="@color/color_on_primary" />
+                android:textColor="@color/color_on_primary"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -90,7 +90,7 @@
 
                 <HorizontalScrollView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
+                    android:layout_height="wrap_content">
 
                     <LinearLayout
                         android:id="@+id/layWeatherToday"
@@ -98,7 +98,7 @@
                         android:layout_height="wrap_content"
                         android:padding="@dimen/app_padding"
                         android:gravity="center"
-                        android:orientation="horizontal" >
+                        android:orientation="horizontal">
 
                         <!-- Populated at runtime by 8 data samples spaced in 3-hour intervals. -->
 
@@ -113,22 +113,21 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/app_gutter"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:layout_marginEnd="@dimen/app_gutter">
+                app:cardCornerRadius="0dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/app_padding">
+                    android:layout_gravity="center"
+                    android:padding="@dimen/app_padding"
+                    android:orientation="horizontal">
 
                     <ImageView
-                        android:layout_width="wrap_content"
+                        android:layout_width="@dimen/dimen_icon_medium"
                         android:layout_height="@dimen/dimen_icon_medium"
-                        android:layout_marginEnd="@dimen/text_spacing"
+                        android:layout_marginEnd="@dimen/app_spacing"
                         android:layout_gravity="center"
-                        android:src="@drawable/ic_sunset" />
+                        android:src="@drawable/ic_sunset"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -136,7 +135,7 @@
                         android:orientation="vertical">
 
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
@@ -144,22 +143,23 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
+                                android:layout_marginEnd="@dimen/app_spacing_half"
                                 android:text="@string/wa_sunrise"
                                 android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
 
                             <TextView
-                                android:id="@+id/txtSunrise"
-                                android:layout_width="match_parent"
+                                android:id="@+id/txtSunriseTime"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
 
                         </LinearLayout>
 
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/text_spacing"
                             android:orientation="horizontal">
@@ -168,21 +168,28 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
+                                android:layout_marginEnd="@dimen/app_spacing_half"
                                 android:text="@string/wa_sunset"
                                 android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
 
                             <TextView
-                                android:id="@+id/txtSunset"
-                                android:layout_width="match_parent"
+                                android:id="@+id/txtSunsetTime"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
 
                         </LinearLayout>
 
                     </LinearLayout>
+
+                    <View
+                        android:layout_width="@dimen/dimen_icon_medium"
+                        android:layout_height="@dimen/dimen_icon_medium"
+                        android:layout_marginStart="@dimen/app_spacing"
+                        android:layout_gravity="center"/>
 
                 </LinearLayout>
 
@@ -197,13 +204,13 @@
                 android:textAlignment="center"
                 android:layout_marginTop="@dimen/app_spacing"
                 android:text="@string/wa_weekly"
-                android:textColor="@color/color_on_primary" />
+                android:textColor="@color/color_on_primary"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/app_spacing"
-                app:cardCornerRadius="0dp" >
+                app:cardCornerRadius="0dp">
 
                 <LinearLayout
                     android:id="@+id/layWeatherWeekly"
@@ -212,7 +219,7 @@
                     android:paddingTop="@dimen/app_padding"
                     android:paddingBottom="@dimen/app_padding"
                     android:layout_gravity="center"
-                    android:orientation="horizontal" >
+                    android:orientation="horizontal">
 
                     <!-- Populated at runtime with notable data for each day. -->
 
@@ -222,7 +229,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/height_navbars" />
+                android:layout_height="@dimen/height_navbars"/>
 
         </LinearLayout>
 
@@ -237,6 +244,6 @@
         android:background="@color/color_primary"
         app:itemIconTint="@color/bottom_navigation_colors"
         app:itemTextColor="@color/bottom_navigation_colors"
-        app:menu="@menu/bottom_navigation_menu" />
+        app:menu="@menu/bottom_navigation_menu"/>
 
 </FrameLayout>
