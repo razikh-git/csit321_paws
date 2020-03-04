@@ -9,7 +9,7 @@
     android:background="@color/color_background"
     android:fitsSystemWindows="true"
     tools:context=".HomeActivity"
-    tools:showIn="@layout/activity_home" >
+    tools:showIn="@layout/activity_home">
 
     <!-- Contextual Survey Incomplete Banner. -->
 
@@ -20,13 +20,13 @@
         android:backgroundTint="@color/color_error"
         android:visibility="gone"
         app:cardElevation="@dimen/elevation_banners"
-        app:cardCornerRadius="0dp" >
+        app:cardCornerRadius="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/app_padding_half"
                 android:gravity="center"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -52,7 +52,7 @@
                     android:gravity="center"
                     android:textAlignment="center"
                     android:textColor="@color/color_on_primary"
-                    android:textAppearance="@style/TextAppearance.Paws.Title" />
+                    android:textAppearance="@style/TextAppearance.Paws.Title"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -61,7 +61,7 @@
                     android:gravity="center"
                     android:textAlignment="center"
                     android:textColor="@color/color_on_primary"
-                    android:textAppearance="@style/TextAppearance.Paws.Caption" />
+                    android:textAppearance="@style/TextAppearance.Paws.Caption"/>
 
             </LinearLayout>
 
@@ -73,7 +73,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:fitsSystemWindows="true" >
+        android:fitsSystemWindows="true">
 
         <LinearLayout
             android:id="@+id/layHome"
@@ -82,7 +82,7 @@
             android:clipChildren="false"
             android:orientation="vertical"
             tools:layout_editor_absoluteX="2dp"
-            tools:layout_editor_absoluteY="2dp" >
+            tools:layout_editor_absoluteY="2dp">
 
             <!-- Weather Preview Card. -->
 
@@ -90,21 +90,21 @@
                 android:id="@+id/cardWeather"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="0dp" >
+                app:cardCornerRadius="0dp">
 
                 <!-- Weather Metadata Banner. -->
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <!-- Weather Title. -->
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="0dp" >
+                        app:cardCornerRadius="0dp">
 
                         <LinearLayout
                             android:id="@+id/layWeatherHeader"
@@ -115,12 +115,12 @@
                             android:paddingTop="@dimen/app_gutter"
                             android:paddingBottom="@dimen/app_padding"
                             android:background="@color/color_primary_alt"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal" >
+                                android:orientation="horizontal">
 
                                 <TextView
                                     android:id="@+id/txtCity"
@@ -144,7 +144,7 @@
                                 android:textColor="@color/color_on_primary"
                                 android:shadowColor="@color/color_ref_black"
                                 android:shadowDx="2"
-                                android:shadowDy="2" />
+                                android:shadowDy="2"/>
 
                         </LinearLayout>
 
@@ -155,7 +155,7 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="0dp" >
+                        app:cardCornerRadius="0dp">
 
                         <LinearLayout
                             android:id="@+id/layWeatherDescription"
@@ -166,14 +166,14 @@
                             android:paddingStart="@dimen/app_gutter"
                             android:paddingEnd="@dimen/app_gutter"
                             android:background="@color/color_primary"
-                            android:orientation="horizontal" >
+                            android:orientation="horizontal">
 
                             <ImageView
                                 android:id="@+id/imgWeatherIcon"
                                 android:layout_width="@dimen/dimen_icon_medium"
                                 android:layout_height="@dimen/dimen_icon_medium"
                                 android:gravity="start"
-                                android:visibility="gone" />
+                                android:visibility="gone"/>
 
                             <ProgressBar
                                 android:id="@+id/barWeatherIcon"
@@ -182,7 +182,7 @@
                                 android:layout_height="@dimen/dimen_icon_medium"
                                 android:layout_gravity="center"
                                 android:indeterminate="true"
-                                android:padding="8dp" />
+                                android:padding="8dp"/>
 
                             <TextView
                                 android:id="@+id/txtWeatherDescription"
@@ -192,7 +192,7 @@
                                 android:layout_marginStart="@dimen/app_padding"
                                 android:maxLines="1"
                                 android:textAppearance="@style/TextAppearance.Paws.Large"
-                                android:textColor="@color/color_on_primary" />
+                                android:textColor="@color/color_on_primary"/>
 
                         </LinearLayout>
 
@@ -208,34 +208,33 @@
                         android:paddingBottom="@dimen/app_spacing_half"
                         android:gravity="center"
                         android:orientation="horizontal"
-                        android:baselineAligned="false" >
+                        android:baselineAligned="false">
 
-                        <!-- Wind Data. -->
+                        <!-- Precipitation and Humidity. -->
 
                         <LinearLayout
-                            android:id="@+id/layWeatherDataWind"
+                            android:id="@+id/layWeatherDataPrecip"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:padding="@dimen/app_padding"
                             android:gravity="center"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/txtWindSpeed"
+                                android:id="@+id/txtPrecipAuxData1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:maxLines="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Large" />
+                                android:textAppearance="@style/TextAppearance.Paws.Large"/>
 
                             <TextView
-                                android:id="@+id/txtWindBearing"
+                                android:id="@+id/txtPrecipAuxData2"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:maxLines="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
 
                         </LinearLayout>
 
@@ -247,7 +246,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/txtTempCurrent"
@@ -255,35 +254,36 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:maxLines="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Immense" />
+                                android:textAppearance="@style/TextAppearance.Paws.Immense"/>
 
                         </LinearLayout>
 
-                        <!-- Precipitation and Humidity. -->
+                        <!-- Wind Data. -->
 
                         <LinearLayout
-                            android:id="@+id/layWeatherDataPrecip"
+                            android:id="@+id/layWeatherDataWind"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:padding="@dimen/app_padding"
                             android:gravity="center"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/txtPrecipAuxData1"
+                                android:id="@+id/txtWindSpeed"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:maxLines="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Large" />
+                                android:textAppearance="@style/TextAppearance.Paws.Large"/>
 
                             <TextView
-                                android:id="@+id/txtPrecipAuxData2"
+                                android:id="@+id/txtWindBearing"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
                                 android:maxLines="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
 
                         </LinearLayout>
 
@@ -297,7 +297,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipChildren="false"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <!-- Mapping Button. -->
 
@@ -305,32 +305,69 @@
                     android:id="@+id/cardMaps"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/app_spacing">
+                    android:layout_marginTop="@dimen/app_gutter">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical" >
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:paddingStart="@dimen/app_gutter"
-                            android:paddingEnd="@dimen/app_gutter"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:background="@color/color_primary" >
+                            android:background="@color/color_primary_alt">
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:padding="@dimen/app_spacing"
-                                android:gravity="center"
-                                android:maxLines="2"
-                                android:text="@string/home_card_maps"
+                                android:paddingTop="@dimen/app_spacing"
+                                android:paddingBottom="@dimen/app_padding"
+                                android:text="@string/home_card_maps_title"
+                                android:textAlignment="viewStart"
+                                android:textAppearance="@style/TextAppearance.Paws.Huge"
+                                android:textColor="@color/color_on_primary"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/app_padding_half"
+                            android:paddingBottom="@dimen/app_padding_half"
+                            android:background="@color/color_primary"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Caption"
                                 android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Button.Large" />
+                                android:textColor="@color/color_on_primary"
+                                android:text="@string/home_card_maps_subtitle_1"/>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Caption"
+                                android:textAlignment="center"
+                                android:textColor="@color/color_on_primary"
+                                android:text="@string/home_card_maps_subtitle_2"/>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:textAppearance="@style/TextAppearance.Paws.Caption"
+                                android:textAlignment="center"
+                                android:textColor="@color/color_on_primary"
+                                android:text="@string/home_card_maps_subtitle_3"/>
 
                         </LinearLayout>
 
@@ -341,23 +378,23 @@
                             android:paddingTop="@dimen/app_spacing"
                             android:paddingStart="@dimen/app_spacing"
                             android:paddingEnd="@dimen/app_spacing"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="@string/home_card_maps_subtitle_large"
+                                android:text="@string/home_card_maps_info_large"
                                 android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium" />
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:gravity="center"
-                                android:text="@string/home_card_maps_subtitle_small"
+                                android:text="@string/home_card_maps_info_small"
                                 android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Small" />
+                                android:textAppearance="@style/TextAppearance.Paws.Small"/>
 
                         </LinearLayout>
 
@@ -379,7 +416,7 @@
                         android:layout_marginStart="@dimen/app_gutter"
                         android:layout_marginEnd="@dimen/app_gutter"
                         android:layout_gravity="center"
-                        android:orientation="horizontal" >
+                        android:orientation="horizontal">
 
                         <!-- Settings Button. -->
 
@@ -392,7 +429,7 @@
                             android:backgroundTint="@color/color_primary"
                             android:tint="@color/color_on_primary"
                             android:scaleType="fitCenter"
-                            android:src="@drawable/ic_settings_box" />
+                            android:src="@drawable/ic_settings_box"/>
 
                         <!-- Profile Button. -->
 
@@ -405,7 +442,7 @@
                             android:backgroundTint="@color/color_primary"
                             android:tint="@color/color_on_primary"
                             android:scaleType="fitCenter"
-                            android:src="@drawable/ic_account_box" />
+                            android:src="@drawable/ic_account_box"/>
 
                         <!-- Help Button. -->
 
@@ -418,7 +455,7 @@
                             android:backgroundTint="@color/color_primary"
                             android:scaleType="fitCenter"
                             android:src="@drawable/ic_help_box"
-                            android:tint="@color/color_on_primary" />
+                            android:tint="@color/color_on_primary"/>
 
                     </LinearLayout>
 
@@ -432,7 +469,7 @@
                     android:gravity="center"
                     android:text="@string/home_footer"
                     android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.Paws.Caption" />
+                    android:textAppearance="@style/TextAppearance.Paws.Caption"/>
 
             </LinearLayout>
 

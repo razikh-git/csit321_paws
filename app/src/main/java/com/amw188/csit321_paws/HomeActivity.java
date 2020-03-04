@@ -33,7 +33,6 @@ public class HomeActivity
     private static final String TAG = "snowpaws_home";
 
     private SharedPreferences mSharedPref;
-    WeatherHandler mWeatherHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -239,8 +238,8 @@ public class HomeActivity
                 final boolean isMetric = mSharedPref.getString(
                         "units", "metric").equals("metric");
                 LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-                mWeatherHandler = new WeatherHandler(this);
-                if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
+                WeatherHandler weatherHandler = new WeatherHandler(this);
+                if (!weatherHandler.updateWeather(this, latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
                     success = initWeatherDisplay(
                             mSharedPref.getString("last_weather_json", "{}"));
@@ -337,7 +336,7 @@ public class HomeActivity
 
     private void onClickHelp(View view) {
         // Redirect to First-Launch Info Page Activity
-        Intent intent = new Intent(this, ProfilingPromptActivity.class);
+        Intent intent = new Intent(this, SurveyInfosheetActivity.class);
         startActivity(intent);
     }
 
