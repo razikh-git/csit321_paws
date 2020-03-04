@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.TextViewCompat;
@@ -26,27 +27,39 @@ import java.io.InputStream;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class SurveyEntryActivity extends BottomNavBarActivity {
+public class SurveyEntryActivity
+        extends BottomNavBarActivity {
+
+    private static final String TAG = "snowpaws_se";
 
     private SharedPreferences mSharedPref;
-    private SharedPreferences.Editor mSharedEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey_entry);
+        if (!init()) {
+            Toast.makeText(this,
+                    "Failed to load the survey launchpad.",
+                    Toast.LENGTH_LONG)
+                    .show();
+            finish();
+        }
+    }
 
-        // Load global preferences.
+    private boolean init() {
+        return initActivity() && initInterface() && initButtons();
+    }
+
+    private boolean initActivity() {
         mSharedPref = this.getSharedPreferences(
                 getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
-        mSharedEditor = mSharedPref.edit();
 
-        // Bottom navigation bar functionality.
-        BottomNavigationView nav = (BottomNavigationView)findViewById(R.id.bottomNavigation);
+        // Bottom navigation bar functionality
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        // Initialise info screen contents.
+        // Initialise info screen contents
         try {
             Resources res = getResources();
             InputStream in = res.openRawResource(R.raw.se_info);
@@ -58,17 +71,15 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
         } catch (Exception e){
             e.printStackTrace();
             ((TextView)findViewById(R.id.txtInfo)).setText(R.string.app_txt_fallback);
+            return false;
         }
-
-        // Initialise interface elements.
-        initInterface();
-        initButtons();
+        return true;
     }
 
     private boolean initButtons() {
-        // Button functionality.
+        // Button functionality
         try {
-            findViewById(R.id.btnContinue).setOnClickListener((view) -> onClickContinue(view));
+            findViewById(R.id.btnContinue).setOnClickListener(this::onClickContinue);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -77,71 +88,46 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
     }
 
     private boolean initInterface() {
-        Log.println(Log.DEBUG, "snowpaws_surveyentry",
-                "app_init : " + mSharedPref.getBoolean("app_init", false));
-        Log.println(Log.DEBUG, "snowpaws_surveyentry",
-                "facebook_init : " + mSharedPref.getBoolean("facebook_init", false));
-        Log.println(Log.DEBUG, "snowpaws_surveyentry",
-                "survey_last_question : " + mSharedPref.getInt("survey_last_question", -1));
-        Log.println(Log.DEBUG, "snowpaws_surveyentry",
-                "profile_time_completed : " + mSharedPref.getLong("profile_time_completed", -1));
-        Log.println(Log.DEBUG, "snowpaws_surveyentry",
-                "units : " + mSharedPref.getString("units", "metric"));
+        Log.d(TAG, "app_init : " + mSharedPref.getBoolean(
+                "app_init", false));
+        Log.d(TAG, "facebook_init : " + mSharedPref.getBoolean(
+                "facebook_init", false));
+        Log.d(TAG, "survey_last_question : " + mSharedPref.getInt(
+                "survey_last_question", 0));
+        Log.d(TAG, "survey_time_completed : " + mSharedPref.getLong(
+                "survey_time_completed", 0));
+        Log.d(TAG, "units : " + mSharedPref.getString(
+                "units", "metric"));
 
         // Initialise data summary contents:
 
-        // Populate progress counter label.
+        // Populate progress counter label
         ((TextView)findViewById(R.id.txtProgressSurvey)).setText(
                 mSharedPref.getInt("survey_last_question", 0)
                         + " / " + getResources().getInteger(R.integer.survey_question_count));
-        TextViewCompat.setTextAppearance(
-                findViewById(R.id.txtProgressSurvey), R.style.TextAppearance_Paws_Medium);
 
         if (mSharedPref.getInt("survey_last_question", 0) < getResources().getInteger(R.integer.survey_question_count)) {
             // Incomplete profiling surveys:
+
             if (mSharedPref.getInt("survey_last_question", 0) == 0) {
                 // Profiling surveys with no progress whatsoever:
 
-                // Relabel the survey entry button.
+                // Relabel the survey entry button
                 ((MaterialButton)findViewById(R.id.btnContinue)).setText(
                         getResources().getString(R.string.app_btn_start));
 
-                // Hide the progress bar.
-                findViewById(R.id.barProgressSurvey).setVisibility(GONE);
-
-                // Show warning graphic.
-                findViewById(R.id.imgProgressIcon).setVisibility(VISIBLE);
-                ((ImageView)findViewById(R.id.imgProgressIcon)).setImageDrawable(
-                        getDrawable(R.drawable.ic_error));
-                ((ImageView)findViewById(R.id.imgProgressIcon)).setImageTintList(
-                        ContextCompat.getColorStateList(this, R.color.error_colors));
-
-                // Display fallback text.
-                ((TextView)findViewById(R.id.txtProgressSurvey)).setText(R.string.se_fallback);
-                TextViewCompat.setTextAppearance(
-                        findViewById(R.id.txtProgressSurvey), R.style.TextAppearance_Paws_Caption);
-
-                // Hide timestamp label.
-                findViewById(R.id.txtTimestamp).setVisibility(GONE);
-
-                // Hide survey details label.
-                findViewById(R.id.txtSurveyResultsLabel).setVisibility(GONE);
+                // Hide the survey results view
+                findViewById(R.id.cardSurveyResults).setVisibility(GONE);
 
             } else {
                 // Incomplete profiling surveys with some progress:
 
-                // Relabel the survey entry button.
+                // Relabel the survey entry button
                 ((MaterialButton)findViewById(R.id.btnContinue)).setText(
                         getResources().getString(R.string.app_btn_continue));
 
-                // Replace timestamp label with a notice.
-                findViewById(R.id.txtTimestamp).setVisibility(VISIBLE);
-                TextViewCompat.setTextAppearance(
-                        findViewById(R.id.txtProgressSurvey), R.style.TextAppearance_Paws_Large);
-                ((TextView)findViewById(R.id.txtTimestamp)).setText(
-                        getResources().getString(R.string.se_in_progress));
-
-                // Show progress bar for survey completion percentage.
+                // Show progress bar for survey completion percentage
+                findViewById(R.id.layProgressContainer).setVisibility(VISIBLE);
                 ProgressBar progressBar = findViewById(R.id.barProgressSurvey);
                 progressBar.setIndeterminate(false);
                 progressBar.setVisibility(VISIBLE);
@@ -151,51 +137,55 @@ public class SurveyEntryActivity extends BottomNavBarActivity {
                             * 100)));
             }
 
-            // Change card style.
+            // Change card style
             ((MaterialCardView)findViewById(R.id.cardSurveyResults)).setStrokeColor(
                     getResources().getColor(R.color.color_error));
 
         } else {
-
             // Completed profiling surveys:
 
-            // Enable onClick events to redirect to the additional details screen.
-            findViewById(R.id.cardSurveyResults).setOnClickListener((view) -> onClickDetails(view));
+            // Enable onClick events to redirect to the additional details screen
+            findViewById(R.id.cardSurveyResults).setOnClickListener(this::onClickDetails);
 
-            // Change card style.
+            // Change card style
             ((MaterialCardView)findViewById(R.id.cardSurveyResults)).setStrokeColor(
                     getResources().getColor(R.color.color_primary));
 
-            // Show full progress icon.
+            // Show full progress icon
             findViewById(R.id.imgProgressIcon).setVisibility(VISIBLE);
             ((ImageView)findViewById(R.id.imgProgressIcon)).setImageDrawable(
                     getDrawable(R.drawable.ic_checkbox_checked));
             ((ImageView)findViewById(R.id.imgProgressIcon)).setImageTintList(
                     ContextCompat.getColorStateList(this, R.color.success_colors));
 
-            // Survey completion timestamp.
+            // Survey completion timestamp
             findViewById(R.id.txtTimestamp).setVisibility(VISIBLE);
-            TextViewCompat.setTextAppearance(
-                    findViewById(R.id.txtProgressSurvey), R.style.TextAppearance_Paws_Small);
             ((TextView)findViewById(R.id.txtTimestamp)).setText(
-                    DateFormat.format("HH:mm dd/MM/yy",
-                            mSharedPref.getLong("profile_time_completed", 0)));
+                    DateFormat.format("hh:mm A\ndd/MM/yyyy",
+                            mSharedPref.getLong("survey_time_completed", 0)));
 
-            // Survey details label.
-            findViewById(R.id.txtSurveyResultsLabel).setVisibility(VISIBLE);
+            // Relabel the survey entry button
+            ((MaterialButton)findViewById(R.id.btnContinue)).setText(
+                    getResources().getString(R.string.app_btn_restart));
         }
 
         return true;
     }
 
     public void onClickDetails(View view) {
-        // Redirect to post-completion details summary screen.
+        // Redirect to post-completion details summary screen
         //Intent intent = new Intent(this, SurveyResultsActivity.class);
         //startActivity(intent);
     }
 
     public void onClickContinue(View view) {
-        // Redirect to live survey screen.
+        // todo: provide dialog prompt for restarting over with a completed profile
+
+        // Reset profile data
+        if (mSharedPref.getLong("survey_time_completed", 0) > 0)
+            PAWSAPI.resetProfileData(this);
+
+        // Redirect to live survey screen
         Intent intent = new Intent(this, SurveyQuestionActivity.class);
         startActivityForResult(intent, RequestCode.SURVEY_CONTINUE);
     }

@@ -65,6 +65,7 @@
 
     <!-- Generic button strings. -->
     <string name="app_btn_start">start</string>
+    <string name="app_btn_restart">restart</string>
     <string name="app_btn_submit">submit</string>
     <string name="app_btn_continue">continue</string>
     <string name="app_btn_return">return</string>
@@ -121,12 +122,15 @@
 
     <string name="home_weather_timestamp">Updated</string>
     <string name="home_card_surveys">Surveys</string>
-    <string name="home_card_maps">Maps and Tracking</string>
-    <string name="home_card_maps_subtitle_large">
+    <string name="home_card_maps_title">Places Near Me</string>
+    <string name="home_card_maps_subtitle_1">Surf maps</string>
+    <string name="home_card_maps_subtitle_2">Weather views</string>
+    <string name="home_card_maps_subtitle_3">Your places</string>
+    <string name="home_card_maps_info_large">
         "Plan your journey ahead of time.\n"
         "Enable the tracking companion to receive updates over the course of your trip.\n"
     </string>
-    <string name="home_card_maps_subtitle_small">
+    <string name="home_card_maps_info_small">
         "Monitor your battery levels at all times. Location services may occupy your resources.\n"
         "You may change usage settings at any time in Preferences.\n"
     </string>
@@ -221,6 +225,7 @@
     <string name="se_in_progress">Survey not yet complete.</string>
     <string name="se_results_label">last completed survey</string>
     <string name="se_fallback">No existing profile found.</string>
+    <string name="se_results_card">Survey progress</string>
 
     <!-- Survey Question Activity. -->
     <string name="sq_title">Question</string>

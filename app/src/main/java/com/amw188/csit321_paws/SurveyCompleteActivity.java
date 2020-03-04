@@ -12,32 +12,14 @@ public class SurveyCompleteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey_complete);
-
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            int activityCode = extras.getInt(AnalysisEntryCodes.EXTRA_KEY);
-            new Handler().postDelayed(() ->
-                    {endSurveyCompleteSplash(activityCode);},
-                    10000);
-        }
+        new Handler().postDelayed(
+                this::endSurveyCompleteSplash,
+                5000);
     }
 
-    private void endSurveyCompleteSplash(int activityCode) {
+    private void endSurveyCompleteSplash() {
         finish();
-        Intent intent;
-        switch (activityCode) {
-            case AnalysisEntryCodes.ENTRY_SURVEY:
-                intent = new Intent(SurveyCompleteActivity.this,
-                        SurveyEntryActivity.class);
-                break;
-            case AnalysisEntryCodes.ENTRY_FACEBOOK:
-                intent = new Intent(SurveyCompleteActivity.this,
-                        FacebookEntryActivity.class);
-                break;
-            default:
-                intent = new Intent(SurveyCompleteActivity.this,
-                        ProfilingMenuActivity.class);
-        }
-        startActivity(intent);
+        startActivity(new Intent(SurveyCompleteActivity.this,
+                SurveyEntryActivity.class));
     }
 }

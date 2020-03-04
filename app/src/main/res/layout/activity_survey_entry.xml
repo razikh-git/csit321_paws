@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:fitsSystemWindows="true" >
+        android:fitsSystemWindows="true">
 
         <LinearLayout
             android:id="@+id/laySurveyEntry"
@@ -24,6 +24,7 @@
             tools:layout_editor_absoluteX="2dp"
             tools:layout_editor_absoluteY="2dp">
 
+            <!-- Activity header banner. -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardHeader"
                 android:layout_width="match_parent"
@@ -46,7 +47,7 @@
                         android:adjustViewBounds="true"
                         android:gravity="center"
                         android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/logo" />
+                        app:srcCompat="@drawable/logo"/>
 
                     <LinearLayout
                         android:id="@+id/layHeaderRight"
@@ -62,7 +63,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="@string/se_title"
-                            android:textAppearance="@style/TextAppearance.Paws.Title" />
+                            android:textAppearance="@style/TextAppearance.Paws.Title"/>
 
                         <TextView
                             android:id="@+id/txtHeaderSubtitle"
@@ -71,7 +72,7 @@
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="@string/se_subtitle"
-                            android:textAppearance="@style/TextAppearance.Paws.Caption" />
+                            android:textAppearance="@style/TextAppearance.Paws.Caption"/>
 
                     </LinearLayout>
 
@@ -79,6 +80,8 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Survey Entry body card
+            Provides an overview of the survey method and content in long text. -->
             <LinearLayout
                 android:id="@+id/laySurveyEntryBody"
                 android:layout_width="match_parent"
@@ -100,10 +103,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="@dimen/app_padding"
-                        android:textAppearance="@style/TextAppearance.Paws.Small" />
+                        android:textAppearance="@style/TextAppearance.Paws.Small"/>
 
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- Survey Results card
+                Shows the progress of the current survey, if in progress,
+                otherwise stays hidden if one has neither been started nor finished. -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardSurveyResults"
                     android:layout_width="match_parent"
@@ -111,85 +117,134 @@
                     android:layout_marginTop="@dimen/app_spacing"
                     android:backgroundTint="@color/survey_results_colors"
                     android:backgroundTintMode="src_over"
-                    android:padding="@dimen/app_padding"
                     android:clipChildren="false"
                     android:clipToPadding="false"
                     app:strokeColor="@color/color_error"
                     app:strokeWidth="@dimen/width_stroke">
 
                     <LinearLayout
-                        android:id="@+id/laySurveyResults"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:clipChildren="false"
-                        android:clipToPadding="false"
-                        android:orientation="vertical"
-                        android:padding="@dimen/app_padding">
+                        android:orientation="vertical">
 
+                        <!-- 'Survey Progress' header. -->
                         <LinearLayout
-                            android:id="@+id/laySurveyResultsTop"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:paddingStart="@dimen/app_padding"
-                            android:paddingEnd="@dimen/app_padding"
-                            android:clipChildren="false"
-                            android:clipToPadding="false"
-                            android:gravity="center"
+                            android:layout_height="wrap_content"
+                            android:background="@color/color_primary"
                             android:orientation="horizontal">
 
-                            <LinearLayout
-                                android:id="@+id/laySurveyProgressGraphics"
-                                android:layout_width="@dimen/dimen_icon_medium"
-                                android:layout_height="@dimen/dimen_icon_medium"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:clipChildren="false"
-                                android:clipToPadding="false"
-                                android:orientation="horizontal">
-
-                                <ImageView
-                                    android:id="@+id/imgProgressIcon"
-                                    android:layout_width="@dimen/dimen_icon_medium"
-                                    android:layout_height="@dimen/dimen_icon_medium"
-                                    android:visibility="gone"
-                                    app:srcCompat="@drawable/ic_radiobutton_unchecked" />
-
-                                <ProgressBar
-                                    android:id="@+id/barProgressSurvey"
-                                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:max="100"
-                                    android:progressDrawable="@drawable/progress_circular_thick"
-                                    android:visibility="gone" />
-
-                            </LinearLayout>
-
                             <TextView
-                                android:id="@+id/txtProgressSurvey"
+                                style="@style/TextAppearance.Paws.Large"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Large" />
+                                android:layout_marginStart="@dimen/app_spacing"
+                                android:layout_marginTop="@dimen/app_spacing_half"
+                                android:layout_marginBottom="@dimen/app_spacing_half"
+                                android:text="@string/se_results_card"
+                                android:textColor="@color/color_on_primary"/>
 
                         </LinearLayout>
 
+                        <!-- Body contents. -->
                         <LinearLayout
-                            android:id="@+id/laySurveyResultsBottom"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:orientation="vertical">
+                            android:layout_height="match_parent"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
+                            android:orientation="vertical"
+                            android:padding="@dimen/app_padding"
+                            android:visibility="visible">
 
-                            <TextView
-                                android:id="@+id/txtTimestamp"
+                            <LinearLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:clipChildren="false"
+                                android:clipToPadding="false"
                                 android:gravity="center"
-                                android:text="--:--/--/--"
-                                android:textAppearance="@style/TextAppearance.Paws.Small" />
+                                android:orientation="horizontal"
+                                android:paddingStart="@dimen/app_padding"
+                                android:paddingEnd="@dimen/app_padding">
+
+                                <!-- Survey results, left side
+                                Shows contextual image or progress bar,
+                                as well as number of questions completed. -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:clipChildren="false"
+                                    android:clipToPadding="false"
+                                    android:gravity="center"
+                                    android:orientation="horizontal">
+
+                                    <!-- Icon for completed or invalid profile. -->
+                                    <ImageView
+                                        android:id="@+id/imgProgressIcon"
+                                        android:layout_width="@dimen/dimen_icon_large"
+                                        android:layout_height="@dimen/dimen_icon_large"
+                                        android:layout_marginEnd="@dimen/app_spacing_half"
+                                        android:visibility="gone"
+                                        app:srcCompat="@drawable/ic_radiobutton_unchecked"/>
+
+                                    <!-- Progress bar for ratio of questions completed. -->
+                                    <LinearLayout
+                                        android:id="@+id/layProgressContainer"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginEnd="@dimen/app_spacing_half"
+                                        android:visibility="gone">
+
+                                        <ProgressBar
+                                            android:id="@+id/barProgressSurvey"
+                                            android:layout_width="@dimen/dimen_icon_large"
+                                            android:layout_height="@dimen/dimen_icon_large"
+                                            style="?android:progressBarStyleHorizontal"
+                                            android:progressDrawable="@drawable/progress_circular"
+                                            android:visibility="gone"/>
+
+                                    </LinearLayout>
+
+                                    <!-- Text view for number of questions answered. -->
+                                    <TextView
+                                        android:id="@+id/txtProgressSurvey"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="@style/TextAppearance.Paws.Large"
+                                        android:textColor="@color/color_on_background"/>
+
+                                </LinearLayout>
+
+                                <!-- Layout results card, right side
+                                 Shows a timestamp for the last completed profile. -->
+                                <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent"
+                                        android:gravity="center"
+                                        android:orientation="vertical">
+
+                                        <TextView
+                                            android:id="@+id/txtTimestamp"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_gravity="start"
+                                            android:text="--:--\n--/--/----"
+                                            android:textAlignment="textStart"
+                                            android:textAppearance="@style/TextAppearance.Paws.Caption"/>
+
+                                    </LinearLayout>
+
+                                </LinearLayout>
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
@@ -197,16 +252,7 @@
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/txtSurveyResultsLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/text_spacing"
-                    android:visibility="gone"
-                    android:text="@string/se_results_label"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.Paws.Caption" />
-
+                <!-- Button to enter SurveyQuestionActivity. -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnContinue"
                     style="@style/Widget.Paws.Button"
@@ -215,7 +261,7 @@
                     android:layout_gravity="center"
                     android:layout_marginTop="@dimen/app_spacing"
                     android:padding="@dimen/padding_buttons"
-                    android:text="@string/app_btn_start" />
+                    android:text="@string/app_btn_start"/>
 
             </LinearLayout>
 
@@ -232,6 +278,6 @@
         android:background="@color/color_primary"
         app:itemIconTint="@color/bottom_navigation_colors"
         app:itemTextColor="@color/bottom_navigation_colors"
-        app:menu="@menu/bottom_navigation_menu" />
+        app:menu="@menu/bottom_navigation_menu"/>
 
 </FrameLayout>

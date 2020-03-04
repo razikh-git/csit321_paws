@@ -73,7 +73,7 @@
             android:screenOrientation="sensorPortrait"
             android:theme="@style/mainAppTheme" />
         <activity
-            android:name=".ProfilingPromptActivity"
+            android:name=".SurveyInfosheetActivity"
             android:screenOrientation="sensorPortrait"
             android:theme="@style/mainAppTheme" />
         <activity
