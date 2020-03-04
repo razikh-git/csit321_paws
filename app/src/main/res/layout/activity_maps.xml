@@ -18,7 +18,34 @@
             android:id="@+id/mapView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="@dimen/height_sheets" />
+            android:paddingBottom="@dimen/height_sheets"/>
+
+        <!-- Debug functionality buttons. -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/app_padding"
+            android:orientation="vertical">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnDebugSendNotification"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginTop="@dimen/app_padding"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_error"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnDebugToggleLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginTop="@dimen/app_padding"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_navigation"/>
+
+        </LinearLayout>
 
         <!-- Floating Top Content Container. -->
 
@@ -39,20 +66,20 @@
                 android:layout_marginTop="@dimen/app_spacing"
                 android:layout_marginStart="@dimen/app_spacing"
                 android:layout_marginEnd="@dimen/app_spacing"
-                android:visibility="gone" >
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
-                    android:padding="@dimen/app_padding_half" >
+                    android:padding="@dimen/app_padding_half">
 
                     <ImageView
                         android:id="@+id/imgSearch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/places_ic_search"
-                        android:contentDescription="@string/ma_search_hint" />
+                        android:contentDescription="@string/ma_search_hint"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -60,14 +87,14 @@
                         android:layout_height="match_parent"
                         android:hint="@string/ma_search_hint"
                         app:boxStrokeWidth="0dp"
-                        app:endIconMode="clear_text" >
+                        app:endIconMode="clear_text">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPostalAddress"
                             android:selectAllOnFocus="true"
-                            android:singleLine="true" />
+                            android:singleLine="true"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -79,7 +106,7 @@
                 android:id="@+id/viewFABPadding"
                 android:layout_width="@dimen/dimen_icon_large"
                 android:layout_height="@dimen/dimen_icon_large"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <!-- Map Type Popout Button. -->
 
@@ -92,7 +119,7 @@
                 android:layout_marginEnd="@dimen/app_padding"
                 android:layout_marginBottom="@dimen/app_padding"
                 android:src="@drawable/ic_eye_settings"
-                android:visibility="visible" />
+                android:visibility="visible"/>
 
             <!-- Map Polygon Draw Button. -->
 
@@ -104,7 +131,7 @@
                 android:layout_marginEnd="@dimen/app_padding"
                 android:layout_marginBottom="@dimen/app_padding"
                 android:src="@drawable/ic_draw"
-                android:visibility="visible" />
+                android:visibility="visible"/>
 
             <!-- Map Polygon Erase Button. -->
 
@@ -117,7 +144,7 @@
                 android:layout_marginBottom="@dimen/app_padding"
                 android:src="@drawable/ic_eraser"
                 android:tint="@color/color_on_primary"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <!-- Map Weather Redirect Button. -->
 
@@ -130,7 +157,7 @@
                 android:layout_marginBottom="@dimen/app_padding"
                 android:src="@drawable/ic_satellite"
                 android:tint="@color/color_on_primary"
-                android:visibility="visible" />
+                android:visibility="visible"/>
 
             <!-- Map Type Popout Card. -->
 
@@ -140,7 +167,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:visibility="gone" >
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -154,18 +181,18 @@
                         android:text="@string/ma_map_type"
                         android:textAllCaps="true"
                         android:textAppearance="@style/TextAppearance.Paws.Medium"
-                        android:textColor="@color/color_on_background" />
+                        android:textColor="@color/color_on_background"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal" >
+                        android:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <ImageButton
                                 android:id="@+id/btnMapTypeDefault"
@@ -178,7 +205,7 @@
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
                                 android:src="@drawable/map_default"
-                                android:contentDescription="@string/ma_default" />
+                                android:contentDescription="@string/ma_default"/>
 
                             <TextView
                                 android:id="@+id/txtMapTypeDefault"
@@ -187,19 +214,19 @@
                                 android:text="@string/ma_default"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
-                                android:textColor="@color/color_midtone" />
+                                android:textColor="@color/color_midtone"/>
 
                         </LinearLayout>
 
                         <View
                             android:layout_width="@dimen/app_spacing"
-                            android:layout_height="match_parent" />
+                            android:layout_height="match_parent"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <ImageButton
                                 android:id="@+id/btnMapTypeSatellite"
@@ -212,7 +239,7 @@
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
                                 android:src="@drawable/map_satellite"
-                                android:contentDescription="@string/ma_satellite" />
+                                android:contentDescription="@string/ma_satellite"/>
 
                             <TextView
                                 android:id="@+id/txtMapTypeSatellite"
@@ -221,19 +248,19 @@
                                 android:text="@string/ma_satellite"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
-                                android:textColor="@color/color_midtone" />
+                                android:textColor="@color/color_midtone"/>
 
                         </LinearLayout>
 
                         <View
                             android:layout_width="@dimen/app_spacing"
-                            android:layout_height="match_parent" />
+                            android:layout_height="match_parent"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <ImageButton
                                 android:id="@+id/btnMapTypeTerrain"
@@ -246,7 +273,7 @@
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
                                 android:src="@drawable/map_terrain"
-                                android:contentDescription="@string/ma_terrain" />
+                                android:contentDescription="@string/ma_terrain"/>
 
                             <TextView
                                 android:id="@+id/txtMapTypeTerrain"
@@ -255,7 +282,7 @@
                                 android:text="@string/ma_terrain"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
-                                android:textColor="@color/color_midtone" />
+                                android:textColor="@color/color_midtone"/>
 
                         </LinearLayout>
 
@@ -277,14 +304,14 @@
             app:behavior_peekHeight="@dimen/height_sheets"
             app:behavior_hideable="false"
             app:cardCornerRadius="0dp"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" >
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:focusable="true"
                 android:clickable="true"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <!-- Location Information Header. -->
 
@@ -294,7 +321,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/color_primary_alt"
                     android:orientation="vertical"
-                    android:padding="@dimen/app_spacing" >
+                    android:padding="@dimen/app_spacing">
 
                     <!-- Notch -->
                     <View
@@ -311,14 +338,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.Paws.Large"
-                        android:textColor="@color/color_on_primary" />
+                        android:textColor="@color/color_on_primary"/>
 
                     <TextView
                         android:id="@+id/txtSheetCoordinates"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.Paws.Small"
-                        android:textColor="@color/color_on_primary" />
+                        android:textColor="@color/color_on_primary"/>
 
                 </LinearLayout>
 
@@ -328,28 +355,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/app_padding" >
+                    android:padding="@dimen/app_padding">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:orientation="horizontal"
-                        android:baselineAligned="false" >
+                        android:baselineAligned="false">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <com.google.android.material.floatingactionbutton.FloatingActionButton
                                 android:id="@+id/btnMapOverlayWind"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:adjustViewBounds="true"
-                                android:src="@drawable/ic_weather_windy" />
+                                android:src="@drawable/ic_weather_windy"/>
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -358,7 +385,7 @@
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
                                 android:textColor="@color/color_on_background"
-                                android:text="@string/ma_wind" />
+                                android:text="@string/ma_wind"/>
 
                         </LinearLayout>
 
@@ -367,14 +394,14 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <com.google.android.material.floatingactionbutton.FloatingActionButton
                                 android:id="@+id/btnMapOverlayPrecip"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:adjustViewBounds="true"
-                                android:src="@drawable/ic_weather_rainy_snowy" />
+                                android:src="@drawable/ic_weather_rainy_snowy"/>
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -383,7 +410,7 @@
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
                                 android:textColor="@color/color_on_background"
-                                android:text="@string/ma_precip" />
+                                android:text="@string/ma_precip"/>
 
                         </LinearLayout>
 
@@ -392,14 +419,14 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:orientation="vertical" >
+                            android:orientation="vertical">
 
                             <com.google.android.material.floatingactionbutton.FloatingActionButton
                                 android:id="@+id/btnMapOverlayRisk"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:adjustViewBounds="true"
-                                android:src="@drawable/ic_paws_icon" />
+                                android:src="@drawable/ic_paws_icon"/>
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -408,7 +435,7 @@
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
                                 android:textColor="@color/color_on_background"
-                                android:text="@string/ma_risk" />
+                                android:text="@string/ma_risk"/>
 
                         </LinearLayout>
 
@@ -433,6 +460,6 @@
         android:background="@color/color_primary"
         app:itemIconTint="@color/bottom_navigation_colors"
         app:itemTextColor="@color/bottom_navigation_colors"
-        app:menu="@menu/bottom_navigation_menu" />
+        app:menu="@menu/bottom_navigation_menu"/>
 
 </FrameLayout>

@@ -38,11 +38,8 @@ public class DailyWeatherWorker extends Worker {
 
     private long mLastDailySample;
     private ArrayList<Double> mDailyTemps;
-    private ArrayList<Double> mDailyWindSpeed;
-    private ArrayList<Double> mDailyWindBearing;
-    private ArrayList<Double> mDailyCloud;
 
-    DailyWeatherWorker(
+    public DailyWeatherWorker(
             @NonNull Context context,
             @NonNull WorkerParameters params) {
         super(context, params);
@@ -50,6 +47,8 @@ public class DailyWeatherWorker extends Worker {
 
     @Override @NonNull
     public Result doWork() {
+		Log.d(TAG, "in doWork()");
+
         Result result = Result.success();
         mContext = getApplicationContext();
         mSharedPref = mContext.getSharedPreferences(
@@ -78,7 +77,7 @@ public class DailyWeatherWorker extends Worker {
      * Fetches and then posts a weather notification.
      * @return Operation success.
      */
-    Result pushWeatherNotification() {
+    private Result pushWeatherNotification() {
         final NotificationManager manager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         if (manager == null) {
@@ -98,8 +97,6 @@ public class DailyWeatherWorker extends Worker {
      * @return Assembled weather notification.
      */
     private Notification getWeatherNotification() {
-        Log.d(TAG, "in getWeatherNotification()");
-
         // debug code
         try {
         	final JSONObject debugJSON = new JSONObject(
@@ -107,7 +104,8 @@ public class DailyWeatherWorker extends Worker {
 					.getJSONObject("lat_lng");
 			final LatLng latLng = new LatLng(debugJSON.getDouble("latitude"),
 					debugJSON.getDouble("longitude"));
-			Log.d(TAG, "URL: " + OpenWeatherMapIntegration.getOWMURL(mContext, latLng));
+			Log.d(TAG, "URL: " + OpenWeatherMapIntegration.getOWMURL(
+			        mContext, latLng, true));
 		} catch (JSONException ex) {
         	Log.e(TAG, "couldnt get URL, we blew it");
 		}
@@ -153,14 +151,6 @@ public class DailyWeatherWorker extends Worker {
                 mDailyTemps = PAWSAPI.getDailyTemperatures(
                         startTime, weatherJSON.getJSONArray("list"));
                 mLastDailySample = now;
-
-				// debug code
-                Log.d(TAG, "mDailyTemps:");
-                String debugstr = "Added: ";
-                for (double temp : mDailyTemps)
-                    debugstr += PAWSAPI.getTemperatureString(temp) + " ";
-                Log.d(TAG, debugstr);
-				// debug code
             }
 
             // Set the notification icon for the coming weather conditions

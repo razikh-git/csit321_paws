@@ -20,6 +20,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.maps.model.LatLng;
 
 import androidx.core.app.NotificationCompat;
 import androidx.work.Constraints;
@@ -30,11 +31,16 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class NotificationService extends Service {
+public class NotificationService
+		extends Service
+		implements WeatherHandler.WeatherReceivedListener {
 
 	// Logging
 	private static final String TAG = "snowpaws_service";
@@ -43,13 +49,10 @@ public class NotificationService extends Service {
 	private static final String PACKAGE_NAME = "com.amw188.csit321_paws";
 	private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
 			".extra.STARTED_FROM_NOTIFICATION";
-	static final String EXTRA_LOCATION = PACKAGE_NAME + ".extra.LOCATION";
-	static final String ACTION_BROADCAST = PACKAGE_NAME + ".action.BROADCAST";
-	static final String ACTION_RECEIVE = PACKAGE_NAME + ".action.RECEIVE";
 
 	// Binder
 	private final IBinder binder = new LocalBinder();
-	public class LocalBinder extends Binder {
+	class LocalBinder extends Binder {
 		NotificationService getService() {
 			return NotificationService.this;
 		}
@@ -75,7 +78,7 @@ public class NotificationService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		Log.i(TAG, "in onBind()");
+		Log.d(TAG, "in onBind()");
 		return binder;
 	}
 
@@ -87,14 +90,14 @@ public class NotificationService extends Service {
 	 */
 	@Override
 	public void onCreate() {
-		Log.i(TAG, "in onCreate()");
+		Log.d(TAG, "in onCreate()");
 		super.onCreate();
 		init();
 	}
 
 	@Override
 	public void onDestroy() {
-		Log.i(TAG, "in onDestroy()");
+		Log.d(TAG, "in onDestroy()");
 		//LocalBroadcastManager.getInstance(this).unregisterReceiver();
 		super.onDestroy();
 	}
@@ -106,23 +109,19 @@ public class NotificationService extends Service {
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.i(TAG, "in onStartCommand()");
-
 		boolean startedFromNotification = intent.getBooleanExtra(
 				EXTRA_STARTED_FROM_NOTIFICATION, false);
-
 		if (startedFromNotification) {
-			Log.i(TAG, "Service started from notification");
-
-			stopLocationUpdates();
+			Log.d(TAG, "Service started from notification");
 
 			// Service will not be revived after it has been killed.
+			stopLocationUpdates();
 			return START_NOT_STICKY;
 		}
 
 		// todo: load up on actions here
 
-		Log.i(TAG, "Service started from activity");
+		Log.d(TAG, "Service started from activity");
 		return START_STICKY;
 	}
 
@@ -133,7 +132,7 @@ public class NotificationService extends Service {
 	 */
 	@TargetApi(23)
 	private void init() {
-		Log.i(TAG, "in init()");
+		Log.d(TAG, "Initialising notification service.");
 
 		// Initialise location utilities
 		mLocationClient = new FusedLocationProviderClient(getApplicationContext());
@@ -164,7 +163,7 @@ public class NotificationService extends Service {
 		startForeground(NOTIFICATION_ID, notif);
 
 		// Push an initial weather notification
-		//pushOneTimeWeatherNotification();
+		pushOneTimeWeatherNotification();
 
 		// Schedule regular weather notifications
 		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
@@ -182,10 +181,6 @@ public class NotificationService extends Service {
 					Integer.parseInt(timeInitial[0]), Integer.parseInt(timeInitial[1]),
 					timeInterval);
 		}
-
-		// debug code
-		//startLocationUpdates();
-		// debug code
 	}
 
 	/**
@@ -248,13 +243,20 @@ public class NotificationService extends Service {
 
 	/* Custom Location Methods */
 
-	public void startLocationUpdates() {
-		Log.d(TAG, "in startLocationUpdates()");
+	boolean isRequestingLocationUpdates() {
+		return mIsRequestingLocationUpdates;
+	}
 
-		if (mIsRequestingLocationUpdates) {
-			Log.d(TAG, "Will not start location updates. Already preoccupied.");
-			return;
-		}
+	void toggleLocationUpdates() {
+		mIsRequestingLocationUpdates = !mIsRequestingLocationUpdates;
+		if (mIsRequestingLocationUpdates)
+			startLocationUpdates();
+		else
+			stopLocationUpdates();
+	}
+
+	private void startLocationUpdates() {
+		Log.d(TAG, "in startLocationUpdates()");
 
 		SharedPreferences sharedPref = getSharedPreferences(
 				getString(R.string.app_global_preferences), MODE_PRIVATE);
@@ -269,14 +271,55 @@ public class NotificationService extends Service {
 		mIsRequestingLocationUpdates = true;
 		mLocationClient.requestLocationUpdates(
 				locationRequest, mLocationCallback, Looper.getMainLooper());
-		Log.d(TAG, "Started location updates.");
+
+		Toast.makeText(this, "Started location updates.", Toast.LENGTH_LONG).show();
 	}
 
-	public void stopLocationUpdates() {
-		Log.i(TAG, "in stopLocationUpdates()");
-
+	private void stopLocationUpdates() {
 		mIsRequestingLocationUpdates = false;
 		mLocationClient.removeLocationUpdates(mLocationCallback);
+
+		Toast.makeText(this, "Stopped location updates.", Toast.LENGTH_LONG).show();
+	}
+
+	/* Custom Weather Methods */
+
+	private void doSomethingWithWeather(String weatherStr) {
+
+	}
+
+	private void updateWeatherData() {
+		try {
+			SharedPreferences sharedPref = getSharedPreferences(getString(
+					R.string.app_global_preferences), MODE_PRIVATE);
+			final boolean isMetric = sharedPref.getString(
+							"units", "metric").equals("metric");
+			final JSONObject weatherJson = new JSONObject(sharedPref.getString(
+					"last_weather_json", "{}"));
+			LatLng latLng = new LatLng(
+					weatherJson.getJSONObject("lat_lng").getDouble("latitude"),
+					weatherJson.getJSONObject("lat_lng").getDouble("longitude"));
+			WeatherHandler weatherHandler = new WeatherHandler(this);
+			if (!weatherHandler.updateWeather(this, latLng, isMetric))
+				// Do something with weather immediately if it needn't wait to be updated
+				doSomethingWithWeather(sharedPref.getString(
+						"last_weather_json", "{}"));
+		} catch (JSONException ex) {
+			Log.e(TAG, "Failed to parse weather JSON in Service.updateWeatherData().");
+			ex.printStackTrace();
+		}
+	}
+
+	/**
+	 * Override of WeatherHandler.WeatherReceivedListener.
+	 * Called from WeatherHandler.getWeather in WeatherHandler.updateWeather.
+	 * @param latLng Latitude/longitude of weather data batch.
+	 * @param response Incredibly long string containing weather 5-day forecast.
+	 * @param isMetric Metric or imperial measurements.
+	 */
+	@Override
+	public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
+		doSomethingWithWeather(response);
 	}
 
 	private Constraints getWorkConstraints() {
@@ -288,7 +331,9 @@ public class NotificationService extends Service {
 	/**
 	 * Post a single weather notification as soon as possible.
 	 */
-	private void pushOneTimeWeatherNotification() {
+	protected void pushOneTimeWeatherNotification() {
+		Log.d(TAG, "in pushOneTimeWeatherNotification()");
+
 		OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(
 				DailyWeatherWorker.class)
 				.setConstraints(getWorkConstraints())

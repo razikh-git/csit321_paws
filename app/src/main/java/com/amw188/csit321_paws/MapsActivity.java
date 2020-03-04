@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
 
 // todo: custom marker style/drawable for favourite locations
 
@@ -76,9 +75,6 @@ public class MapsActivity
     private static final String BUNDLE_KEY = "MapViewBundleKey";
     private static final String CAMERA_KEY = "MapCameraPositionKey";
     private static final String LOCATION_KEY = "MapLocationKey";
-    private static final String ISTRACKING_KEY = "MapIsTrackingKey";
-
-    private static final String TIMER_KEY = "PAWSCooldown";
 
     private static final int DEFAULT_ZOOM = 5;
     private static final int DASH_WIDTH = 30;
@@ -109,34 +105,37 @@ public class MapsActivity
 
     // Notification services
     private NotificationService mNotificationService;
-    private boolean mIsBound;
-    private boolean mIsReceivingLocationUpdates;
-    private boolean mIsNotificationOnCooldown;
-    private Timer mCooldownTimer;
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.i(TAG, "in onServiceConnected()");
+            Log.d(TAG, "in onServiceConnected()");
             NotificationService.LocalBinder binder = (NotificationService.LocalBinder) service;
             mNotificationService = binder.getService();
-            mIsBound = true;
+
+            // Attach button functionalities
+			findViewById(R.id.btnDebugSendNotification).setOnClickListener(
+					this::debugSendNotification);
+			findViewById(R.id.btnDebugToggleLocation).setOnClickListener(
+					this::debugToggleLocation);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            Log.i(TAG, "in onServiceDisconnected()");
-            mIsBound = false;
+            Log.d(TAG, "in onServiceDisconnected()");
+            if (mNotificationService.isRequestingLocationUpdates())
+            	mNotificationService.toggleLocationUpdates();
         }
+
+		private void debugSendNotification(View view) {
+			Log.d(TAG, "in debugSendNotification()");
+			mNotificationService.pushOneTimeWeatherNotification();
+		}
+
+		private void debugToggleLocation(View view) {
+			Log.d(TAG, "in debugToggleLocation()");
+			mNotificationService.toggleLocationUpdates();
+		}
     };
-
-    /*
-    protected BroadcastReceiver _receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
-    */
 
     /**
      * Custom info window implementation for location map markers.
@@ -201,7 +200,6 @@ public class MapsActivity
             mBundle = savedInstanceState.getBundle(BUNDLE_KEY);
             mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
             mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-            mIsReceivingLocationUpdates = savedInstanceState.getBoolean(ISTRACKING_KEY);
         }
 
         // Load the activity layout
@@ -228,9 +226,6 @@ public class MapsActivity
     private void initActivity() {
         // Initialise buttons
         initButtons();
-
-        // Prepare PAWS location tracking
-        mCooldownTimer = new Timer(TIMER_KEY);
 
         // Prepare the map
         mTileOverlayURL = getString(R.string.app_url_owm_map_root)
@@ -811,18 +806,6 @@ public class MapsActivity
         }
     }
 
-    private void startReceivingLocationUpdates() {
-        /*
-        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
-        manager.registerReceiver(_receiver, new IntentFilter(NotificationService.ACTION_RECEIVE));
-        manager.sendBroadcast(new Intent(NotificationService.ACTION_BROADCAST));
-         */
-    }
-
-    private void stopReceivingLocationUpdates() {
-        // todo: this
-    }
-
     @Override
     protected void onPermissionGranted(String perm) {}
 
@@ -844,7 +827,6 @@ public class MapsActivity
             outState.putBundle(BUNDLE_KEY, bundle);
             outState.putParcelable(LOCATION_KEY, mLocation);
             outState.putParcelable(CAMERA_KEY, mMap.getCameraPosition());
-            outState.putBoolean(ISTRACKING_KEY, mIsReceivingLocationUpdates);
         }
         if (mMapView != null)
             mMapView.onSaveInstanceState(bundle);
@@ -855,9 +837,6 @@ public class MapsActivity
         super.onRestoreInstanceState(savedInstanceState);
         mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
         mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-        mIsReceivingLocationUpdates = savedInstanceState.getBoolean(ISTRACKING_KEY);
-        if (mIsReceivingLocationUpdates)
-            startReceivingLocationUpdates();
     }
 
     @Override
@@ -877,9 +856,9 @@ public class MapsActivity
     @Override
     protected void onStart() {
         super.onStart();
+        // Start the map view
         if (mMapView != null)
             mMapView.onStart();
-
         // Bind to the notification service
         Intent intent = new Intent(this, NotificationService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -887,10 +866,9 @@ public class MapsActivity
 
     @Override
     protected void onStop() {
-        // Unbind the notification service
+        // Unbind from the notification service
         unbindService(mConnection);
-        mIsBound = false;
-
+		// Disable the map view
         if (mMapView != null)
             mMapView.onStop();
         super.onStop();

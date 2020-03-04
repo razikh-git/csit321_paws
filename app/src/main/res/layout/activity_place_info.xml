@@ -115,6 +115,15 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="0dp">
 
+                <!-- Horizontal divider between scrollable and static elements. -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/app_spacing"
+                    android:layout_marginEnd="@dimen/app_spacing"
+                    android:background="@color/color_primary"
+                    android:alpha="0.75"/>
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"

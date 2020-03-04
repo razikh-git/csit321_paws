@@ -117,7 +117,7 @@ class WeatherHandler {
 
         // Generate URL and request queue
         RequestQueue queue = Volley.newRequestQueue(context);
-        String url = OpenWeatherMapIntegration.getOWMURL(context, latLng);
+        String url = OpenWeatherMapIntegration.getOWMURL(context, latLng, true);
         Log.d(TAG, "URL:\n" + url);
 
         // Generate and post the request.
