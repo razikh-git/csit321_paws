@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void enterProfilingPrompt() {
         // Redirect to user profiling prompt and  information screen
-        Intent intent = new Intent(this, ProfilingPromptActivity.class);
+        Intent intent = new Intent(this, SurveyInfosheetActivity.class);
         startActivity(intent);
     }
 

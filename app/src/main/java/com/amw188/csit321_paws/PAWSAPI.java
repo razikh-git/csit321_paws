@@ -1,10 +1,12 @@
 package com.amw188.csit321_paws;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -242,5 +244,28 @@ final class PAWSAPI {
             ex.printStackTrace();
         }
         return tempList;
+    }
+
+    static void resetProfileData(Context context) {
+        // Load global preferences
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                context.getResources().getString(
+                        R.string.app_global_preferences), Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor = sharedPref.edit();
+        sharedEditor.putBoolean("app_init", false);
+        sharedEditor.putBoolean("facebook_init", false);
+
+        // Reset all survey profile data
+        final int end = context.getResources().getInteger(R.integer.survey_question_count);
+        for (int i = 0; i < end; ++i)
+            sharedEditor.putInt("survey_answer_" + i, 0);
+        sharedEditor.putInt("survey_last_question", 0);
+        sharedEditor.putLong("survey_time_completed", 0);
+        sharedEditor.apply();
+
+        Toast.makeText(context,
+                R.string.app_reset_result,
+                Toast.LENGTH_LONG)
+                .show();
     }
 }

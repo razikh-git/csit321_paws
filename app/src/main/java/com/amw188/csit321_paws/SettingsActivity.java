@@ -131,22 +131,6 @@ public class SettingsActivity extends BottomNavBarActivity {
     }
 
     public void onClickReset(View view) {
-        // Load global preferences.
-        SharedPreferences sharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
-        SharedPreferences.Editor sharedEditor = sharedPref.edit();
-        sharedEditor.putBoolean("app_init", false);
-        sharedEditor.putBoolean("facebook_init", false);
-
-        // Reset all survey profile data.
-        for (int i = 0; i < getResources().getInteger(R.integer.survey_question_count); ++i)
-            sharedEditor.putInt("survey_answer_" + i, 0);
-        sharedEditor.putInt("survey_last_question", 0);
-        sharedEditor.putLong("profile_time_completed", 0);
-        sharedEditor.apply();
-
-        Toast.makeText(this,
-                R.string.app_reset_result,
-                Toast.LENGTH_LONG).show();
+    	PAWSAPI.resetProfileData(this);
     }
 }
