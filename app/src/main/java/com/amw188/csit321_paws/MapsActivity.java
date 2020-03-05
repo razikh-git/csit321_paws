@@ -188,9 +188,9 @@ public class MapsActivity
         location.setLongitude(marker.getPosition().longitude);
         String distanceStr = "";
         final Location lastBestLocation = mNotificationService.getLastBestLocation();
-        if (lastBestLocation != null )
-            distanceStr = PAWSAPI.metresToMiles(lastBestLocation.distanceTo(location))
-                    + (isMetric ? "km" : "mi");
+        if (lastBestLocation != null)
+			distanceStr = PAWSAPI.getDistanceString(isMetric,
+					lastBestLocation.distanceTo(location));
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoDistance)).setText(
                 distanceStr);
 

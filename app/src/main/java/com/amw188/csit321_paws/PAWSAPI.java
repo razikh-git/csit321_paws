@@ -26,6 +26,10 @@ final class PAWSAPI {
 
     static double metresToMiles(double m) { return m * 0.62d; }
 
+    static String getDistanceString(boolean isMetric, double m) {
+    	return (isMetric ? m / 1000.0f : metresToMiles(m)) + (isMetric ? "km" : "mi");
+	}
+
     /**
      * Formats a string for some precipitation depth in appropriate units.
      * @param isMetric Value conversion and units to display for metric or non-metric preferences.
