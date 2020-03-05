@@ -260,6 +260,7 @@
     <string name="fe_fallback">No existing profile found.</string>
 
     <!-- Weather Activity. -->
+    <string name="wa_nearby">Near to</string>
     <string name="wa_today">Today</string>
     <string name="wa_weekly">Forecast</string>
     <string name="wa_sunrise">Sunrise</string>

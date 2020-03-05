@@ -16,14 +16,22 @@ import java.util.Locale;
 
 public class FetchAddressIntentService extends IntentService {
 
+    private static final String TAG = "snowpaws_fais";
+
     public FetchAddressIntentService() {
         super("FetchAddressIntentService");
     }
 
     protected ResultReceiver mReceiver;
 
-    // Queues up an address fetch request.
-    public static void startActionFetchAddress(Context context, ResultReceiver receiver, Location location) {
+    /**
+     * Queues up an address fetch request
+     * @param context Activity context.
+     * @param receiver Activity to deliver result to.
+     * @param location Location object to derive address from.
+     */
+    public static void startActionFetchAddress(Context context,
+                                               ResultReceiver receiver, Location location) {
         Intent intent = new Intent(context, FetchAddressIntentService.class);
         intent.setAction(FetchAddressCode.ACTION_FETCH_ADDRESS);
         intent.putExtra(FetchAddressCode.EXTRA_RECEIVER, receiver);
@@ -43,7 +51,10 @@ public class FetchAddressIntentService extends IntentService {
         }
     }
 
-    // Handles address fetching in a background thread.
+    /**
+     * Handles address fetching in a background thread
+     * @param location Location object to derive address from.
+     */
     private void handleActionFetchAddress(Location location) {
         String error = "";
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
@@ -56,17 +67,17 @@ public class FetchAddressIntentService extends IntentService {
         } catch (IOException e) {
             error = getString(R.string.sv_fa_service_unavailable);
             e.printStackTrace();
-            Log.e("snowpaws_sv_fa", error);
+            Log.e(TAG, error);
         } catch (IllegalArgumentException e) {
             error = getString(R.string.sv_fa_invalid_lat_lng);
             e.printStackTrace();
-            Log.e("snowpaws_sv_fa", error);
+            Log.e(TAG, error);
         }
 
         if (addressList == null || addressList.size() == 0) {
             if (!error.isEmpty()) {
                 error = getString(R.string.sv_fa_no_address);
-                Log.e("snowpaws_sv_fa", error);
+                Log.e(TAG, error);
             }
             deliverResultToReceiver(FetchAddressCode.FAILURE_RESULT,
                     addressList, error);
@@ -76,7 +87,14 @@ public class FetchAddressIntentService extends IntentService {
         }
     }
 
-    private void deliverResultToReceiver(int resultCode, ArrayList<Address> addressList, String message) {
+    /**
+     * Returns the address list to the receiving activity.
+     * @param resultCode Success or failure code.
+     * @param addressList List of address data for this location.
+     * @param message Extra message, contains error info.
+     */
+    private void deliverResultToReceiver(int resultCode,
+                                         ArrayList<Address> addressList, String message) {
         Bundle bundle = new Bundle();
         bundle.putString(FetchAddressCode.RESULT_DATA_KEY, message);
         bundle.putParcelableArrayList(FetchAddressCode.RESULT_ADDRESSLIST_KEY, addressList);

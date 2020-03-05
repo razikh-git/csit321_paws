@@ -155,21 +155,44 @@ public class MapsActivity
     private View setupInfoWindow(Marker marker) {
         Log.d(TAG, "in setupInfoWindow()");
 
+        SharedPreferences sharedPref = getSharedPreferences(
+                getString(R.string.app_global_preferences), MODE_PRIVATE);
+        final boolean isMetric = sharedPref.getString("units", "metric")
+                .equals("metric");
+
         // Title - Location name
-        String[] abbreviatedAddress = getAbbreviatedAddress(mAddressList).split(" ");
+        String[] abbreviatedAddress = getAbbreviatedAddress(mSelectedAddressList).split(" ");
         StringBuilder title = new StringBuilder();
         final int end = Math.max(0, abbreviatedAddress.length - 2);
-        for (int i = 0; i < end; ++i)
-            title.append(abbreviatedAddress[i]).append(' ');
+        for (int i = 0; i < end; ++i) {
+            title.append(abbreviatedAddress[i]);
+            if (i < end - 1)
+                title.append(' ');
+        }
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).setText(
                 title);
 
         // Subtitle - Location broader area
         StringBuilder subtitle = new StringBuilder();
-        for (int i = end; i < abbreviatedAddress.length; ++i)
-            subtitle.append(abbreviatedAddress[i]).append(' ');
+        for (int i = end; i < abbreviatedAddress.length; ++i) {
+            subtitle.append(abbreviatedAddress[i]);
+            if (i < abbreviatedAddress.length - 1)
+                subtitle.append(' ');
+        }
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoSubtitle)).setText(
                 subtitle);
+
+        // Subtitle - Distance from last best location
+        Location location = new Location(LocationManager.GPS_PROVIDER);
+        location.setLatitude(marker.getPosition().latitude);
+        location.setLongitude(marker.getPosition().longitude);
+        String distanceStr = "";
+        final Location lastBestLocation = mNotificationService.getLastBestLocation();
+        if (lastBestLocation != null )
+            distanceStr = PAWSAPI.metresToMiles(lastBestLocation.distanceTo(location))
+                    + (isMetric ? "km" : "mi");
+        ((TextView)mInfoWindow.findViewById(R.id.txtInfoDistance)).setText(
+                distanceStr);
 
         // Body text - Place and weather summary
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoContent)).setText(
@@ -199,7 +222,7 @@ public class MapsActivity
         if (savedInstanceState != null) {
             mBundle = savedInstanceState.getBundle(BUNDLE_KEY);
             mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
-            mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
+            mSelectedLocation = savedInstanceState.getParcelable(LOCATION_KEY);
         }
 
         // Load the activity layout
@@ -238,9 +261,11 @@ public class MapsActivity
     private void onMapWeatherRedirectClick(View view) {
         // Redirect to weather screen with data from the current marker
         Intent intent = new Intent(this, PlaceInfoActivity.class);
-        if (mLocation != null) {
+        if (mSelectedLocation != null) {
             intent.putExtra(RequestCode.EXTRA_LATLNG,
-                    new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
+                    new LatLng(mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude()));
+            intent.putExtra(RequestCode.EXTRA_PLACENAME,
+                    ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).getText());
         }
         startActivityForResult(intent, RequestCode.REQUEST_WEATHER_BY_LOCATION);
     }
@@ -327,7 +352,7 @@ public class MapsActivity
         if (mMap.getMapType() == type)
             return;
 
-        // Reset element styles.
+        // Reset element styles
         findViewById(R.id.btnMapTypeDefault).setPadding(0, 0, 0, 0);
         findViewById(R.id.btnMapTypeSatellite).setPadding(0, 0, 0, 0);
         findViewById(R.id.btnMapTypeTerrain).setPadding(0, 0, 0, 0);
@@ -338,7 +363,7 @@ public class MapsActivity
         ((TextView)findViewById(R.id.txtMapTypeTerrain)).setTextColor(
                 ContextCompat.getColor(this, R.color.color_midtone));
 
-        // Highlight elements for the selected map type.
+        // Highlight elements for the selected map type
         findViewById(idBtn).setPadding(pad, pad, pad, pad);
         ((TextView)findViewById(idTxt)).setTextColor(
                 ContextCompat.getColor(this, R.color.color_accent_alt));
@@ -362,7 +387,7 @@ public class MapsActivity
                 break;
             }
             case R.id.btnMapOverlayRisk: {
-                // Toggle visibility of the polydraw overlay.
+                // Toggle visibility of the polydraw overlay
                 boolean isVis = true;
                 if (!mPolyList.isEmpty())
                     if (mPolyList.get(0).isVisible())
@@ -405,19 +430,40 @@ public class MapsActivity
     }
 
     private void onMapDefaultLongClick(LatLng latLng) {
-        // Remove old markers
-        if (mMarker != null)
-            mMarker.remove();
+        Location location = new Location(LocationManager.GPS_PROVIDER);
+        location.setLatitude(latLng.latitude);
+        location.setLongitude(latLng.longitude);
+        awaitAddress(location);
+    }
 
-        // Place a new marker on the held location and move the camera
-        mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+    private void placeNewMarker(ArrayList<Address> addressList) {
+        try {
+            if (addressList == null || addressList.size() <= 0)
+                return;
 
-        // Reinitialise the location information
-        mLocation = new Location(LocationManager.GPS_PROVIDER);
-        mLocation.setLongitude(latLng.longitude);
-        mLocation.setLatitude(latLng.latitude);
-        fetchAddress();
+            // Values outside of Australia are excluded and ignored
+            final Address address = addressList.get(0);
+            if (!address.getCountryCode().equals("AU"))
+                return;
+
+            // Remove existing marker
+            if (mMarker != null)
+                mMarker.remove();
+
+            // Place a new marker on the held location and move the camera
+            final LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
+
+            // Update the global location information
+            mSelectedLocation = new Location(LocationManager.GPS_PROVIDER);
+            mSelectedLocation.setLatitude(address.getLatitude());
+            mSelectedLocation.setLongitude(address.getLongitude());
+
+            // Update activity
+            updateLocationDisplay();
+        } catch (NullPointerException ex) {
+            Log.e(TAG, "Failed to generate marker from null address.");
+        }
     }
 
     private void onMapDrawingClick(LatLng latLng) {
@@ -683,7 +729,7 @@ public class MapsActivity
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            fetchLocation();
+            awaitLocation();
         } else {
             checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                     RequestCode.REQUEST_PERMISSIONS_LOCATION);
@@ -739,12 +785,12 @@ public class MapsActivity
     @Override
     protected void onLocationReceived() {
         // Request an address from the current location
-        fetchAddress();
+        awaitAddress(mSelectedLocation);
     }
 
     @Override
     protected void onAddressReceived() {
-        updateLocationDisplay();
+        placeNewMarker(mSelectedAddressList);
     }
 
     private void updateLocationDisplay() {
@@ -752,36 +798,33 @@ public class MapsActivity
         String str;
 
         // Debug print the full address
-        for (Address address : mAddressList) {
+        for (Address address : mSelectedAddressList) {
             for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                 Log.d(TAG, address.getAddressLine(i));
             }
         }
 
-        if (mMarker == null)
-            // Reposition the camera, and zoom in to a reasonably broad scope
+        // Reposition the camera away from the default position,
+        // and zoom in to a reasonably broad scope
+        if (0.0 - mCameraPosition.target.latitude <= 1
+                && 0.0 - mCameraPosition.target.longitude <= 1)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(mLocation.getLatitude(), mLocation.getLongitude()),
+                    new LatLng(mMarker.getPosition().latitude, mMarker.getPosition().longitude),
                     DEFAULT_ZOOM));
-        else
-            mMarker.remove();
 
-        // Place a marker at the current or chosen location
-        mMarker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(mLocation.getLatitude(), mLocation.getLongitude())));
-
+        // Add marker info
         ((TextView)findViewById(R.id.txtSheetTitle)).setText("");
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText("");
-        if (mAddressList != null) {
+        if (mSelectedAddressList != null) {
 
             // Set the location title
             // eg. 95 Iris St, Beacon Hill NSW 2100, Australia
             // ==> Beacon Hill NSW 2100
             ((TextView)findViewById(R.id.txtSheetTitle)).setText(
-                    getAbbreviatedAddress(mAddressList));
+                    getAbbreviatedAddress(mSelectedAddressList));
 
             // Give address to the InfoWindow view to format
-            str = mAddressList.get(0).getAddressLine(0);
+            str = mSelectedAddressList.get(0).getAddressLine(0);
             mMarker.setTitle(str);
 
             // todo: infowindow body text
@@ -791,13 +834,13 @@ public class MapsActivity
             mMarker.showInfoWindow();
 
             // Set the coordinates setupInfoWindow.
-            str = new DecimalFormat("#.##").format(mAddressList.get(0).getLongitude());
-            str += " " + new DecimalFormat("#.##").format(mAddressList.get(0).getLatitude());
+            str = new DecimalFormat("#.##").format(mSelectedAddressList.get(0).getLongitude());
+            str += " " + new DecimalFormat("#.##").format(mSelectedAddressList.get(0).getLatitude());
             ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
 
             // Set the coordinates setupInfoWindow.
-            final double lng = mAddressList.get(0).getLongitude();
-            final double lat = mAddressList.get(0).getLatitude();
+            final double lng = mSelectedAddressList.get(0).getLongitude();
+            final double lat = mSelectedAddressList.get(0).getLatitude();
             final char bearingLng = lng > 0 ? 'E' : 'W';
             final char bearingLat = lat > 0 ? 'N' : 'S';
             str = new DecimalFormat("#.##").format(Math.abs(lng)) + " " + bearingLng
@@ -825,7 +868,7 @@ public class MapsActivity
         if (bundle != null) {
             bundle = new Bundle();
             outState.putBundle(BUNDLE_KEY, bundle);
-            outState.putParcelable(LOCATION_KEY, mLocation);
+            outState.putParcelable(LOCATION_KEY, mSelectedLocation);
             outState.putParcelable(CAMERA_KEY, mMap.getCameraPosition());
         }
         if (mMapView != null)
@@ -836,7 +879,7 @@ public class MapsActivity
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
-        mLocation = savedInstanceState.getParcelable(LOCATION_KEY);
+        mSelectedLocation = savedInstanceState.getParcelable(LOCATION_KEY);
     }
 
     @Override

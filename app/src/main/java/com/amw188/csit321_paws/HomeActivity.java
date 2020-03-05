@@ -91,7 +91,7 @@ public class HomeActivity
         if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
                 RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
             Log.i(TAG, "HomeActivity.initInterface.hasPermssions TRUE");
-            fetchLocation();
+            awaitLocation();
         }
         return true;
     }
@@ -224,7 +224,7 @@ public class HomeActivity
     }
 
     /**
-     * Called from onLocationReceived after LocationActivity.fetchLocation.
+     * Called from onLocationReceived after LocationActivity.awaitLocation.
      * Updates location strings in activity with latest results.
      * Calls initWeatherDisplay if data in strings is out of date.
      * @return Operation success.
@@ -232,12 +232,12 @@ public class HomeActivity
     private boolean initLocationDisplay() {
         if (checkHasPermissions(
                 RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
-            if (mLocation != null) {
+            if (mSelectedLocation != null) {
                 // Call and await an update to the weather JSON string in prefs
                 boolean success = true;
                 final boolean isMetric = mSharedPref.getString(
                         "units", "metric").equals("metric");
-                LatLng latLng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
+                LatLng latLng = new LatLng(mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
                 WeatherHandler weatherHandler = new WeatherHandler(this);
                 if (!weatherHandler.updateWeather(this, latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
@@ -371,7 +371,7 @@ public class HomeActivity
 
     /**
      * Override of LocationActivity.onLocationReceived.
-     * Called from LocationActivity.fetchLocation.
+     * Called from LocationActivity.awaitLocation.
      * Redirects to initLocationDisplay to update data displays in the activity.
      */
     @Override

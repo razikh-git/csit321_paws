@@ -29,8 +29,10 @@ public class PlaceInfoActivity
 {
     private static final String TAG = "snowpaws_wa";
 
-    SharedPreferences mSharedPref;
-    WeatherHandler mWeatherHandler;
+    private SharedPreferences mSharedPref;
+    private WeatherHandler mWeatherHandler;
+
+    private String mNearbyPlace;
 
     // todo: relocate weather calls to the foreground service
 
@@ -39,15 +41,20 @@ public class PlaceInfoActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_info);
 
-        // Load global preferences
-         mSharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+        if (!initActivity() || !initWeatherData(savedInstanceState))
+            Log.e(TAG, "Failed to initialise weather for place info.");
+    }
 
-        // Bottom navigation bar functionality
+    private boolean initActivity() {
+        mSharedPref = this.getSharedPreferences(
+                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        return true;
+    }
 
-        // Initialise all weather data.
+    private boolean initWeatherData(Bundle savedInstanceState) {
+        // Initialise all weather data
         LatLng latLng = null;
         try {
             if (savedInstanceState == null) {
@@ -55,6 +62,7 @@ public class PlaceInfoActivity
                 if (extras != null) {
                     Log.d(TAG, "PlaceInfoActivity identified parcelable extras.");
                     latLng = extras.getParcelable(RequestCode.EXTRA_LATLNG);
+                    mNearbyPlace = extras.getString(RequestCode.EXTRA_PLACENAME);
                 } else {
                     Log.d(TAG, "No parcelable extras bundled in call to PlaceInfoActivity.");
                 }
@@ -69,20 +77,21 @@ public class PlaceInfoActivity
             }
         } catch (JSONException e) {
             e.printStackTrace();
+            return false;
         }
-        if (latLng != null) {
-            // Call and await an update to the weather JSON string in prefs
-            final boolean isMetric = mSharedPref.getString("units", "metric")
-                    .equals("metric");
-            mWeatherHandler = new WeatherHandler(this);
-            if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
-                // Initialise weather displays with last best values if none are being updated
-                initWeatherDisplay(
-                        latLng,
-                        mSharedPref.getString("last_weather_json", "{}"),
-                        isMetric);
-            }
+
+        // Call and await an update to the weather JSON string in prefs
+        final boolean isMetric = mSharedPref.getString("units", "metric")
+                .equals("metric");
+        mWeatherHandler = new WeatherHandler(this);
+        if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
+            // Initialise weather displays with last best values if none are being updated
+            return initWeatherDisplay(
+                    latLng,
+                    mSharedPref.getString("last_weather_json", "{}"),
+                    isMetric);
         }
+        return true;
     }
 
     @Override
@@ -108,10 +117,23 @@ public class PlaceInfoActivity
             // Fetch the latest weather forecast for the provided location
             JSONObject weatherForecastJSON = new JSONObject(response);
 
-            // Weather title
+            // Weather title -- City of forecast
             str = weatherForecastJSON.getJSONObject("city")
                     .getString("name");
             ((TextView)findViewById(R.id.txtWeatherCity)).setText(str);
+
+            // Weather subtitle -- Nearby place from maps marker
+
+            Log.d(TAG, "YOUR PLACES: str=[" + str + "] place=[" + mNearbyPlace + "]");
+
+            if (mNearbyPlace != null && !mNearbyPlace.equals("") && !mNearbyPlace.equals(str)) {
+                ((TextView)findViewById(R.id.txtWeatherNearby)).setText(
+                        getString(R.string.wa_nearby) + ' ' + mNearbyPlace);
+                findViewById(R.id.txtWeatherNearby).setVisibility(View.VISIBLE);
+            } else {
+                ((TextView)findViewById(R.id.txtWeatherNearby)).setText("");
+                findViewById(R.id.txtWeatherNearby).setVisibility(View.GONE);
+            }
 
             // Weather description
             str = weatherForecastJSON.getJSONArray("list").getJSONObject(0)

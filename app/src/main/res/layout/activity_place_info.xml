@@ -38,6 +38,16 @@
                 android:textColor="@color/color_on_primary"/>
 
             <TextView
+                android:id="@+id/txtWeatherNearby"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/app_spacing"
+                android:textAppearance="@style/TextAppearance.Paws.Medium"
+                android:textAlignment="center"
+                android:textColor="@color/color_on_primary"
+                android:visibility="gone"/>
+
+            <TextView
                 android:id="@+id/txtWeatherDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -122,7 +132,8 @@
                     android:layout_marginStart="@dimen/app_spacing"
                     android:layout_marginEnd="@dimen/app_spacing"
                     android:background="@color/color_primary"
-                    android:alpha="0.75"/>
+                    android:alpha="0.75"
+                    android:visibility="gone"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"

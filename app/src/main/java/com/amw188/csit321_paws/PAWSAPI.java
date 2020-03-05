@@ -18,11 +18,13 @@ import java.util.Calendar;
 final class PAWSAPI {
     private PAWSAPI() {}
 
-    private static final String TAG = "snowpaws_pawsapi";
+    private static final String TAG = "snowpaws_api";
 
     private static double toKilometresPerHour(double ms) { return ms * 3.6d; }
     private static double toMilesPerHour(double ms) { return ms * 2.237d; }
-    private static double toInches(double mm) { return mm / 25.4; }
+    private static double toInches(double mm) { return mm / 25.4d; }
+
+    static double metresToMiles(double m) { return m * 0.62d; }
 
     /**
      * Formats a string for some precipitation depth in appropriate units.

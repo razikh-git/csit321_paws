@@ -21,4 +21,5 @@ interface RequestCode {
     int REQUEST_WEATHER_BY_LOCATION = 0;
     String PACKAGE_NAME = "com.amw188.csit321_paws";
     String EXTRA_LATLNG = PACKAGE_NAME + ".extra.LOCATION";
+    String EXTRA_PLACENAME = PACKAGE_NAME + ".extra.PLACENAME";
 }

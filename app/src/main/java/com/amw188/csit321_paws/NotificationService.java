@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -63,6 +64,7 @@ public class NotificationService
 	private static final String NOTIFICATION_CHANNEL_ID = "paws_notif_channel";
 
 	// Locations
+	private Location mLastBestLocation;
 	private boolean mIsRequestingLocationUpdates;
 	private FusedLocationProviderClient mLocationClient;
 	private LocationCallback mLocationCallback;
@@ -142,11 +144,12 @@ public class NotificationService
 				super.onLocationResult(locationResult);
 				if (locationResult != null && mHostListener != null) {
 					mHostListener.onLocationResultReceived(locationResult);
-				} else {
-					Log.e(TAG, "Listener or location failed to catch location callback.");
+				} else if (locationResult == null) {
+					Log.e(TAG, "Location result or request was null.");
 				}
 			}
 		};
+		startLocationUpdates();
 
 		// Create notification channel
 		NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -280,6 +283,10 @@ public class NotificationService
 		mLocationClient.removeLocationUpdates(mLocationCallback);
 
 		Toast.makeText(this, "Stopped location updates.", Toast.LENGTH_LONG).show();
+	}
+
+	protected Location getLastBestLocation() {
+		return mLastBestLocation;
 	}
 
 	/* Custom Weather Methods */

@@ -20,13 +20,13 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-class LocationActivity extends PermissionActivity {
+abstract class LocationActivity extends PermissionActivity {
 
 	private String TAG = "snowpaws_la";
 
-	protected ArrayList<Address> mAddressList;
+	protected ArrayList<Address> mSelectedAddressList;
 	protected MapsActivity.AddressResultReceiver mAddressReceiver;
-	protected Location mLocation;
+	protected Location mSelectedLocation;
 	protected FusedLocationProviderClient mFusedLocationClient;
 
 	class AddressResultReceiver extends ResultReceiver {
@@ -40,7 +40,7 @@ class LocationActivity extends PermissionActivity {
 				return;
 			String error = resultData.getString(FetchAddressCode.RESULT_DATA_KEY);
 			if (error == null || error.equals(""))
-				mAddressList = resultData.getParcelableArrayList(
+				mSelectedAddressList = resultData.getParcelableArrayList(
 						FetchAddressCode.RESULT_ADDRESSLIST_KEY);
 			else
 				return;
@@ -76,55 +76,55 @@ class LocationActivity extends PermissionActivity {
 				: null;
 	}
 
-	protected void fetchAddress() {
+	protected void awaitAddress(Location location) {
 		FetchAddressIntentService.startActionFetchAddress(this,
-				mAddressReceiver, mLocation);
+				mAddressReceiver, location);
 	}
 
-	protected void fetchLocation() {
+	protected void awaitLocation() {
 		// Prepare the initial location information
-		mFusedLocationClient.getLastLocation().addOnSuccessListener(
-				(location -> {
-					mLocation = location;
-					if (mLocation == null) {
-						try {
-							// TODO remove debug functionality
-							SharedPreferences sharedPref = this.getSharedPreferences(
-									getResources().getString(R.string.app_global_preferences),
-									Context.MODE_PRIVATE);
-							JSONObject lastWeather = new JSONObject(
-									sharedPref.getString(
-											"last_weather_json", "{}"));
-							mLocation = new Location(LocationManager.GPS_PROVIDER);
-							mLocation.setLatitude(
-									Float.parseFloat(
-											lastWeather.getJSONObject("lat_lng")
-													.getString("latitude")));
-							mLocation.setLongitude(
-									Float.parseFloat(
-											lastWeather.getJSONObject("lat_lng")
-													.getString("longitude")));
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
+		mFusedLocationClient.getLastLocation().addOnSuccessListener(this::onLocationSuccess);
+	}
+
+	private void onLocationSuccess(Location location) {
+		mSelectedLocation = location;
+		if (mSelectedLocation == null) {
+			try {
+				// TODO remove debug functionality
+				SharedPreferences sharedPref = this.getSharedPreferences(
+						getResources().getString(R.string.app_global_preferences),
+						Context.MODE_PRIVATE);
+				JSONObject lastWeather = new JSONObject(
+						sharedPref.getString(
+								"last_weather_json", "{}"));
+				mSelectedLocation = new Location(LocationManager.GPS_PROVIDER);
+				mSelectedLocation.setLatitude(
+						Float.parseFloat(
+								lastWeather.getJSONObject("lat_lng")
+										.getString("latitude")));
+				mSelectedLocation.setLongitude(
+						Float.parseFloat(
+								lastWeather.getJSONObject("lat_lng")
+										.getString("longitude")));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 						/*
 						Toast.makeText(this,
 								R.string.sv_fa_service_unavailable,
 								Toast.LENGTH_LONG).show();
 						 */
-						return;
-					}
-					// todo: push this as a dialog fragment
-					// Push an error message on geocoder failure
-					if (!Geocoder.isPresent()) {
-						Toast.makeText(this,
-								R.string.sv_fa_geocoder_unavailable,
-								Toast.LENGTH_LONG).show();
-						return;
-					}
-					onLocationReceived();
-				})
-		);
+			return;
+		}
+		// todo: push this as a dialog fragment
+		// Push an error message on geocoder failure
+		if (!Geocoder.isPresent()) {
+			Toast.makeText(this,
+					R.string.sv_fa_geocoder_unavailable,
+					Toast.LENGTH_LONG).show();
+			return;
+		}
+		onLocationReceived();
 	}
 
 	protected void onLocationReceived() {}
