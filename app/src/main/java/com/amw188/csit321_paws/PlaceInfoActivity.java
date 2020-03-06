@@ -27,10 +27,9 @@ public class PlaceInfoActivity
                 WeatherHandler.WeatherReceivedListener,
                 Preference.OnPreferenceChangeListener
 {
-    private static final String TAG = "snowpaws_wa";
+    private static final String TAG = PrefConstValues.tag_prefix + "wa";
 
     private SharedPreferences mSharedPref;
-    private WeatherHandler mWeatherHandler;
 
     private String mNearbyPlace;
 
@@ -47,7 +46,7 @@ public class PlaceInfoActivity
 
     private boolean initActivity() {
         mSharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         return true;
@@ -69,7 +68,7 @@ public class PlaceInfoActivity
             }
             if (latLng == null) {
                 JSONObject lastWeather = new JSONObject(
-                        mSharedPref.getString("last_weather_json", "{}"));
+                        mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json));
                 latLng = new LatLng(lastWeather.getJSONObject("city").getJSONObject("coord")
                         .getDouble("lat"),
                         lastWeather.getJSONObject("city").getJSONObject("coord")
@@ -80,15 +79,14 @@ public class PlaceInfoActivity
             return false;
         }
 
-        // Call and await an update to the weather JSON string in prefs
-        final boolean isMetric = mSharedPref.getString("units", "metric")
-                .equals("metric");
-        mWeatherHandler = new WeatherHandler(this);
-        if (!mWeatherHandler.updateWeather(this, latLng, isMetric)) {
+        // Call and await an update to the weather JSON string in shared prefs
+        final boolean isMetric = mSharedPref.getString(PrefKeys.units, PrefDefValues.units)
+                .equals(PrefConstValues.units_metric);
+        if (!new WeatherHandler(this).updateWeather(this, latLng, isMetric)) {
             // Initialise weather displays with last best values if none are being updated
             return initWeatherDisplay(
                     latLng,
-                    mSharedPref.getString("last_weather_json", "{}"),
+                    mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json),
                     isMetric);
         }
         return true;
@@ -108,24 +106,21 @@ public class PlaceInfoActivity
     private boolean initWeatherDisplay(LatLng latLng, String response, boolean isMetric) {
         String str;
         Double dbl;
-        long lon;
 
-        final int index = 8;
-        final int pad = Math.round(getResources().getDimension(R.dimen.text_spacing));
+        final int elemsPerDay = 24 / 3;
+        final int pad = Math.round(getResources().getDimension(R.dimen.app_spacing_medium));
 
         try {
             // Fetch the latest weather forecast for the provided location
-            JSONObject weatherForecastJSON = new JSONObject(response);
+            final JSONObject weatherForecastJSON = new JSONObject(response);
+            final JSONObject currentWeatherJson = weatherForecastJSON.getJSONArray("list")
+                    .getJSONObject(0);
 
             // Weather title -- City of forecast
-            str = weatherForecastJSON.getJSONObject("city")
-                    .getString("name");
+            str = weatherForecastJSON.getJSONObject("city").getString("name");
             ((TextView)findViewById(R.id.txtWeatherCity)).setText(str);
 
             // Weather subtitle -- Nearby place from maps marker
-
-            Log.d(TAG, "YOUR PLACES: str=[" + str + "] place=[" + mNearbyPlace + "]");
-
             if (mNearbyPlace != null && !mNearbyPlace.equals("") && !mNearbyPlace.equals(str)) {
                 ((TextView)findViewById(R.id.txtWeatherNearby)).setText(
                         getString(R.string.wa_nearby) + ' ' + mNearbyPlace);
@@ -136,29 +131,46 @@ public class PlaceInfoActivity
             }
 
             // Weather description
-            str = weatherForecastJSON.getJSONArray("list").getJSONObject(0)
-                    .getJSONArray("weather").getJSONObject(0)
+            str = currentWeatherJson.getJSONArray("weather").getJSONObject(0)
                     .getString("description");
             ((TextView)findViewById(R.id.txtWeatherDescription)).setText(str);
 
             // Weather icon
-            str = weatherForecastJSON.getJSONArray("list").getJSONObject(0)
-                    .getJSONArray("weather").getJSONObject(0)
+            str = currentWeatherJson.getJSONArray("weather").getJSONObject(0)
                     .getString("icon");
             ((ImageView)findViewById(R.id.imgWeatherIcon)).setImageDrawable(
                     PAWSAPI.getWeatherDrawable(this, str));
 
             // Current temperature
-            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(0)
-                    .getJSONObject("main")
-                    .getDouble("temp");
+            dbl = currentWeatherJson.getJSONObject("main").getDouble("temp");
             str = PAWSAPI.getTemperatureString(dbl, isMetric);
-
             ((TextView)findViewById(R.id.txtTempCurrent)).setText(str);
 
-            // Populate today's weather.
+            // Current wind
+            dbl = currentWeatherJson.getJSONObject("wind").getDouble("speed");
+            str = PAWSAPI.getWindSpeedString(dbl, isMetric);
+            ((TextView)findViewById(R.id.txtWindCurrent)).setText(str);
+
+            // Current precipitation
+            dbl = 0.0d;
+            if (currentWeatherJson.has("rain"))
+                if (currentWeatherJson.getJSONObject("rain").has("3h"))
+                    dbl = currentWeatherJson.getJSONObject("rain").getDouble("3h");
+            str = PAWSAPI.getPrecipitationString(isMetric, dbl);
+            ((TextView)findViewById(R.id.txtPrecipCurrent)).setText(str);
+
+            // Current humidity
+            dbl = (double)currentWeatherJson.getJSONObject("main").getInt("humidity");
+            str = PAWSAPI.getSimplePercentageString(dbl);
+            ((TextView)findViewById(R.id.txtHumidityCurrent)).setText(str);
+
+            /* Populate today's weather: */
+
             LinearLayout layParent = findViewById(R.id.layWeatherToday);
-            for (int i = 0; i < index + 1; i++) {
+            for (int elem = 0; elem < elemsPerDay + 1; elem++) {
+                final JSONObject periodicWeatherJson = weatherForecastJSON
+                        .getJSONArray("list").getJSONObject(elem);
+
                 // Create a new LinearLayout child
                 LinearLayout.LayoutParams params;
                 LinearLayout layout = new LinearLayout(this);
@@ -173,9 +185,7 @@ public class PlaceInfoActivity
 
                 // Write the time of the forecast sample
                 str = DateFormat.format("h a",
-                        weatherForecastJSON.getJSONArray("list")
-                                .getJSONObject(i)
-                                .getLong("dt") * 1000).toString();
+                        periodicWeatherJson.getLong("dt") * 1000).toString();
                 txt = new TextView(this);
                 params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -190,8 +200,7 @@ public class PlaceInfoActivity
                 layout.addView(txt);
 
                 // Create a weather icon
-                str = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                        .getJSONArray("weather").getJSONObject(0)
+                str = periodicWeatherJson.getJSONArray("weather").getJSONObject(0)
                         .getString("icon");
                 img = new ImageView(this);
                 img.setImageDrawable(PAWSAPI.getWeatherDrawable(this, str));
@@ -203,14 +212,12 @@ public class PlaceInfoActivity
                 layout.addView(img);
 
                 // Add any predicted precipitation
-                int id = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                        .getJSONArray("weather").getJSONObject(0)
+                int id = periodicWeatherJson.getJSONArray("weather").getJSONObject(0)
                         .getInt("id");
                 if (id < 800) {
                     if (id > 100) {
                         // Rainy weather, measurements as periodic volume in millimetres
-                        dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                                .getJSONObject("rain").getDouble("3h");
+                        dbl = periodicWeatherJson.getJSONObject("rain").getDouble("3h");
                         str = PAWSAPI.getPrecipitationString(isMetric, dbl);
                     }
                 } else if (id == 800) {
@@ -218,9 +225,8 @@ public class PlaceInfoActivity
                     str = "";
                 } else {
                     // Cloudy weather, measurements in percentage coverage
-                    dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                            .getJSONObject("clouds").getDouble("all");
-                    str = 10 * Math.round(dbl / 10) + "%";
+                    dbl = periodicWeatherJson.getJSONObject("clouds").getDouble("all");
+                    str = PAWSAPI.getSimplePercentageString(dbl);
                 }
 
                 txt = new TextView(this);
@@ -236,9 +242,7 @@ public class PlaceInfoActivity
                 layout.addView(txt);
 
                 // Add the predicted temperature
-                dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                        .getJSONObject("main")
-                        .getDouble("temp");
+                dbl = periodicWeatherJson.getJSONObject("main").getDouble("temp");
                 str = PAWSAPI.getTemperatureString(dbl);
                 txt = new TextView(this);
                 params = new LinearLayout.LayoutParams(
@@ -256,27 +260,34 @@ public class PlaceInfoActivity
                 layParent.addView(layout);
             }
 
-            // Populate the 5-day forecast.
-            double tempHigh = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+            /* Populate the 5-day forecast: */
+
+            // todo: rewrite the 4 (!) different loops over the week in every iteration of this loop
+
+            double tempHigh = weatherForecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
                             .getJSONObject("main")
                             .getDouble("temp");
             double tempLow = tempHigh;
-            String icon = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+            String icon = weatherForecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
                     .getJSONArray("weather").getJSONObject(0)
                     .getString("icon");
             String icon2 = icon;
-            int id = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+            int weatherId1 = weatherForecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
                     .getJSONArray("weather").getJSONObject(0)
                     .getInt("id");
-            int id2 = id;
+            int weatherId2 = weatherId1;
 
             layParent = findViewById(R.id.layWeatherWeekly);
-            for (int i = index; i < 40; ++i) {
-                if ((i + 1) % 8 == 0) {
+            final int elemCount = weatherForecastJSON.getJSONArray("list").length();
+            for (int elem = elemsPerDay; elem < elemCount; ++elem) {
+                final JSONObject periodicWeatherJson = weatherForecastJSON
+                        .getJSONArray("list").getJSONObject(elem);
+
+                if ((elem + 1) % elemsPerDay == 0) {
                     LinearLayout.LayoutParams params;
 
                     // Create a vertical divider between children
-                    if (i / 8 > 1) {
+                    if (elem / elemsPerDay > 1) {
                         View view = new View(this);
                         params = new LinearLayout.LayoutParams(
                                 1,
@@ -300,9 +311,10 @@ public class PlaceInfoActivity
                     ImageView img;
 
                     // Write the day's title
-                    lon = weatherForecastJSON.getJSONArray("list").getJSONObject(i - 8)
-                            .getLong("dt") * 1000;
-                    str = DateFormat.format("E", lon).toString();
+                    str = DateFormat.format("E",
+                            weatherForecastJSON.getJSONArray("list")
+                                    .getJSONObject(elem - 8)
+                                    .getLong("dt") * 1000).toString();
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -390,11 +402,11 @@ public class PlaceInfoActivity
 
                     // Create a wind bearing icon
                     dbl = 0d;
-                    for (int j = i - 8; j < i; j++)
-                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(j)
+                    for (int i = elem - elemsPerDay; i < elem; i++)
+                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(i)
                                 .getJSONObject("wind")
                                 .getDouble("deg");
-                    dbl /= 8;
+                    dbl /= elemsPerDay;
                     img = new ImageView(this);
                     img.setImageDrawable(getDrawable(R.drawable.ic_navigation));
                     img.setColorFilter(ContextCompat.getColor(
@@ -411,11 +423,10 @@ public class PlaceInfoActivity
 
                     // Add the predicted average wind speed
                     dbl = 0d;
-                    for (int j = i - 7; j < i; j++)
-                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(j)
-                                .getJSONObject("wind")
-                                .getDouble("speed");
-                    str = PAWSAPI.getWindSpeedString(dbl / 8, isMetric);
+                    for (int i = elem - elemsPerDay - 1; i < elem; i++)
+                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                                .getJSONObject("wind").getDouble("speed");
+                    str = PAWSAPI.getWindSpeedString(dbl / elemsPerDay, isMetric);
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -431,22 +442,22 @@ public class PlaceInfoActivity
 
                     // Add any precipitation for the lowest-tier weather effects for the day
                     str = "";
-                    if (id < 800) {
-                        if (id > 100) {
+                    if (weatherId1 < 800) {
+                        if (weatherId1 > 100) {
                             // Rainy weather, measurements as daily total volume in millimetres
                             dbl = 0d;
-                            for (int j = i - 7; j < i; j++) {
+                            for (int i = elem - elemsPerDay - 1; i < elem; i++) {
                                 if (weatherForecastJSON.getJSONArray("list")
-                                        .getJSONObject(j).has("rain")) {
+                                        .getJSONObject(i).has("rain")) {
                                     if (weatherForecastJSON.getJSONArray("list")
-                                            .getJSONObject(j).getJSONObject("rain")
+                                            .getJSONObject(i).getJSONObject("rain")
                                             .has("3h")) {
-                                        Log.d(TAG, "Sampling rain/3h from element " + j + ". ("
+                                        Log.d(TAG, "Sampling rain/3h from element " + i + ". ("
                                                 + weatherForecastJSON.getJSONArray("list")
-                                                .getJSONObject(j).getJSONObject("rain")
+                                                .getJSONObject(i).getJSONObject("rain")
                                                 .getDouble("3h") + ")");
                                         dbl += weatherForecastJSON.getJSONArray("list")
-                                                .getJSONObject(j)
+                                                .getJSONObject(i)
                                                 .getJSONObject("rain").getDouble("3h");
                                     }
                                 }
@@ -454,27 +465,26 @@ public class PlaceInfoActivity
                             if (dbl > 0d)
                                 str = PAWSAPI.getPrecipitationString(isMetric, dbl);
                         }
-                    } else if (id == 800) {
+                    } else if (weatherId1 == 800) {
                         // Clear skies, no notable measurements
                     } else {
                         // Cloudy weather, measurements in percentage coverage
                         dbl = 0d;
-                        for (int j = i - 7; j < i; j++) {
-                            Log.d(TAG, "Sampling clouds/all from element " + j + ". ("
+                        for (int i = elem - elemsPerDay - 1; i < elem; i++) {
+                            Log.d(TAG, "Sampling clouds/all from element " + i + ". ("
                                     + weatherForecastJSON.getJSONArray("list")
-                                    .getJSONObject(j).getJSONObject("clouds")
+                                    .getJSONObject(i).getJSONObject("clouds")
                                     .getInt("all") + ")");
                             dbl += Double.parseDouble(weatherForecastJSON.getJSONArray("list")
-                                    .getJSONObject(j)
+                                    .getJSONObject(i)
                                     .getJSONObject("clouds").getString("all"));
                         }
-                        dbl /= 8;
-                        str = 10 * Math.round(dbl / 10) + "%";
+                        str = PAWSAPI.getSimplePercentageString(dbl / elemsPerDay);
                     }
 
                     if (!(str.equals(""))) {
                         Log.d(TAG, "Adding additional weather data ("
-                                + str + ") for day " + i / 8);
+                                + str + ") for day " + elem / elemsPerDay);
 
                         // Create a weather icon
                         img = new ImageView(this);
@@ -506,17 +516,14 @@ public class PlaceInfoActivity
                     layParent.addView(layout);
 
                     // After each 24-hour cluster of samples, publish the data as a new day
-                    double temp = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                            .getJSONObject("main")
-                            .getDouble("temp");
+                    double temp = periodicWeatherJson.getJSONObject("main").getDouble("temp");
                     tempHigh = temp;
                     tempLow = temp;
                 }
 
                 // Compare temperatures sampled every 3 hours to identify highs and lows for the day
-                double temp = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                        .getJSONObject("main")
-                        .getDouble("temp");
+                double temp = periodicWeatherJson.getJSONObject("main").getDouble("temp");
+                Log.d(TAG, "Sampling temperature/3h from element " + elem + ". (" + temp + ")");
 
                 if (tempHigh < temp)
                     tempHigh = temp;
@@ -526,19 +533,16 @@ public class PlaceInfoActivity
                 // Compare weather IDs to bring notable weather events to attention
                 // Note:
                 // Cloud > Clear = 800 > Atmospherics > Snow > Rain > Drizzle > Thunderstorm
-                int idTemp = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                        .getJSONArray("weather").getJSONObject(0)
-                        .getInt("id");
-                if (idTemp < id) {
-                    id = idTemp;
-                    icon = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                            .getJSONArray("weather").getJSONObject(0)
-                            .getString("icon");
-                } else if (idTemp < id2) {
-                    id2 = idTemp;
-                    icon = weatherForecastJSON.getJSONArray("list").getJSONObject(i)
-                            .getJSONArray("weather").getJSONObject(0)
-                            .getString("icon");
+                int elemWeatherId = periodicWeatherJson.getJSONArray("weather")
+                        .getJSONObject(0).getInt("id");
+                if (elemWeatherId < weatherId1) {
+                    weatherId1 = elemWeatherId;
+                    icon = periodicWeatherJson.getJSONArray("weather")
+                            .getJSONObject(0).getString("icon");
+                } else if (elemWeatherId < weatherId2) {
+                    weatherId2 = elemWeatherId;
+                    icon = periodicWeatherJson.getJSONArray("weather")
+                            .getJSONObject(0).getString("icon");
                 }
             }
 
@@ -557,11 +561,19 @@ public class PlaceInfoActivity
                             .getLong("sunset") * 1000)).toString();
             ((TextView)findViewById(R.id.txtSunsetTime)).setText(str);
 
+            // Timestamp for current weather sample
+            final int whichTime = PAWSAPI.getWeatherJsonIndexForTime(
+                    weatherForecastJSON.getJSONArray("list"), System.currentTimeMillis());
+            if (whichTime >= 0) {
+                str = PAWSAPI.getWeatherTimestampString(this,
+                        weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
+                                .getLong("dt") * 1000);
+                ((TextView)findViewById(R.id.txtWeatherTimestamp)).setText(str);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
             return false;
         }
-
         return true;
     }
 }
