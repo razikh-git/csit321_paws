@@ -80,8 +80,7 @@ public class PlaceInfoActivity
         }
 
         // Call and await an update to the weather JSON string in shared prefs
-        final boolean isMetric = mSharedPref.getString(PrefKeys.units, PrefDefValues.units)
-                .equals(PrefConstValues.units_metric);
+        final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
         if (!new WeatherHandler(this).updateWeather(this, latLng, isMetric)) {
             // Initialise weather displays with last best values if none are being updated
             return initWeatherDisplay(
@@ -184,8 +183,8 @@ public class PlaceInfoActivity
                 ImageView img;
 
                 // Write the time of the forecast sample
-                str = DateFormat.format("h a",
-                        periodicWeatherJson.getLong("dt") * 1000).toString();
+                str = PAWSAPI.getShortClockString(
+                        periodicWeatherJson.getLong("dt") * 1000);
                 txt = new TextView(this);
                 params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -551,14 +550,14 @@ public class PlaceInfoActivity
             // TODO : Guarantee sunrise/sunset uses local timezone rather than system timezone.
 
             // Sunrise and sunset
-            str = (DateFormat.format("h:mm a",
-                    weatherForecastJSON.getJSONObject("city")
-                            .getLong("sunrise") * 1000)).toString();
+            str = PAWSAPI.getClockString(this,
+                    weatherForecastJSON.getJSONObject("city").getLong("sunrise") * 1000,
+                    true);
             ((TextView)findViewById(R.id.txtSunriseTime)).setText(str);
 
-            str = (DateFormat.format("h:mm a",
-                    weatherForecastJSON.getJSONObject("city")
-                            .getLong("sunset") * 1000)).toString();
+            str = PAWSAPI.getClockString(this,
+                    weatherForecastJSON.getJSONObject("city").getLong("sunset") * 1000,
+                    true);
             ((TextView)findViewById(R.id.txtSunsetTime)).setText(str);
 
             // Timestamp for current weather sample

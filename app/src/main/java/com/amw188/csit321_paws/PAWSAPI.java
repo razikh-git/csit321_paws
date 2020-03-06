@@ -15,8 +15,10 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 final class PAWSAPI {
     private PAWSAPI() {}
@@ -29,9 +31,21 @@ final class PAWSAPI {
 
     static double metresToMiles(final double m) { return m * 0.62d; }
 
+    static boolean preferredUnits(SharedPreferences sharedPref) {
+        return sharedPref.getString(PrefKeys.units, PrefDefValues.units)
+                .equals(PrefConstValues.units_metric);
+    }
+
+    private static boolean preferredClockFormat(SharedPreferences sharedPref) {
+       return sharedPref.getString(PrefKeys.hourformat, PrefDefValues.hourformat)
+               .equals(PrefConstValues.hourformat_24);
+    }
+
     static String getDistanceString(final boolean isMetric, final double m) {
     	return (isMetric ? m / 1000.0f : metresToMiles(m)) + (isMetric ? "km" : "mi");
 	}
+
+	// todo: resolve 12-hour time not taking effect
 
     /**
      * Returns the index of the weather sample covering a given point in time.
@@ -52,15 +66,63 @@ final class PAWSAPI {
 	}
 
     /**
-     * Formats a time into some consistent style for weather timestamps.
+     * Formats a time into an abbreviated 12-hour string for weather timestamps.
+     * @param ms Raw timestamp in milliseconds.
+     * @return Formatted weather timestamp string.
+     */
+	static String getShortClockString(final long ms) {
+        return new SimpleDateFormat("h a", Locale.getDefault()).format(ms);
+    }
+
+    /**
+     * Formats a time into some simple style for weather timestamps.
+     * @param context Context.
+     * @param ms Raw timestamp in milliseconds.
+     * @param showMinutes Show or hide minutes in formatted time.
+     * @return Formatted weather timestamp string.
+     */
+	static String getClockString(final Context context, final long ms, final boolean showMinutes) {
+        final boolean is24hr = PAWSAPI.preferredClockFormat(context.getSharedPreferences(
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
+        final String pattern = String.format(
+                "%s%s%s",
+                is24hr ? "HH" : "h",
+                showMinutes ? ":mm" : "",
+                is24hr ? "" : " a");
+	    return new SimpleDateFormat(pattern, Locale.getDefault()).format(ms);
+    }
+
+    /**
+     * Formats a time into some consistent style for detailed weather timestamps.
      * @param context Context.
      * @param ms Raw timestamp in milliseconds.
      * @return Formatted weather timestamp string.
      */
 	static String getWeatherTimestampString(final Context context, final long ms) {
-		return context.getString(R.string.home_weather_timestamp) + " " +
-				DateFormat.format("dd/MM HH:mm", ms).toString();
+	    final boolean is24hr = PAWSAPI.preferredClockFormat(context.getSharedPreferences(
+	            PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
+	    final String pattern = "dd/MM " + (is24hr ? "HH" : "hh") + ":mm" + (is24hr ? "" : "e");
+		return context.getString(R.string.home_weather_timestamp)
+                + " " + new SimpleDateFormat(pattern, Locale.getDefault()).format(ms);
 	}
+
+    /**
+     * Formats a time into a detailed timestamp including year and date.
+     * @param context Context.
+     * @param ms Raw timestamp in milliseconds.
+     * @param newline Whether to split time and date into separate lines.
+     * @return Formatted timestamp string.
+     */
+	static String getDateTimestampString(final Context context, final long ms, boolean newline) {
+	    final boolean is24hr = PAWSAPI.preferredClockFormat(context.getSharedPreferences(
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
+	    final String pattern = String.format(
+	            "%s:mm %s%sdd/MM/yyyy",
+                is24hr ? "HH" : "hh",
+                is24hr ? "" : "a",
+                newline ? '\n' : ' ');
+        return new SimpleDateFormat(pattern, Locale.getDefault()).format(ms);
+    }
 
 	/**
 	 * Rounds a decimal to the nearest multiple of 10, for simplifying percentages.
@@ -100,8 +162,8 @@ final class PAWSAPI {
      */
     static String getPrecipitationString(final boolean isMetric, final double mm) {
             return isMetric
-                ? new DecimalFormat("#.##").format(mm) + "mm"
-                : new DecimalFormat("#.##").format(millimetresToInches(mm)) + "in";
+                ? new DecimalFormat("#.#").format(mm) + "mm"
+                : new DecimalFormat("#.#").format(millimetresToInches(mm)) + "in";
     }
 
     /**

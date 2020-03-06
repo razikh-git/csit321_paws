@@ -4,6 +4,7 @@ import android.app.TimePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.ActionBar;
@@ -20,26 +21,28 @@ public class SettingsActivity extends BottomNavBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_settings);
-
-        // Button functionality
-        findViewById(R.id.btnReset).setOnClickListener(this::onClickReset);
-
-        // Bottom navigation bar functionality
-        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
-        nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.settings, new SettingsFragment())
-                .commit();
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+		if (!init()) {
+			Log.e(TAG, "Failed to initialise preferences.");
+		}
     }
+
+    private boolean init() {
+		findViewById(R.id.btnReset).setOnClickListener(this::onClickReset);
+		BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+		nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+		getSupportFragmentManager()
+				.beginTransaction()
+				.replace(R.id.settings, new SettingsFragment())
+				.commit();
+
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
+		return true;
+	}
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
         @Override
@@ -66,7 +69,8 @@ public class SettingsActivity extends BottomNavBarActivity {
 					.split(":");
 			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
 			now.set(Calendar.MINUTE, Integer.parseInt(str[1]));
-            pref.setTitle(DateFormat.format("hh:mm a", now));
+			pref.setTitle(PAWSAPI.getClockString(getContext(),
+					now.getTimeInMillis(), true));
 
             pref = findPreference("notif_time_end");
             pref.setOnPreferenceClickListener(this::onClickNotifTimePreference);
@@ -75,7 +79,8 @@ public class SettingsActivity extends BottomNavBarActivity {
 					.split(":");
 			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
 			now.set(Calendar.MINUTE, Integer.parseInt(str[1]));
-			pref.setTitle(DateFormat.format("hh:mm a", now));
+			pref.setTitle(PAWSAPI.getClockString(getContext(),
+					now.getTimeInMillis(), true));
         }
 
         private boolean onClickNotifTimePreference(Preference pref) {

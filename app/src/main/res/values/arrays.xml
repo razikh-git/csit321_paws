@@ -10,6 +10,16 @@
         <item>imperial</item>
     </string-array>
 
+    <string-array name="hourformat_entries">
+        <item>12-Hour time</item>
+        <item>24-Hour time</item>
+    </string-array>
+
+    <string-array name="hourformat_values">
+        <item>12</item>
+        <item>24</item>
+    </string-array>
+
     <!-- Notifications Preferences -->
     <string-array name="notif_interval_entries">
         <item>Every five days</item>

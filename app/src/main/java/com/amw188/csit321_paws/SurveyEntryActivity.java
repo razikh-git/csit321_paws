@@ -160,8 +160,9 @@ public class SurveyEntryActivity
             // Survey completion timestamp
             findViewById(R.id.txtTimestamp).setVisibility(VISIBLE);
             ((TextView)findViewById(R.id.txtTimestamp)).setText(
-                    DateFormat.format("hh:mm A\ndd/MM/yyyy",
-                            mSharedPref.getLong(PrefKeys.survey_time_completed, 0)));
+                    PAWSAPI.getDateTimestampString(this,
+                            mSharedPref.getLong(PrefKeys.survey_time_completed, 0),
+                            true));
 
             // Relabel the survey entry button
             ((MaterialButton)findViewById(R.id.btnContinue)).setText(

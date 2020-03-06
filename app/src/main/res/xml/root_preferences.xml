@@ -27,7 +27,15 @@
             app:entryValues="@array/units_values"
             app:key="units"
             app:title="@string/pref_title_units"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"/>
+
+        <ListPreference
+            app:defaultValue="24"
+            app:entries="@array/hourformat_entries"
+            app:entryValues="@array/hourformat_values"
+            app:key="hourformat"
+            app:title="@string/pref_title_hourformat"
+            app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>
 
@@ -39,17 +47,17 @@
             app:entryValues="@array/notif_interval_values"
             app:key="weather_notif_interval"
             app:title="@string/pref_title_notif_interval"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"/>
 
         <Preference
             app:key="notif_time_heading"
-            app:title="@string/pref_title_notif_heading" />
+            app:title="@string/pref_title_notif_heading"/>
 
         <Preference
-            app:key="notif_time_start" />
+            app:key="notif_time_start"/>
 
         <Preference
-            app:key="notif_time_end" />
+            app:key="notif_time_end"/>
 
     </PreferenceCategory>
 
@@ -61,7 +69,7 @@
             app:entryValues="@array/location_priority_values"
             app:key="location_priority"
             app:title="@string/pref_title_location_usage"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"/>
 
         <ListPreference
             app:defaultValue="5000"
@@ -69,7 +77,7 @@
             app:entryValues="@array/location_rate_values"
             app:key="location_rate"
             app:title="@string/pref_title_location_rate"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>
 

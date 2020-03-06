@@ -259,8 +259,8 @@
     <string name="wa_nearby">Near to</string>
     <string name="wa_today">Today</string>
     <string name="wa_weekly">Forecast</string>
-    <string name="wa_sunrise">Sunrise</string>
-    <string name="wa_sunset">Sunset</string>
+    <string name="wa_sunrise">"Sunrise "</string>
+    <string name="wa_sunset">"Sunset  "</string>
 
     <string name="wa_temperature">Temperature</string>
     <string name="wa_humidity">Humidity</string>
@@ -304,7 +304,7 @@
 
     <!-- Units Preferences. -->
     <string name="pref_title_units">Units of measurement</string>
-    <string name="pref_title_time">Time format</string>
+    <string name="pref_title_hourformat">Clock format</string>
 
     <!-- Notifications Preferences. -->
     <string name="pref_title_notif_heading">Show weather updates between:</string>
