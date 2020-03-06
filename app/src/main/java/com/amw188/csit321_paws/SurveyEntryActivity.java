@@ -30,7 +30,7 @@ import static android.view.View.VISIBLE;
 public class SurveyEntryActivity
         extends BottomNavBarActivity {
 
-    private static final String TAG = "snowpaws_se";
+    private static final String TAG = PrefConstValues.tag_prefix + "se";
 
     private SharedPreferences mSharedPref;
 
@@ -53,7 +53,7 @@ public class SurveyEntryActivity
 
     private boolean initActivity() {
         mSharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
 
         // Bottom navigation bar functionality
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
@@ -88,28 +88,27 @@ public class SurveyEntryActivity
     }
 
     private boolean initInterface() {
-        Log.d(TAG, "app_init : " + mSharedPref.getBoolean(
-                "app_init", false));
-        Log.d(TAG, "facebook_init : " + mSharedPref.getBoolean(
-                "facebook_init", false));
-        Log.d(TAG, "survey_last_question : " + mSharedPref.getInt(
-                "survey_last_question", 0));
-        Log.d(TAG, "survey_time_completed : " + mSharedPref.getLong(
-                "survey_time_completed", 0));
-        Log.d(TAG, "units : " + mSharedPref.getString(
-                "units", "metric"));
+        Log.d(TAG, PrefKeys.app_init + " : " + mSharedPref.getBoolean(
+                PrefKeys.app_init, PrefDefValues.app_init));
+        Log.d(TAG, PrefKeys.survey_last_question + " : " + mSharedPref.getInt(
+                PrefKeys.survey_last_question, 0));
+        Log.d(TAG, PrefKeys.survey_time_completed + " : " + mSharedPref.getLong(
+                PrefKeys.survey_time_completed, 0));
+        Log.d(TAG, PrefKeys.units + " : " + mSharedPref.getString(
+                PrefKeys.units, PrefDefValues.units));
 
         // Initialise data summary contents:
+        final int surveyQuestionCount = PAWSAPI.getSurveyQuestionCount(this);
 
         // Populate progress counter label
         ((TextView)findViewById(R.id.txtProgressSurvey)).setText(
-                mSharedPref.getInt("survey_last_question", 0)
-                        + " / " + getResources().getInteger(R.integer.survey_question_count));
+                mSharedPref.getInt(PrefKeys.survey_last_question, 0)
+                        + " / " + surveyQuestionCount);
 
-        if (mSharedPref.getInt("survey_last_question", 0) < getResources().getInteger(R.integer.survey_question_count)) {
+        if (mSharedPref.getInt(PrefKeys.survey_last_question, 0) < surveyQuestionCount) {
             // Incomplete profiling surveys:
 
-            if (mSharedPref.getInt("survey_last_question", 0) == 0) {
+            if (mSharedPref.getInt(PrefKeys.survey_last_question, 0) == 0) {
                 // Profiling surveys with no progress whatsoever:
 
                 // Relabel the survey entry button
@@ -132,8 +131,8 @@ public class SurveyEntryActivity
                 progressBar.setIndeterminate(false);
                 progressBar.setVisibility(VISIBLE);
                 progressBar.setProgress(
-                        (int)((double)(mSharedPref.getInt("survey_last_question", 1)
-                            / (double)getResources().getInteger(R.integer.survey_question_count)
+                        (int)((double)(mSharedPref.getInt(PrefKeys.survey_last_question, 1)
+                            / (double)surveyQuestionCount
                             * 100)));
             }
 
@@ -162,7 +161,7 @@ public class SurveyEntryActivity
             findViewById(R.id.txtTimestamp).setVisibility(VISIBLE);
             ((TextView)findViewById(R.id.txtTimestamp)).setText(
                     DateFormat.format("hh:mm A\ndd/MM/yyyy",
-                            mSharedPref.getLong("survey_time_completed", 0)));
+                            mSharedPref.getLong(PrefKeys.survey_time_completed, 0)));
 
             // Relabel the survey entry button
             ((MaterialButton)findViewById(R.id.btnContinue)).setText(
@@ -182,7 +181,7 @@ public class SurveyEntryActivity
         // todo: provide dialog prompt for restarting over with a completed profile
 
         // Reset profile data
-        if (mSharedPref.getLong("survey_time_completed", 0) > 0)
+        if (mSharedPref.getLong(PrefKeys.survey_time_completed, 0) > 0)
             PAWSAPI.resetProfileData(this);
 
         // Redirect to live survey screen

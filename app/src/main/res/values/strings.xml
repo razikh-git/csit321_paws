@@ -4,11 +4,6 @@
     <!--      Functional strings      -->
     <!--                              -->
 
-    <!-- App settings. -->
-    <string name="app_global_preferences" translatable="false">
-        com.amw188.csit321_paws_preferences
-    </string>
-
     <!-- Open Weather Maps. -->
     <string name="app_url_owm_root" translatable="false">
         https://openweathermap.org/
@@ -42,10 +37,6 @@
     <string name="noti_chan_desc_default">paws_notification_channel</string>
     <string name="noti_chan_desc_high">paws_notification_channel</string>
     <string name="noti_chan_desc_max">paws_notification_channel</string>
-
-    <!-- Weather notifications. -->
-    <string name="app_default_weather_notif_time_start">08:00</string>
-    <string name="app_default_weather_notif_time_end">20:00</string>
 
     <!--                              -->
     <!--        Vanity strings        -->
@@ -260,11 +251,21 @@
     <string name="fe_fallback">No existing profile found.</string>
 
     <!-- Weather Activity. -->
+    <string name="wa_north">north</string>
+    <string name="wa_south">south</string>
+    <string name="wa_east">east</string>
+    <string name="wa_west">west</string>
+
     <string name="wa_nearby">Near to</string>
     <string name="wa_today">Today</string>
     <string name="wa_weekly">Forecast</string>
     <string name="wa_sunrise">Sunrise</string>
     <string name="wa_sunset">Sunset</string>
+
+    <string name="wa_temperature">Temperature</string>
+    <string name="wa_humidity">Humidity</string>
+    <string name="wa_precip">Precipitation</string>
+    <string name="wa_wind">Wind</string>
 
     <!-- Mapping Activity. -->
     <string name="ma_map_type">Map Type</string>

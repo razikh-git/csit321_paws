@@ -25,12 +25,11 @@ import java.util.Collections;
 import java.util.Locale;
 
 public class DailyWeatherWorker extends Worker {
-    private static final String TAG = "snowpaws_dww";
+    private static final String TAG = PrefConstValues.tag_prefix + "dww";
 
-    private static final String PACKAGE_NAME = "com.amw188.csit321_paws";
     private static final int WEATHER_ID = 1338;
     private static final String WEATHER_TAG = "paws_weather_channel";
-    static final String WORK_TAG = PACKAGE_NAME + ".daily_weather_work";
+    static final String WORK_TAG = PrefConstValues.package_name + ".daily_weather_work";
     static final String WEATHER_CHANNEL_ID = "paws_weather_channel";
 
     private Context mContext;
@@ -52,8 +51,7 @@ public class DailyWeatherWorker extends Worker {
         Result result = Result.success();
         mContext = getApplicationContext();
         mSharedPref = mContext.getSharedPreferences(
-                mContext.getResources().getString(R.string.app_global_preferences),
-                Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
 
         final long timeNow = System.currentTimeMillis();
         final long timeUntilStart = PAWSAPI.getTimeUntil(
@@ -100,7 +98,7 @@ public class DailyWeatherWorker extends Worker {
         // debug code
         try {
         	final JSONObject debugJSON = new JSONObject(
-					mSharedPref.getString("last_weather_json", "{}"))
+					mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json))
 					.getJSONObject("lat_lng");
 			final LatLng latLng = new LatLng(debugJSON.getDouble("latitude"),
 					debugJSON.getDouble("longitude"));
@@ -128,18 +126,18 @@ public class DailyWeatherWorker extends Worker {
 
         try {
             // Fetch the last best weather forecast from storage
-            final JSONObject weatherJSON = new JSONObject(mSharedPref.getString(
-                    "last_weather_json", "{}"));
+            final JSONObject weatherJson = new JSONObject(mSharedPref.getString(
+                    PrefKeys.last_weather_json, PrefConstValues.empty_json));
 
             // Choose the next best forecast 3hr time block
             final long now = System.currentTimeMillis();
-            int whichTime = 0;
-            while (whichTime < weatherJSON.getJSONArray("list").length()
-                    && weatherJSON.getJSONArray("list")
-                    .getJSONObject(whichTime).getLong("dt") * 1000 < now) {
-                whichTime++;
+            final int whichTime = PAWSAPI.getWeatherJsonIndexForTime(
+                    weatherJson.getJSONArray("list"), now);
+            if (whichTime < 0) {
+                Log.e(TAG, "Invalid or obsolete weather JSON.");
+                return null;
             }
-            final JSONObject timeJSON = weatherJSON.getJSONArray("list")
+            final JSONObject timeJSON = weatherJson.getJSONArray("list")
                     .getJSONObject(whichTime);
 
             // Update the daily weather values when the day passes
@@ -149,7 +147,7 @@ public class DailyWeatherWorker extends Worker {
                         ? now + PAWSAPI.getTimeUntil(now, 0, 0)
                         : now;
                 mDailyTemps = PAWSAPI.getDailyTemperatures(
-                        startTime, weatherJSON.getJSONArray("list"));
+                        startTime, weatherJson.getJSONArray("list"));
                 mLastDailySample = now;
             }
 
@@ -159,10 +157,10 @@ public class DailyWeatherWorker extends Worker {
                     .getString("icon"));
 
             // Format the notification with the coming weather data
-            final boolean isMetric = mSharedPref.getString("units", "metric")
-                    .equals("metric");
+            final boolean isMetric = mSharedPref.getString(PrefKeys.units, PrefDefValues.units)
+                    .equals(PrefConstValues.units_metric);
             weatherTitle = String.format(Locale.getDefault(), weatherTitle,
-                    weatherJSON.getJSONObject("city").getString("name"),
+                    weatherJson.getJSONObject("city").getString("name"),
                     DateFormat.format(
                             "h a", timeJSON.getLong("dt") * 1000));
             weatherMessage = String.format(Locale.getDefault(), weatherMessage,
@@ -176,7 +174,7 @@ public class DailyWeatherWorker extends Worker {
                     // Wind data
                     PAWSAPI.getWindSpeedString(
                             timeJSON.getJSONObject("wind").getDouble("speed"), isMetric),
-                    PAWSAPI.getWindBearingString(
+                    PAWSAPI.getWindBearingString(mContext,
                             timeJSON.getJSONObject("wind").getDouble("deg"), true),
 
                     // Temperature range
@@ -214,14 +212,14 @@ public class DailyWeatherWorker extends Worker {
     }
 
     private String[] getStartTime() {
-        return mSharedPref.getString("weather_notif_time_start",
-                mContext.getResources().getString(R.string.app_default_weather_notif_time_start))
+        return mSharedPref.getString(PrefKeys.weather_notif_time_start,
+                PrefDefValues.weather_notif_time_start)
                 .split(":");
     }
 
     private String[] getEndTime() {
-        return mSharedPref.getString("weather_notif_time_end",
-                mContext.getResources().getString(R.string.app_default_weather_notif_time_end))
+        return mSharedPref.getString(PrefKeys.weather_notif_time_end,
+                PrefDefValues.weather_notif_time_end)
                 .split(":");
     }
 }

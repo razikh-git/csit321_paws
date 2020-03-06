@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -30,7 +29,7 @@ public class HomeActivity
         extends LocationActivity
         implements WeatherHandler.WeatherReceivedListener
 {
-    private static final String TAG = "snowpaws_home";
+    private static final String TAG = PrefConstValues.tag_prefix + "home";
 
     private SharedPreferences mSharedPref;
 
@@ -40,7 +39,7 @@ public class HomeActivity
         setContentView(R.layout.activity_home);
 
         mSharedPref = this.getSharedPreferences(
-                getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         if (!init()) {
             Log.e(TAG, "Failed to completely initialise HomeActivity.");
         }
@@ -81,7 +80,8 @@ public class HomeActivity
      */
     private boolean initInterface() {
         // Initialise home screen banners
-        if (mSharedPref.getInt("survey_last_question", 1) < getResources().getInteger(R.integer.survey_question_count)) {
+        if (mSharedPref.getInt(PrefKeys.survey_last_question, 1)
+                < PAWSAPI.getSurveyQuestionCount(this)) {
             findViewById(R.id.cardWarningBanner).setVisibility(VISIBLE);
             final float pad = getResources().getDimension(R.dimen.height_banners_contextual);
             findViewById(R.id.layHome).setPadding(0, (int)pad, 0, 0);
@@ -105,8 +105,8 @@ public class HomeActivity
      */
     private boolean initWeatherDisplay(String response) {
         try {
-            final boolean isMetric = mSharedPref.getString("units", "metric")
-                    .equals("metric");
+            final boolean isMetric = mSharedPref.getString(PrefKeys.units, PrefDefValues.units)
+                    .equals(PrefConstValues.units_metric);
 
             int index = 0;
             String str;
@@ -153,10 +153,9 @@ public class HomeActivity
 
             // Time of forecast
             ((TextView)(findViewById(R.id.txtWeatherTimestamp))).setText(
-                    getString(R.string.home_weather_timestamp) + " " +
-                            DateFormat.format("dd/MM HH:mm",
-                                    weatherForecastJSON.getJSONArray("list").getJSONObject(index)
-                                            .getLong("dt") * 1000).toString());
+                    PAWSAPI.getWeatherTimestampString(this,
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                            .getLong("dt") * 1000));
 
             // Fill in body data
 
@@ -175,7 +174,7 @@ public class HomeActivity
             // Wind (bearing)
             dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
                     .getJSONObject("wind").getDouble("deg");
-            str = PAWSAPI.getWindBearingString(dbl);
+            str = PAWSAPI.getWindBearingString(this, dbl);
             ((TextView)findViewById(R.id.txtWindBearing)).setText(str);
 
             // Weather type
@@ -236,13 +235,12 @@ public class HomeActivity
                 // Call and await an update to the weather JSON string in prefs
                 boolean success = true;
                 final boolean isMetric = mSharedPref.getString(
-                        "units", "metric").equals("metric");
+                        PrefKeys.units, PrefDefValues.units).equals(PrefConstValues.units_metric);
                 LatLng latLng = new LatLng(mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
-                WeatherHandler weatherHandler = new WeatherHandler(this);
-                if (!weatherHandler.updateWeather(this, latLng, isMetric)) {
+                if (!new WeatherHandler(this).updateWeather(this, latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
                     success = initWeatherDisplay(
-                            mSharedPref.getString("last_weather_json", "{}"));
+                            mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json));
                 }
                 return success;
             }
@@ -376,6 +374,8 @@ public class HomeActivity
      */
     @Override
     protected void onLocationReceived() {
-        initLocationDisplay();
+        if (!initLocationDisplay()) {
+            Log.e(TAG, "Failed to update location elements.");
+        }
     }
 }

@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,13 +19,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-
 public class SurveyQuestionActivity extends BottomNavBarActivity {
 
     SharedPreferences mSharedPref;
 
-    private static final String TAG = "snowpaws_sq";
+    private static final String TAG = PrefConstValues.tag_prefix + "sq";
 
     private static final String TAG_PROGRESS = "progress";
     private JSONObject mSurveyJson = null;
@@ -40,8 +37,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
         if (!(init() && continueSurvey())) {
             Toast.makeText(this,
                     "Failed to generate the survey.",
-                    Toast.LENGTH_LONG)
-                    .show();
+                    Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -52,7 +48,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
     private boolean initActivity() {
         mSharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
 
         // Bottom navigation bar functionality
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
@@ -79,11 +75,11 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
     // Initialise generic layout elements
     private boolean initSurveyLayout() {
-        final int count = getResources().getInteger(R.integer.survey_question_count);
+        final int surveyQuestionCount = PAWSAPI.getSurveyQuestionCount(this);
 
         // Populate the progress bar
         LinearLayout layout = findViewById(R.id.layProgressContainer);
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < surveyQuestionCount; ++i) {
             // Generate layout parameters
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     Math.round(getResources().getDimension(R.dimen.dimen_icon_survey_progress)),
@@ -107,19 +103,12 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
     // Initialise the layout based on the last question completed
     private boolean continueSurvey() {
-        mIndex = mSharedPref.getInt("survey_last_question", 0);
+        mIndex = mSharedPref.getInt(PrefKeys.survey_last_question, 0);
 
         // Load survey questionnaire data
-        try {
-            InputStream in = getResources().openRawResource(R.raw.paws_survey_json);
-            byte[] b = new byte[in.available()];
-            in.read(b);
-            mSurveyJson = new JSONObject(new String(b));
-
-        } catch (Exception e){
-            e.printStackTrace();
-            ((TextView)findViewById(R.id.txtQuestion)).setText(R.string.app_txt_fallback);
-            return false;
+        mSurveyJson = PAWSAPI.getSurveyJson(this);
+        if (mSurveyJson == null) {
+            ((TextView) findViewById(R.id.txtQuestion)).setText(R.string.app_txt_fallback);
         }
 
         // Fill the progress bubbles
@@ -214,16 +203,17 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
         // Push changes to saved data
         SharedPreferences.Editor sharedEditor = mSharedPref.edit();
-        sharedEditor.putInt("survey_answer_" + mIndex, answer);
-        sharedEditor.putInt("survey_last_question", mIndex);
+        sharedEditor.putInt(PrefKeys.survey_answer_ + mIndex, answer);
+        sharedEditor.putInt(PrefKeys.survey_last_question, mIndex);
         sharedEditor.apply();
 
-        if (mIndex < getResources().getInteger(R.integer.survey_question_count)) {
+        final int surveyQuestionCount = PAWSAPI.getSurveyQuestionCount(this);
+        if (mIndex < surveyQuestionCount) {
             // Load in the next question
             nextQuestion();
         } else {
             // At the end of the survey, finalise all details
-            sharedEditor.putLong("survey_time_completed", System.currentTimeMillis());
+            sharedEditor.putLong(PrefKeys.survey_time_completed, System.currentTimeMillis());
             sharedEditor.apply();
 
             // Continue to the completed splash

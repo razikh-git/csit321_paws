@@ -5,12 +5,15 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,17 +21,76 @@ import java.util.Calendar;
 final class PAWSAPI {
     private PAWSAPI() {}
 
-    private static final String TAG = "snowpaws_api";
+    private static final String TAG = PrefConstValues.tag_prefix + "api";
 
-    private static double toKilometresPerHour(double ms) { return ms * 3.6d; }
-    private static double toMilesPerHour(double ms) { return ms * 2.237d; }
-    private static double toInches(double mm) { return mm / 25.4d; }
+    private static double msToKilometresPerHour(final double ms) { return ms * 3.6d; }
+    private static double msToMilesPerHour(final double ms) { return ms * 2.237d; }
+    private static double millimetresToInches(final double mm) { return mm / 25.4d; }
 
-    static double metresToMiles(double m) { return m * 0.62d; }
+    static double metresToMiles(final double m) { return m * 0.62d; }
 
-    static String getDistanceString(boolean isMetric, double m) {
+    static String getDistanceString(final boolean isMetric, final double m) {
     	return (isMetric ? m / 1000.0f : metresToMiles(m)) + (isMetric ? "km" : "mi");
 	}
+
+    /**
+     * Returns the index of the weather sample covering a given point in time.
+     * @param weatherArray Array of weather samples.
+     * @param when Target time.
+     * @return Index of a 3-hour periodic sample covering the given time. -1 if not found.
+     */
+	static int getWeatherJsonIndexForTime(final JSONArray weatherArray, final long when) {
+    	try {
+    	    final int end = weatherArray.length();
+			for (int whichTime = 0; whichTime < end; ++whichTime)
+			    if (weatherArray.getJSONObject(whichTime).getLong("dt") * 1000 <= when)
+                    return whichTime;
+		} catch (JSONException ex) {
+    		ex.printStackTrace();
+		}
+        return -1;
+	}
+
+    /**
+     * Formats a time into some consistent style for weather timestamps.
+     * @param context Context.
+     * @param ms Raw timestamp in milliseconds.
+     * @return Formatted weather timestamp string.
+     */
+	static String getWeatherTimestampString(final Context context, final long ms) {
+		return context.getString(R.string.home_weather_timestamp) + " " +
+				DateFormat.format("dd/MM HH:mm", ms).toString();
+	}
+
+	/**
+	 * Rounds a decimal to the nearest multiple of 10, for simplifying percentages.
+	 * @param dbl Decimal number.
+	 * @return Rounded integer.
+	 */
+	static int roundToTen(final double dbl) { return (int)(10 * Math.round(dbl / 10)); }
+
+	static String getSimplePercentageString(final double dbl) { return roundToTen(dbl) + "%"; }
+
+	static JSONObject getSurveyJson(final Context context) {
+        try {
+            InputStream in = context.getResources().openRawResource(R.raw.paws_survey_json);
+            byte[] b = new byte[in.available()];
+            in.read(b);
+            return new JSONObject(new String(b));
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+	static int getSurveyQuestionCount(final Context context) {
+        try {
+            return getSurveyJson(context).getJSONArray("questions").length();
+        } catch (NullPointerException | JSONException ex) {
+        	ex.printStackTrace();
+            return -1;
+        }
+    }
 
     /**
      * Formats a string for some precipitation depth in appropriate units.
@@ -36,10 +98,10 @@ final class PAWSAPI {
      * @param mm Value to show and/or convert.
      * @return Formatted string.
      */
-    static String getPrecipitationString(boolean isMetric, double mm) {
+    static String getPrecipitationString(final boolean isMetric, final double mm) {
             return isMetric
                 ? new DecimalFormat("#.##").format(mm) + "mm"
-                : new DecimalFormat("#.##").format(toInches(mm)) + "in";
+                : new DecimalFormat("#.##").format(millimetresToInches(mm)) + "in";
     }
 
     /**
@@ -48,10 +110,10 @@ final class PAWSAPI {
      * @param speed Value to show and convert.
      * @return Formatted string.
      */
-    static String getWindSpeedString(double speed, boolean isMetric) {
+    static String getWindSpeedString(final double speed, final boolean isMetric) {
         return isMetric
-                ? new DecimalFormat("#").format(toKilometresPerHour(speed)) + " km/h"
-                : new DecimalFormat("#").format(toMilesPerHour(speed)) + " mph";
+                ? new DecimalFormat("#").format(msToKilometresPerHour(speed)) + " km/h"
+                : new DecimalFormat("#").format(msToMilesPerHour(speed)) + " mph";
     }
 
     /**
@@ -59,15 +121,15 @@ final class PAWSAPI {
      * @param bearing Wind bearing value in degrees.
      * @return Cardinal direction string.
      */
-    static String getWindBearingString(double bearing) {
-        String str = "north";
+    static String getWindBearingString(final Context context, final double bearing) {
+        int id = R.string.wa_north;
         if (bearing < 135)
-            str = "west";
+            id = R.string.wa_west;
         else if (bearing < 225)
-            str = "south";
+            id = R.string.wa_south;
         else if (bearing < 315)
-            str = "east";
-        return str;
+            id = R.string.wa_east;
+        return context.getString(id);
     }
 
     /**
@@ -76,8 +138,9 @@ final class PAWSAPI {
      * @param isVerbose Whether to return the full name or an abbreviation.
      * @return Cardinal direction string.
      */
-    static String getWindBearingString(double bearing, boolean isVerbose) {
-        String str = getWindBearingString(bearing);
+    static String getWindBearingString(final Context context,
+                                       final double bearing, final boolean isVerbose) {
+        final String str = getWindBearingString(context, bearing);
         return isVerbose ? str : str.substring(0, 1).toUpperCase();
     }
 
@@ -86,7 +149,7 @@ final class PAWSAPI {
      * @param temperature Value to show.
      * @return Formatted string.
      */
-    static String getTemperatureString(double temperature) {
+    static String getTemperatureString(final double temperature) {
         return new DecimalFormat("#").format(temperature) + "°";
     }
 
@@ -95,11 +158,11 @@ final class PAWSAPI {
      * @param temperature Value to show.
      * @return Formatted string.
      */
-    static String getTemperatureString(double temperature, boolean isMetric) {
+    static String getTemperatureString(final double temperature, final boolean isMetric) {
         return new DecimalFormat("#").format(temperature) + (isMetric ? "°C" : "°F");
     }
 
-    static int getWeatherIconId(String icon) {
+    static int getWeatherIconId(final String icon) {
         int id = -1;
         switch (icon) {
             case "01":
@@ -169,7 +232,7 @@ final class PAWSAPI {
      * @param icon OWM icon code.
      * @return Drawable for weather icon code.
      */
-    static Bitmap getWeatherBitmap(Context ctx, String icon) {
+    static Bitmap getWeatherBitmap(final Context ctx, final String icon) {
         return BitmapFactory.decodeResource(ctx.getResources(),
                 getWeatherIconId(icon));
     }
@@ -180,7 +243,7 @@ final class PAWSAPI {
      * @param icon OWM icon code.
      * @return Drawable for weather icon code.
      */
-    static Drawable getWeatherDrawable(Context ctx, String icon) {
+    static Drawable getWeatherDrawable(final Context ctx, final String icon) {
         return ctx.getDrawable(getWeatherIconId(icon));
     }
 
@@ -190,7 +253,7 @@ final class PAWSAPI {
      * @param milliseconds Duration to round down.
      * @return Decimal hour value.
      */
-    static double msToHours(long milliseconds) {
+    static double msToHours(final long milliseconds) {
         final double hours = (double) milliseconds / 1000 / 60;
         return (hours / 60) % hours;
     }
@@ -201,7 +264,8 @@ final class PAWSAPI {
      * @param hour Hour with minutes as a floating point remainder.
      * @return Minutes extra to the hour.
      */
-    static int minuteOfHour(double hour) { return (int)((hour - (int)Math.floor(hour)) * 60); }
+    static int minuteOfHour(final double hour)
+    { return (int)((hour - (int)Math.floor(hour)) * 60); }
 
     /**
      * Gives the time in milliseconds, to the nearest minute, from some starting time
@@ -211,7 +275,7 @@ final class PAWSAPI {
      * @param minute Minute of the hour.
      * @return Milliseconds between starting time and the next instance of this hour and minute.
      */
-    static long getTimeUntil(long from, int hour, int minute) {
+    static long getTimeUntil(final long from, final int hour, final int minute) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(from);
         return (hour - calendar.get(Calendar.HOUR_OF_DAY)) * 1000 * 60 * 60
@@ -225,7 +289,8 @@ final class PAWSAPI {
      * @param weatherJSON JSON array containing a list of weather samples to iterate through.
      * @return ArrayList containing all temperature samples for the day.
      */
-    static ArrayList<Double> getDailyTemperatures(long startTime, JSONArray weatherJSON) {
+    static ArrayList<Double> getDailyTemperatures(final long startTime,
+                                                  final JSONArray weatherJSON) {
         Log.d(TAG, "Fetching new daily temperatures.");
         ArrayList<Double> tempList = new ArrayList<>();
         try {
@@ -252,26 +317,23 @@ final class PAWSAPI {
         return tempList;
     }
 
-    static void resetProfileData(Context context) {
+    static void resetProfileData(final Context context) {
         // Load global preferences
         SharedPreferences sharedPref = context.getSharedPreferences(
-                context.getResources().getString(
-                        R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
-        sharedEditor.putBoolean("app_init", false);
-        sharedEditor.putBoolean("facebook_init", false);
+        sharedEditor.putBoolean(PrefKeys.app_init, false);
 
         // Reset all survey profile data
-        final int end = context.getResources().getInteger(R.integer.survey_question_count);
+        final int end = getSurveyQuestionCount(context);
         for (int i = 0; i < end; ++i)
-            sharedEditor.putInt("survey_answer_" + i, 0);
-        sharedEditor.putInt("survey_last_question", 0);
-        sharedEditor.putLong("survey_time_completed", 0);
+            sharedEditor.putInt(PrefKeys.survey_answer_ + i, 0);
+        sharedEditor.putInt(PrefKeys.survey_last_question, 0);
+        sharedEditor.putLong(PrefKeys.survey_time_completed, 0);
         sharedEditor.apply();
 
         Toast.makeText(context,
                 R.string.app_reset_result,
-                Toast.LENGTH_LONG)
-                .show();
+                Toast.LENGTH_LONG).show();
     }
 }
