@@ -1,12 +1,10 @@
 package com.amw188.csit321_paws;
 
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.Preference;
@@ -17,7 +15,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.Calendar;
 
 public class SettingsActivity extends BottomNavBarActivity {
-    private static final String TAG = "snowpaws_settings";
+    private static final String TAG = PrefConstValues.tag_prefix + "settings";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,10 +23,10 @@ public class SettingsActivity extends BottomNavBarActivity {
 
         setContentView(R.layout.activity_settings);
 
-        // Button functionality.
+        // Button functionality
         findViewById(R.id.btnReset).setOnClickListener(this::onClickReset);
 
-        // Bottom navigation bar functionality.
+        // Bottom navigation bar functionality
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
@@ -49,7 +47,7 @@ public class SettingsActivity extends BottomNavBarActivity {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
             SharedPreferences sharedPref = getContext().getSharedPreferences(
-                    getString(R.string.app_global_preferences), MODE_PRIVATE);
+            		PrefKeys.app_global_preferences, MODE_PRIVATE);
 
             // todo: add listpreference picker of notification frequency to arrays / stringperfs
 
@@ -63,8 +61,8 @@ public class SettingsActivity extends BottomNavBarActivity {
 
             pref = findPreference("notif_time_start");
             pref.setOnPreferenceClickListener(this::onClickNotifTimePreference);
-            str = sharedPref.getString("weather_notif_time_start",
-					getString(R.string.app_default_weather_notif_time_start))
+            str = sharedPref.getString(PrefKeys.weather_notif_time_start,
+					PrefDefValues.weather_notif_time_start)
 					.split(":");
 			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
 			now.set(Calendar.MINUTE, Integer.parseInt(str[1]));
@@ -72,8 +70,8 @@ public class SettingsActivity extends BottomNavBarActivity {
 
             pref = findPreference("notif_time_end");
             pref.setOnPreferenceClickListener(this::onClickNotifTimePreference);
-			str = sharedPref.getString("weather_notif_time_end",
-					getString(R.string.app_default_weather_notif_time_end))
+			str = sharedPref.getString(PrefKeys.weather_notif_time_end,
+					PrefDefValues.weather_notif_time_end)
 					.split(":");
 			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
 			now.set(Calendar.MINUTE, Integer.parseInt(str[1]));
@@ -82,15 +80,15 @@ public class SettingsActivity extends BottomNavBarActivity {
 
         private boolean onClickNotifTimePreference(Preference pref) {
             SharedPreferences sharedPref = getContext().getSharedPreferences(
-                    getString(R.string.app_global_preferences), MODE_PRIVATE);
+                    PrefKeys.app_global_preferences, MODE_PRIVATE);
 
             final boolean isStartTimePref = pref.getKey().equals("notif_time_start");
 
 			String[] str = (isStartTimePref
-					? sharedPref.getString("weather_notif_time_start",
-					getString(R.string.app_default_weather_notif_time_start))
-					: sharedPref.getString("weather_notif_time_end",
-					getString(R.string.app_default_weather_notif_time_end)))
+					? sharedPref.getString(PrefKeys.weather_notif_time_start,
+					PrefDefValues.weather_notif_time_start)
+					: sharedPref.getString(PrefKeys.weather_notif_time_end,
+					PrefDefValues.weather_notif_time_end))
 					.split(":");
 
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(),
@@ -104,8 +102,8 @@ public class SettingsActivity extends BottomNavBarActivity {
 						now.set(Calendar.MINUTE, dialogMinute);
 						final String timeStr = dialogHour + ":" + dialogMinute;
 						final String prefKey = isStartTimePref
-								? "weather_notif_time_start"
-								: "weather_notif_time_end";
+								? PrefKeys.weather_notif_time_start
+								: PrefKeys.weather_notif_time_end;
 						pref.setTitle(DateFormat.format("hh:mm a", now));
 
 						// Push changes to shared preferences

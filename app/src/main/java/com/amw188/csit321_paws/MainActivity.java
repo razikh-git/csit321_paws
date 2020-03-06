@@ -30,26 +30,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Load global preferences
         SharedPreferences sharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Handle first-time launches
-        if (sharedPref.getBoolean("app_init", false)) {
+        if (sharedPref.getBoolean(PrefKeys.app_init, PrefDefValues.app_init)) {
             // Proceed straight to the home screen
             enterHome();
         } else {
             // Initialise all preferences to defaults
-            sharedEditor.putInt("survey_last_question", 0);
-            sharedEditor.putLong("survey_time_completed", 0);
-            sharedEditor.putLong("selfanalysis_time_completed", 0);
-            sharedEditor.putBoolean("facebook_init", false);
-            sharedEditor.putBoolean("app_init", true);
-            sharedEditor.putString("weather_notif_time_start",
-                    getResources().getString(R.string.app_default_weather_notif_time_start));
-            sharedEditor.putString("weather_notif_time_end",
-                    getResources().getString(R.string.app_default_weather_notif_time_end));
-            sharedEditor.putString("weather_notif_interval", Integer.toString(
-                    getResources().getInteger(R.integer.app_default_weather_notif_interval)));
+            sharedEditor.putInt(PrefKeys.survey_last_question, 0);
+            sharedEditor.putLong(PrefKeys.survey_time_completed, 0);
+            sharedEditor.putBoolean(PrefKeys.app_init, true);
+            sharedEditor.putString(PrefKeys.weather_notif_time_start,
+                    PrefDefValues.weather_notif_time_start);
+            sharedEditor.putString(PrefKeys.weather_notif_time_end,
+                    PrefDefValues.weather_notif_time_end);
+            sharedEditor.putString(PrefKeys.weather_notif_interval,
+                    PrefDefValues.weather_notif_interval);
             sharedEditor.apply();
 
             // Display a prompt for the user to begin profiling

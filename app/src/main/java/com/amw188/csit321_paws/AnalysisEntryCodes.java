@@ -1,8 +1,7 @@
 package com.amw188.csit321_paws;
 
 interface AnalysisEntryCodes {
-    String PACKAGE_NAME = "com.amw188.csit321_paws";
-    String EXTRA_KEY = PACKAGE_NAME + ".extra.KEY";
+    String EXTRA_KEY = PrefConstValues.package_name + ".extra.KEY";
 
     int ENTRY_SELF_ANALYSIS = 0;
     int ENTRY_SURVEY = 1;

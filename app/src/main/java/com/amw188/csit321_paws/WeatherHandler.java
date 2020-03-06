@@ -17,7 +17,7 @@ import java.text.DecimalFormat;
 
 class WeatherHandler {
 
-    private static final String TAG = "snowpaws_wh";
+    private static final String TAG = PrefConstValues.tag_prefix + "wh";
 
     private static final double LOC_CERTAINTY = 0.1d;
 
@@ -40,13 +40,13 @@ class WeatherHandler {
         // Generate URL and request OWM data
         try {
             SharedPreferences sharedPref = context.getSharedPreferences(
-                    context.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                    PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
 
             // Decide whether to update current weather data
             JSONObject lastWeather = new JSONObject(
-                    sharedPref.getString("last_weather_json", "{}"));
+                    sharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json));
 
-            if (lastWeather.toString().equals("{}") || lastWeather.length() == 0) {
+            if (lastWeather.toString().equals(PrefConstValues.empty_json) || lastWeather.length() == 0) {
                 Log.d(TAG,
                         "Fetching new weather data: Last weather data does not exist.");
             } else {
@@ -112,7 +112,7 @@ class WeatherHandler {
     private void getWeather(Context context, LatLng latLng, boolean isMetric) {
 
         SharedPreferences sharedPref = context.getSharedPreferences(
-                context.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Generate URL and request queue
@@ -143,7 +143,7 @@ class WeatherHandler {
                     }
 
                     // Save the weather dictionary to local data
-                    sharedEditor.putString("last_weather_json", response);
+                    sharedEditor.putString(PrefKeys.last_weather_json, response);
                     sharedEditor.apply();
                 },
                 (ex) -> {

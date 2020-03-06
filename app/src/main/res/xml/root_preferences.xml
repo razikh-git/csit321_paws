@@ -17,6 +17,8 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- todo: update defaultValues when changed in prefKeys/prefDefValues -->
+
     <PreferenceCategory app:title="@string/pref_heading_general">
 
         <ListPreference

@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 public class SurveyInfosheetActivity extends AppCompatActivity {
 
-    private static final String TAG = "snowpaws_pp";
+    private static final String TAG = PrefConstValues.tag_prefix + "pp";
 
     private int mIndex = 0;
 

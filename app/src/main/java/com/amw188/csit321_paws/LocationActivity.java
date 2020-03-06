@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 abstract class LocationActivity extends PermissionActivity {
 
-	private String TAG = "snowpaws_la";
+	private static final String TAG = PrefConstValues.tag_prefix + "la";
 
 	protected ArrayList<Address> mSelectedAddressList;
 	protected MapsActivity.AddressResultReceiver mAddressReceiver;
@@ -82,7 +82,6 @@ abstract class LocationActivity extends PermissionActivity {
 	}
 
 	protected void awaitLocation() {
-		// Prepare the initial location information
 		mFusedLocationClient.getLastLocation().addOnSuccessListener(this::onLocationSuccess);
 	}
 
@@ -92,11 +91,11 @@ abstract class LocationActivity extends PermissionActivity {
 			try {
 				// TODO remove debug functionality
 				SharedPreferences sharedPref = this.getSharedPreferences(
-						getResources().getString(R.string.app_global_preferences),
+						PrefKeys.app_global_preferences,
 						Context.MODE_PRIVATE);
 				JSONObject lastWeather = new JSONObject(
 						sharedPref.getString(
-								"last_weather_json", "{}"));
+								PrefKeys.last_weather_json, PrefConstValues.empty_json));
 				mSelectedLocation = new Location(LocationManager.GPS_PROVIDER);
 				mSelectedLocation.setLatitude(
 						Float.parseFloat(

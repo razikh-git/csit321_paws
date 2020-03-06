@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.view.View.VISIBLE;
+
 // todo: custom marker style/drawable for favourite locations
 
 public class MapsActivity
@@ -70,7 +72,7 @@ public class MapsActivity
 {
     SharedPreferences mSharedPref;
 
-    private static final String TAG = "snowpaws_ma";
+    private static final String TAG = PrefConstValues.tag_prefix + "ma";
 
     private static final String BUNDLE_KEY = "MapViewBundleKey";
     private static final String CAMERA_KEY = "MapCameraPositionKey";
@@ -112,12 +114,14 @@ public class MapsActivity
             NotificationService.LocalBinder binder = (NotificationService.LocalBinder) service;
             mNotificationService = binder.getService();
 
-            // Attach button functionalities
+            // Debug code: Reveal test buttons.
 			findViewById(R.id.btnDebugSendNotification).setOnClickListener(
 					this::debugSendNotification);
+			findViewById(R.id.btnDebugSendNotification).setVisibility(VISIBLE);
 			findViewById(R.id.btnDebugToggleLocation).setOnClickListener(
 					this::debugToggleLocation);
-        }
+			findViewById(R.id.btnDebugToggleLocation).setVisibility(VISIBLE);
+		}
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
@@ -156,9 +160,9 @@ public class MapsActivity
         Log.d(TAG, "in setupInfoWindow()");
 
         SharedPreferences sharedPref = getSharedPreferences(
-                getString(R.string.app_global_preferences), MODE_PRIVATE);
-        final boolean isMetric = sharedPref.getString("units", "metric")
-                .equals("metric");
+                PrefKeys.app_global_preferences, MODE_PRIVATE);
+        final boolean isMetric = sharedPref.getString(PrefKeys.units, PrefDefValues.units)
+                .equals(PrefConstValues.units_metric);
 
         // Title - Location name
         String[] abbreviatedAddress = getAbbreviatedAddress(mSelectedAddressList).split(" ");
@@ -216,7 +220,7 @@ public class MapsActivity
 
         // Load global preferences
         mSharedPref = this.getSharedPreferences(
-                getResources().getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
 
         // Load saved state
         if (savedInstanceState != null) {
@@ -284,7 +288,7 @@ public class MapsActivity
                 findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
                         getDrawable(R.drawable.ic_draw_selected));
                 findViewById(R.id.btnMapPolyErase).setVisibility(View.GONE);
-                findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.VISIBLE);
+                findViewById(R.id.btnMapWeatherRedirect).setVisibility(VISIBLE);
                 // Reset click event listeners
                 mMap.setOnMapClickListener(this::onMapDefaultClick);
                 mMap.setOnMapLongClickListener(this::onMapDefaultLongClick);
@@ -294,7 +298,7 @@ public class MapsActivity
                         ContextCompat.getColor(this, R.color.color_primary_alt));
                 findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
                         getDrawable(R.drawable.ic_draw));
-                findViewById(R.id.btnMapPolyErase).setVisibility(View.VISIBLE);
+                findViewById(R.id.btnMapPolyErase).setVisibility(VISIBLE);
                 findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
                 // Use click event listeners for live drawing
                 mMap.setOnMapClickListener(this::onMapDrawingClick);
@@ -405,7 +409,7 @@ public class MapsActivity
 
     private void onMapDefaultClick(LatLng latLng) {
         // Toggle map type popout menu visibility
-        if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
+        if (findViewById(R.id.cardMapType).getVisibility() == VISIBLE) {
             // Hide the map type picker popout and show the popout button
             togglePopoutButton();
         }
@@ -434,6 +438,7 @@ public class MapsActivity
         location.setLatitude(latLng.latitude);
         location.setLongitude(latLng.longitude);
         awaitAddress(location);
+        // todo: redirect marker to nearest location when address invalid or null
     }
 
     private void placeNewMarker(ArrayList<Address> addressList) {
@@ -582,7 +587,7 @@ public class MapsActivity
     }
 
     private void togglePopoutButton() {
-        if (findViewById(R.id.cardMapType).getVisibility() == View.VISIBLE) {
+        if (findViewById(R.id.cardMapType).getVisibility() == VISIBLE) {
             // Change button style
             (findViewById(R.id.btnMapTypePopout)).setBackgroundColor(
                     ContextCompat.getColor(this, R.color.color_primary_alt));
@@ -590,8 +595,8 @@ public class MapsActivity
                     getDrawable(R.drawable.ic_eye_settings));
 
             // Reveal other FABs and hide the map type picker popout
-            findViewById(R.id.btnMapPolyDraw).setVisibility(View.VISIBLE);
-            findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.VISIBLE);
+            findViewById(R.id.btnMapPolyDraw).setVisibility(VISIBLE);
+            findViewById(R.id.btnMapWeatherRedirect).setVisibility(VISIBLE);
             findViewById(R.id.cardMapType).setVisibility(View.GONE);
         } else {
             // Change button style
@@ -605,7 +610,7 @@ public class MapsActivity
             onMapPolyDrawClick(null);
             findViewById(R.id.btnMapPolyDraw).setVisibility(View.GONE);
             findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
-            findViewById(R.id.cardMapType).setVisibility(View.VISIBLE);
+            findViewById(R.id.cardMapType).setVisibility(VISIBLE);
         }
     }
 

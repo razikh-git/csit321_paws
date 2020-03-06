@@ -16,7 +16,7 @@ import java.util.Locale;
 
 public class FetchAddressIntentService extends IntentService {
 
-    private static final String TAG = "snowpaws_fais";
+    private static final String TAG = PrefConstValues.tag_prefix + "fais";
 
     public FetchAddressIntentService() {
         super("FetchAddressIntentService");

@@ -30,7 +30,6 @@ import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,11 +43,10 @@ public class NotificationService
 		implements WeatherHandler.WeatherReceivedListener {
 
 	// Logging
-	private static final String TAG = "snowpaws_service";
+	private static final String TAG = PrefConstValues.tag_prefix + "service";
 
 	// Intent extras
-	private static final String PACKAGE_NAME = "com.amw188.csit321_paws";
-	private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
+	private static final String EXTRA_STARTED_FROM_NOTIFICATION = PrefConstValues.package_name +
 			".extra.STARTED_FROM_NOTIFICATION";
 
 	// Binder
@@ -72,7 +70,6 @@ public class NotificationService
 	interface LocationResultListener {
 		void onLocationResultReceived(LocationResult locationResult);
 	}
-
 
 	public NotificationService() {}
 
@@ -100,7 +97,6 @@ public class NotificationService
 	@Override
 	public void onDestroy() {
 		Log.d(TAG, "in onDestroy()");
-		//LocalBroadcastManager.getInstance(this).unregisterReceiver();
 		super.onDestroy();
 	}
 
@@ -142,11 +138,7 @@ public class NotificationService
 			@Override
 			public void onLocationResult(LocationResult locationResult) {
 				super.onLocationResult(locationResult);
-				if (locationResult != null && mHostListener != null) {
-					mHostListener.onLocationResultReceived(locationResult);
-				} else if (locationResult == null) {
-					Log.e(TAG, "Location result or request was null.");
-				}
+				NotificationService.this.onLocationResult(locationResult);
 			}
 		};
 		startLocationUpdates();
@@ -170,15 +162,13 @@ public class NotificationService
 
 		// Schedule regular weather notifications
 		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
-				getString(R.string.app_global_preferences), MODE_PRIVATE);
+				PrefKeys.app_global_preferences, MODE_PRIVATE);
 		final int timeInterval = Integer.parseInt(
-				sharedPref.getString("weather_notif_interval",
-				Integer.toString(getResources().getInteger(
-						R.integer.app_default_weather_notif_interval))));
+				sharedPref.getString(PrefKeys.weather_notif_interval,
+				PrefDefValues.weather_notif_interval));
 		if (timeInterval > 0) {
-			final String[] timeInitial = sharedPref.getString("weather_notif_time_start",
-					getResources().getString(
-							R.string.app_default_weather_notif_time_start))
+			final String[] timeInitial = sharedPref.getString(PrefKeys.weather_notif_time_start,
+					PrefDefValues.weather_notif_time_start)
 					.split(":");
 			scheduleWeatherNotifications(
 					Integer.parseInt(timeInitial[0]), Integer.parseInt(timeInitial[1]),
@@ -246,6 +236,8 @@ public class NotificationService
 
 	/* Custom Location Methods */
 
+	protected void setHostListener(LocationResultListener hostListener) { mHostListener = hostListener; }
+
 	boolean isRequestingLocationUpdates() {
 		return mIsRequestingLocationUpdates;
 	}
@@ -262,47 +254,68 @@ public class NotificationService
 		Log.d(TAG, "in startLocationUpdates()");
 
 		SharedPreferences sharedPref = getSharedPreferences(
-				getString(R.string.app_global_preferences), MODE_PRIVATE);
+				PrefKeys.app_global_preferences, MODE_PRIVATE);
 		LocationRequest locationRequest = new LocationRequest()
 				.setPriority(Integer.parseInt(sharedPref.getString(
-						"location_priority",
-						Integer.toString(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY))))
+						PrefKeys.location_priority,
+						PrefDefValues.location_priority)))
 				.setInterval(Integer.parseInt(sharedPref.getString(
-						"location_rate",
-						Integer.toString(R.integer.app_default_loc_min_interval))));
+						PrefKeys.location_rate,
+						PrefDefValues.location_rate)));
 
 		mIsRequestingLocationUpdates = true;
 		mLocationClient.requestLocationUpdates(
 				locationRequest, mLocationCallback, Looper.getMainLooper());
 
-		Toast.makeText(this, "Started location updates.", Toast.LENGTH_LONG).show();
+		Toast.makeText(this,
+				"Started location updates.",
+				Toast.LENGTH_LONG).show();
 	}
 
 	private void stopLocationUpdates() {
 		mIsRequestingLocationUpdates = false;
 		mLocationClient.removeLocationUpdates(mLocationCallback);
 
-		Toast.makeText(this, "Stopped location updates.", Toast.LENGTH_LONG).show();
+		Toast.makeText(this,
+				"Stopped location updates.",
+				Toast.LENGTH_LONG).show();
 	}
 
 	protected Location getLastBestLocation() {
 		return mLastBestLocation;
 	}
 
+	/**
+	 * Location result was received when awaiting update on device location.
+	 * @param locationResult Last best location result for this device.
+	 */
+	private void onLocationResult(LocationResult locationResult) {
+		if (locationResult == null) {
+			Log.e(TAG, "Location result or request was null.");
+			return;
+		}
+
+		// todo: assign hostListener when needed to reflect location changes in MapsActivity
+		if (mHostListener != null)
+			mHostListener.onLocationResultReceived(locationResult);
+	}
+
 	/* Custom Weather Methods */
 
 	private void doSomethingWithWeather(String weatherStr) {
-
+		Toast.makeText(this,
+				"NotificationService.doSomethingWithWeather()",
+				Toast.LENGTH_LONG).show();
 	}
 
 	private void updateWeatherData() {
 		try {
-			SharedPreferences sharedPref = getSharedPreferences(getString(
-					R.string.app_global_preferences), MODE_PRIVATE);
+			SharedPreferences sharedPref = getSharedPreferences(
+					PrefKeys.app_global_preferences, MODE_PRIVATE);
 			final boolean isMetric = sharedPref.getString(
-							"units", "metric").equals("metric");
+							PrefKeys.units, PrefDefValues.units).equals(PrefConstValues.units_metric);
 			final JSONObject weatherJson = new JSONObject(sharedPref.getString(
-					"last_weather_json", "{}"));
+					PrefKeys.last_weather_json, PrefConstValues.empty_json));
 			LatLng latLng = new LatLng(
 					weatherJson.getJSONObject("lat_lng").getDouble("latitude"),
 					weatherJson.getJSONObject("lat_lng").getDouble("longitude"));
@@ -310,7 +323,7 @@ public class NotificationService
 			if (!weatherHandler.updateWeather(this, latLng, isMetric))
 				// Do something with weather immediately if it needn't wait to be updated
 				doSomethingWithWeather(sharedPref.getString(
-						"last_weather_json", "{}"));
+						PrefKeys.last_weather_json, PrefConstValues.empty_json));
 		} catch (JSONException ex) {
 			Log.e(TAG, "Failed to parse weather JSON in Service.updateWeatherData().");
 			ex.printStackTrace();

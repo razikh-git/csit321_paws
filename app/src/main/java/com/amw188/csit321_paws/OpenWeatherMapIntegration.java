@@ -8,14 +8,14 @@ import com.google.android.gms.maps.model.LatLng;
 class OpenWeatherMapIntegration {
     static String getOWMURL(Context context, LatLng latLng, boolean isWeekly) {
         SharedPreferences sharedPref = context.getSharedPreferences(
-                context.getString(R.string.app_global_preferences), Context.MODE_PRIVATE);
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         final boolean isMetric = sharedPref.getString(
-                "units", "metric").equals("metric");
+                PrefKeys.units, PrefDefValues.units).equals(PrefConstValues.units_metric);
         return context.getResources().getString(R.string.app_url_owm_weather_root)
                 + "data/2.5/"
                 + (isWeekly ? "forecast" : "weather")
                 + "?lat=" + latLng.latitude + "&lon=" + latLng.longitude
-                + "&units=" + (isMetric ? "metric" : "imperial")
+                + "&units=" + (isMetric ? PrefConstValues.units_metric : PrefConstValues.units_imperial)
                 + "&lang=" + context.getResources().getConfiguration().locale.getDisplayLanguage()
                 + "&mode=json"
                 + "&appid=" + context.getResources().getString(R.string.open_weather_maps_key);
