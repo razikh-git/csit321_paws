@@ -25,7 +25,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/app_padding"
+            android:padding="@dimen/app_spacing_medium"
             android:background="@color/color_primary">
 
             <!-- Favorite icon -->
@@ -42,8 +42,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginStart="@dimen/app_spacing_half"
-                android:layout_marginEnd="@dimen/app_spacing_half">
+                android:layout_marginStart="@dimen/app_spacing_small"
+                android:layout_marginEnd="@dimen/app_spacing_small">
 
                 <TextView android:id="@+id/txtInfoTitle"
                     android:layout_width="wrap_content"
@@ -92,9 +92,9 @@
             <TextView android:id="@+id/txtInfoContent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:layout_marginStart="@dimen/app_padding"
-                android:layout_marginEnd="@dimen/app_padding"
+                android:layout_marginTop="@dimen/app_spacing_large"
+                android:layout_marginStart="@dimen/app_spacing_medium"
+                android:layout_marginEnd="@dimen/app_spacing_medium"
                 android:text="@string/noti_action_view"
                 android:textAppearance="@style/TextAppearance.Paws.Small"
                 android:textColor="@color/color_on_background"/>
@@ -106,9 +106,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/height_buttons_small"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:layout_marginBottom="@dimen/app_spacing"
-                android:padding="@dimen/padding_buttons"
+                android:layout_marginTop="@dimen/app_spacing_large"
+                android:layout_marginBottom="@dimen/app_spacing_large"
+                android:padding="@dimen/app_spacing_tiny"
                 android:text="@string/app_btn_info"
                 android:backgroundTint="@color/color_primary"/>
 

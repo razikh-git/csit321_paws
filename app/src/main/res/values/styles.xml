@@ -85,13 +85,13 @@
     <style name="Widget.Paws.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:textAppearance">@style/TextAppearance.Paws.Button.Small</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:padding">@dimen/padding_buttons</item>
+        <item name="android:padding">@dimen/app_spacing_tiny</item>
         <item name="android:clipToPadding">false</item>
     </style>
     <style name="Widget.Paws.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textAppearance">@style/TextAppearance.Paws.Button.Small</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:padding">@dimen/padding_buttons</item>
+        <item name="android:padding">@dimen/app_spacing_tiny</item>
         <item name="android:clipToPadding">false</item>
     </style>
     <style name="Widget.Paws.Button.Facebook" parent="Widget.MaterialComponents.Button.TextButton">
@@ -99,7 +99,7 @@
         <item name="android:textColor">@color/color_on_primary</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:padding">@dimen/padding_buttons</item>
+        <item name="android:padding">@dimen/app_spacing_tiny</item>
         <item name="android:clipToPadding">false</item>
     </style>
     <style name="Widget.Paws.Button.TextButton.List" parent="Widget.Paws.Button.TextButton">
@@ -112,7 +112,7 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/color_on_background</item>
         <item name="iconTint">@color/color_on_background</item>
-        <item name="iconPadding">@dimen/text_spacing</item>
+        <item name="iconPadding">@dimen/app_spacing_medium</item>
     </style>
     <style name="Widget.Paws.Button.TextButton.Block" parent="Widget.Paws.Button.TextButton.List">
         <item name="android:strokeWidth">2</item>

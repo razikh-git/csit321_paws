@@ -24,26 +24,30 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/app_padding"
+            android:layout_marginStart="@dimen/app_spacing_medium"
             android:orientation="vertical">
 
+            <!-- Debug one-time weather notification push. -->
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/btnDebugSendNotification"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_marginTop="@dimen/app_padding"
+                android:layout_marginTop="@dimen/app_spacing_medium"
                 android:adjustViewBounds="true"
-                android:src="@drawable/ic_error"/>
+                android:src="@drawable/ic_error"
+                android:visibility="gone"/>
 
+            <!-- Debug location tracking toggle. -->
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/btnDebugToggleLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_marginTop="@dimen/app_padding"
+                android:layout_marginTop="@dimen/app_spacing_medium"
                 android:adjustViewBounds="true"
-                android:src="@drawable/ic_navigation"/>
+                android:src="@drawable/ic_navigation"
+                android:visibility="gone"/>
 
         </LinearLayout>
 
@@ -63,16 +67,16 @@
                 style="@style/Widget.MaterialComponents.CardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing"
-                android:layout_marginStart="@dimen/app_spacing"
-                android:layout_marginEnd="@dimen/app_spacing"
+                android:layout_marginTop="@dimen/app_spacing_large"
+                android:layout_marginStart="@dimen/app_spacing_large"
+                android:layout_marginEnd="@dimen/app_spacing_large"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
-                    android:padding="@dimen/app_padding_half">
+                    android:padding="@dimen/app_spacing_tiny">
 
                     <ImageView
                         android:id="@+id/imgSearch"
@@ -115,9 +119,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginTop="@dimen/app_padding"
-                android:layout_marginEnd="@dimen/app_padding"
-                android:layout_marginBottom="@dimen/app_padding"
+                android:layout_marginTop="@dimen/app_spacing_medium"
+                android:layout_marginEnd="@dimen/app_spacing_medium"
+                android:layout_marginBottom="@dimen/app_spacing_medium"
                 android:src="@drawable/ic_eye_settings"
                 android:visibility="visible"/>
 
@@ -128,8 +132,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginEnd="@dimen/app_padding"
-                android:layout_marginBottom="@dimen/app_padding"
+                android:layout_marginEnd="@dimen/app_spacing_medium"
+                android:layout_marginBottom="@dimen/app_spacing_medium"
                 android:src="@drawable/ic_draw"
                 android:visibility="visible"/>
 
@@ -140,8 +144,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginEnd="@dimen/app_padding"
-                android:layout_marginBottom="@dimen/app_padding"
+                android:layout_marginEnd="@dimen/app_spacing_medium"
+                android:layout_marginBottom="@dimen/app_spacing_medium"
                 android:src="@drawable/ic_eraser"
                 android:tint="@color/color_on_primary"
                 android:visibility="gone"/>
@@ -153,8 +157,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginEnd="@dimen/app_padding"
-                android:layout_marginBottom="@dimen/app_padding"
+                android:layout_marginEnd="@dimen/app_spacing_medium"
+                android:layout_marginBottom="@dimen/app_spacing_medium"
                 android:src="@drawable/ic_satellite"
                 android:tint="@color/color_on_primary"
                 android:visibility="visible"/>
@@ -173,7 +177,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/app_padding">
+                    android:padding="@dimen/app_spacing_medium">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -199,8 +203,8 @@
                                 android:layout_width="@dimen/dimen_icon_huge"
                                 android:layout_height="@dimen/dimen_icon_huge"
                                 android:layout_gravity="center"
-                                android:layout_marginTop="@dimen/text_spacing"
-                                android:layout_marginBottom="@dimen/text_spacing"
+                                android:layout_marginTop="@dimen/app_spacing_medium"
+                                android:layout_marginBottom="@dimen/app_spacing_medium"
                                 android:adjustViewBounds="true"
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
@@ -219,7 +223,7 @@
                         </LinearLayout>
 
                         <View
-                            android:layout_width="@dimen/app_spacing"
+                            android:layout_width="@dimen/app_spacing_large"
                             android:layout_height="match_parent"/>
 
                         <LinearLayout
@@ -233,8 +237,8 @@
                                 android:layout_width="@dimen/dimen_icon_huge"
                                 android:layout_height="@dimen/dimen_icon_huge"
                                 android:layout_gravity="center"
-                                android:layout_marginTop="@dimen/text_spacing"
-                                android:layout_marginBottom="@dimen/text_spacing"
+                                android:layout_marginTop="@dimen/app_spacing_medium"
+                                android:layout_marginBottom="@dimen/app_spacing_medium"
                                 android:adjustViewBounds="true"
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
@@ -253,7 +257,7 @@
                         </LinearLayout>
 
                         <View
-                            android:layout_width="@dimen/app_spacing"
+                            android:layout_width="@dimen/app_spacing_large"
                             android:layout_height="match_parent"/>
 
                         <LinearLayout
@@ -267,8 +271,8 @@
                                 android:layout_width="@dimen/dimen_icon_huge"
                                 android:layout_height="@dimen/dimen_icon_huge"
                                 android:layout_gravity="center"
-                                android:layout_marginTop="@dimen/text_spacing"
-                                android:layout_marginBottom="@dimen/text_spacing"
+                                android:layout_marginTop="@dimen/app_spacing_medium"
+                                android:layout_marginBottom="@dimen/app_spacing_medium"
                                 android:adjustViewBounds="true"
                                 android:background="@drawable/rounded_rectangle"
                                 android:scaleType="fitCenter"
@@ -321,7 +325,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/color_primary_alt"
                     android:orientation="vertical"
-                    android:padding="@dimen/app_spacing">
+                    android:padding="@dimen/app_spacing_large">
 
                     <!-- Notch -->
                     <View
@@ -355,7 +359,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/app_padding">
+                    android:padding="@dimen/app_spacing_medium">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -381,7 +385,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:layout_marginTop="@dimen/app_padding_half"
+                                android:layout_marginTop="@dimen/app_spacing_tiny"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
                                 android:textColor="@color/color_on_background"
@@ -406,7 +410,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:layout_marginTop="@dimen/app_padding_half"
+                                android:layout_marginTop="@dimen/app_spacing_tiny"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
                                 android:textColor="@color/color_on_background"
@@ -431,7 +435,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:layout_marginTop="@dimen/app_padding_half"
+                                android:layout_marginTop="@dimen/app_spacing_tiny"
                                 android:textAlignment="center"
                                 android:textAppearance="@style/TextAppearance.Paws.Small"
                                 android:textColor="@color/color_on_background"

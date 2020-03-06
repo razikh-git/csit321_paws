@@ -31,8 +31,8 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/dimen_icon_huge"
-                android:padding="@dimen/padding_buttons"
-                android:layout_marginStart="@dimen/app_spacing"
+                android:padding="@dimen/app_spacing_tiny"
+                android:layout_marginStart="@dimen/app_spacing_large"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/ic_warning"
@@ -41,7 +41,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/app_padding_half"
+                android:padding="@dimen/app_spacing_tiny"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -110,10 +110,10 @@
                             android:id="@+id/layWeatherHeader"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:paddingStart="@dimen/app_gutter"
-                            android:paddingEnd="@dimen/app_gutter"
-                            android:paddingTop="@dimen/app_gutter"
-                            android:paddingBottom="@dimen/app_padding"
+                            android:paddingStart="@dimen/app_spacing_huge"
+                            android:paddingEnd="@dimen/app_spacing_huge"
+                            android:paddingTop="@dimen/app_spacing_huge"
+                            android:paddingBottom="@dimen/app_spacing_medium"
                             android:background="@color/color_primary_alt"
                             android:orientation="vertical">
 
@@ -161,10 +161,10 @@
                             android:id="@+id/layWeatherDescription"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:paddingTop="@dimen/app_padding_half"
-                            android:paddingBottom="@dimen/app_padding_half"
-                            android:paddingStart="@dimen/app_gutter"
-                            android:paddingEnd="@dimen/app_gutter"
+                            android:paddingTop="@dimen/app_spacing_tiny"
+                            android:paddingBottom="@dimen/app_spacing_tiny"
+                            android:paddingStart="@dimen/app_spacing_huge"
+                            android:paddingEnd="@dimen/app_spacing_huge"
                             android:background="@color/color_primary"
                             android:orientation="horizontal">
 
@@ -189,7 +189,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
-                                android:layout_marginStart="@dimen/app_padding"
+                                android:layout_marginStart="@dimen/app_spacing_medium"
                                 android:maxLines="1"
                                 android:textAppearance="@style/TextAppearance.Paws.Large"
                                 android:textColor="@color/color_on_primary"/>
@@ -204,8 +204,8 @@
                         android:id="@+id/layWeatherDataColumns"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="@dimen/app_spacing_half"
-                        android:paddingBottom="@dimen/app_spacing_half"
+                        android:paddingTop="@dimen/app_spacing_small"
+                        android:paddingBottom="@dimen/app_spacing_small"
                         android:gravity="center"
                         android:orientation="horizontal"
                         android:baselineAligned="false">
@@ -265,7 +265,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:padding="@dimen/app_padding"
+                            android:padding="@dimen/app_spacing_medium"
                             android:gravity="center"
                             android:orientation="vertical">
 
@@ -305,7 +305,7 @@
                     android:id="@+id/cardMaps"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/app_gutter">
+                    android:layout_marginTop="@dimen/app_spacing_huge">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -315,15 +315,15 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:paddingStart="@dimen/app_gutter"
+                            android:paddingStart="@dimen/app_spacing_huge"
                             android:background="@color/color_primary_alt">
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:paddingTop="@dimen/app_spacing"
-                                android:paddingBottom="@dimen/app_padding"
+                                android:paddingTop="@dimen/app_spacing_large"
+                                android:paddingBottom="@dimen/app_spacing_medium"
                                 android:text="@string/home_card_maps_title"
                                 android:textAlignment="viewStart"
                                 android:textAppearance="@style/TextAppearance.Paws.Huge"
@@ -334,8 +334,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:paddingTop="@dimen/app_padding_half"
-                            android:paddingBottom="@dimen/app_padding_half"
+                            android:paddingTop="@dimen/app_spacing_tiny"
+                            android:paddingBottom="@dimen/app_spacing_tiny"
                             android:background="@color/color_primary"
                             android:orientation="horizontal">
 
@@ -375,9 +375,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:paddingTop="@dimen/app_spacing"
-                            android:paddingStart="@dimen/app_spacing"
-                            android:paddingEnd="@dimen/app_spacing"
+                            android:paddingTop="@dimen/app_spacing_large"
+                            android:paddingStart="@dimen/app_spacing_large"
+                            android:paddingEnd="@dimen/app_spacing_large"
                             android:orientation="vertical">
 
                             <TextView
@@ -407,14 +407,14 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/app_spacing"
-                    android:layout_marginBottom="@dimen/app_spacing">
+                    android:layout_marginTop="@dimen/app_spacing_large"
+                    android:layout_marginBottom="@dimen/app_spacing_large">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginStart="@dimen/app_gutter"
-                        android:layout_marginEnd="@dimen/app_gutter"
+                        android:layout_marginStart="@dimen/app_spacing_huge"
+                        android:layout_marginEnd="@dimen/app_spacing_huge"
                         android:layout_gravity="center"
                         android:orientation="horizontal">
 
@@ -424,7 +424,7 @@
                             android:id="@+id/btnSettings"
                             android:layout_width="@dimen/height_home_cards"
                             android:layout_height="@dimen/height_home_cards"
-                            android:layout_margin="@dimen/app_padding"
+                            android:layout_margin="@dimen/app_spacing_medium"
                             android:layout_weight="1"
                             android:backgroundTint="@color/color_primary"
                             android:tint="@color/color_on_primary"
@@ -437,7 +437,7 @@
                             android:id="@+id/btnProfile"
                             android:layout_width="@dimen/height_home_cards"
                             android:layout_height="@dimen/height_home_cards"
-                            android:layout_margin="@dimen/app_padding"
+                            android:layout_margin="@dimen/app_spacing_medium"
                             android:layout_weight="1"
                             android:backgroundTint="@color/color_primary"
                             android:tint="@color/color_on_primary"
@@ -450,7 +450,7 @@
                             android:id="@+id/btnHelp"
                             android:layout_width="@dimen/height_home_cards"
                             android:layout_height="@dimen/height_home_cards"
-                            android:layout_margin="@dimen/app_padding"
+                            android:layout_margin="@dimen/app_spacing_medium"
                             android:layout_weight="1"
                             android:backgroundTint="@color/color_primary"
                             android:scaleType="fitCenter"
@@ -465,7 +465,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="@dimen/app_gutter"
+                    android:layout_marginBottom="@dimen/app_spacing_huge"
                     android:gravity="center"
                     android:text="@string/home_footer"
                     android:textAlignment="center"

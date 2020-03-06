@@ -35,8 +35,8 @@
                     android:id="@+id/imgLogo"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/app_spacing"
-                    android:layout_marginEnd="@dimen/app_spacing"
+                    android:layout_marginStart="@dimen/app_spacing_large"
+                    android:layout_marginEnd="@dimen/app_spacing_large"
                     android:adjustViewBounds="true"
                     android:gravity="center"
                     android:scaleType="fitCenter"
@@ -76,9 +76,9 @@
             android:id="@+id/layQuestionBody"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/app_spacing"
-            android:layout_marginEnd="@dimen/app_spacing"
-            android:padding="@dimen/app_spacing"
+            android:layout_marginStart="@dimen/app_spacing_large"
+            android:layout_marginEnd="@dimen/app_spacing_large"
+            android:padding="@dimen/app_spacing_large"
             android:clipChildren="false"
             android:orientation="horizontal">
 
@@ -91,9 +91,9 @@
                     android:id="@+id/layProgressContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingTop="@dimen/padding_survey_progress"
-                    android:paddingBottom="@dimen/padding_survey_progress"
-                    android:paddingLeft="@dimen/padding_survey_progress"
+                    android:paddingTop="@dimen/app_spacing_medium"
+                    android:paddingBottom="@dimen/app_spacing_medium"
+                    android:paddingLeft="@dimen/app_spacing_medium"
                     android:orientation="vertical">
 
                 </LinearLayout>
@@ -104,7 +104,7 @@
                 android:id="@+id/layQuestionContent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/app_spacing"
+                android:layout_marginStart="@dimen/app_spacing_large"
                 android:orientation="vertical">
 
                 <com.google.android.material.card.MaterialCardView
@@ -118,8 +118,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:paddingLeft="@dimen/text_spacing"
-                        android:paddingRight="@dimen/text_spacing"
+                        android:paddingLeft="@dimen/app_spacing_medium"
+                        android:paddingRight="@dimen/app_spacing_medium"
                         android:textAppearance="@style/TextAppearance.Paws.Large" />
 
                 </com.google.android.material.card.MaterialCardView>
@@ -128,20 +128,20 @@
                     android:id="@+id/cardAnswers"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="@dimen/app_spacing" >
+                    android:layout_marginTop="@dimen/app_spacing_large" >
 
                     <LinearLayout
                         android:id="@+id/layAnswersContainer"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:padding="@dimen/app_padding"
+                        android:padding="@dimen/app_spacing_medium"
                         android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/txtAnswer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:padding="@dimen/app_padding_half"
+                            android:padding="@dimen/app_spacing_tiny"
                             android:text="@string/sq_answer"
                             android:textAppearance="@style/TextAppearance.Paws.Caption" />
 
