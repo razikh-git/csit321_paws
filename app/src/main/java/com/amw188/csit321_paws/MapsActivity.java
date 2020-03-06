@@ -70,8 +70,6 @@ public class MapsActivity
                 GoogleMap.OnPoiClickListener,
                 GoogleMap.OnMarkerClickListener
 {
-    SharedPreferences mSharedPref;
-
     private static final String TAG = PrefConstValues.tag_prefix + "ma";
 
     private static final String BUNDLE_KEY = "MapViewBundleKey";
@@ -159,10 +157,9 @@ public class MapsActivity
     private View setupInfoWindow(Marker marker) {
         Log.d(TAG, "in setupInfoWindow()");
 
-        SharedPreferences sharedPref = getSharedPreferences(
-                PrefKeys.app_global_preferences, MODE_PRIVATE);
-        final boolean isMetric = sharedPref.getString(PrefKeys.units, PrefDefValues.units)
-                .equals(PrefConstValues.units_metric);
+        SharedPreferences sharedPref = this.getSharedPreferences(
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        final boolean isMetric = PAWSAPI.preferredUnits(sharedPref);
 
         // Title - Location name
         String[] abbreviatedAddress = getAbbreviatedAddress(mSelectedAddressList).split(" ");
@@ -217,10 +214,6 @@ public class MapsActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
-
-        // Load global preferences
-        mSharedPref = this.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
 
         // Load saved state
         if (savedInstanceState != null) {

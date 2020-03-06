@@ -157,8 +157,7 @@ public class DailyWeatherWorker extends Worker {
                     .getString("icon"));
 
             // Format the notification with the coming weather data
-            final boolean isMetric = mSharedPref.getString(PrefKeys.units, PrefDefValues.units)
-                    .equals(PrefConstValues.units_metric);
+            final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
             weatherTitle = String.format(Locale.getDefault(), weatherTitle,
                     weatherJson.getJSONObject("city").getString("name"),
                     DateFormat.format(

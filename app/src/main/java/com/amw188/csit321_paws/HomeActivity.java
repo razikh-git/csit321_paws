@@ -105,8 +105,7 @@ public class HomeActivity
      */
     private boolean initWeatherDisplay(String response) {
         try {
-            final boolean isMetric = mSharedPref.getString(PrefKeys.units, PrefDefValues.units)
-                    .equals(PrefConstValues.units_metric);
+            final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
 
             int index = 0;
             String str;
@@ -234,13 +233,14 @@ public class HomeActivity
             if (mSelectedLocation != null) {
                 // Call and await an update to the weather JSON string in prefs
                 boolean success = true;
-                final boolean isMetric = mSharedPref.getString(
-                        PrefKeys.units, PrefDefValues.units).equals(PrefConstValues.units_metric);
-                LatLng latLng = new LatLng(mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
+                final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
+                LatLng latLng = new LatLng(
+                        mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
                 if (!new WeatherHandler(this).updateWeather(this, latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
                     success = initWeatherDisplay(
-                            mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json));
+                            mSharedPref.getString(PrefKeys.last_weather_json,
+                                    PrefConstValues.empty_json));
                 }
                 return success;
             }

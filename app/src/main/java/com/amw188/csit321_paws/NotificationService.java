@@ -312,8 +312,7 @@ public class NotificationService
 		try {
 			SharedPreferences sharedPref = getSharedPreferences(
 					PrefKeys.app_global_preferences, MODE_PRIVATE);
-			final boolean isMetric = sharedPref.getString(
-							PrefKeys.units, PrefDefValues.units).equals(PrefConstValues.units_metric);
+			final boolean isMetric = PAWSAPI.preferredUnits(sharedPref);
 			final JSONObject weatherJson = new JSONObject(sharedPref.getString(
 					PrefKeys.last_weather_json, PrefConstValues.empty_json));
 			LatLng latLng = new LatLng(
