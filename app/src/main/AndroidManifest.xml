@@ -36,10 +36,6 @@
             android:label="@string/title_activity_settings"
             android:screenOrientation="sensorPortrait" />
         <activity
-            android:name=".SelfAnalysisActivity"
-            android:label="@string/label_surveys"
-            android:screenOrientation="sensorPortrait" />
-        <activity
             android:name=".SurveyCompleteActivity"
             android:label="@string/label_surveys"
             android:screenOrientation="sensorPortrait" />
@@ -48,15 +44,7 @@
             android:label="@string/label_surveys"
             android:screenOrientation="sensorPortrait" />
         <activity
-            android:name=".FacebookEntryActivity"
-            android:label="@string/label_surveys"
-            android:screenOrientation="sensorPortrait" />
-        <activity
             android:name=".SurveyEntryActivity"
-            android:label="@string/label_surveys"
-            android:screenOrientation="sensorPortrait" />
-        <activity
-            android:name=".ProfilingMenuActivity"
             android:label="@string/label_surveys"
             android:screenOrientation="sensorPortrait" />
         <activity
