@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,14 +30,15 @@ final class PAWSAPI {
 
     static double metresToMiles(final double m) { return m * 0.62d; }
 
-    static boolean preferredUnits(SharedPreferences sharedPref) {
+    static boolean preferredMetric(SharedPreferences sharedPref) {
         return sharedPref.getString(PrefKeys.units, PrefDefValues.units)
                 .equals(PrefConstValues.units_metric);
     }
 
-    private static boolean preferredClockFormat(SharedPreferences sharedPref) {
-       return sharedPref.getString(PrefKeys.hourformat, PrefDefValues.hourformat)
-               .equals(PrefConstValues.hourformat_24);
+    private static boolean preferred24HourFormat(SharedPreferences sharedPref) {
+        final String hourformat = sharedPref.getString(PrefKeys.hourformat, PrefDefValues.hourformat);
+        Log.d(TAG, "Using " + hourformat + " hour time.");
+        return hourformat.equals(PrefConstValues.hourformat_24);
     }
 
     static String getDistanceString(final boolean isMetric, final double m) {
@@ -57,7 +57,8 @@ final class PAWSAPI {
     	try {
     	    final int end = weatherArray.length();
 			for (int whichTime = 0; whichTime < end; ++whichTime)
-			    if (weatherArray.getJSONObject(whichTime).getLong("dt") * 1000 <= when)
+			    if ((weatherArray.getJSONObject(whichTime).getLong("dt") * 1000)
+                        - (1000 * 60 * 60 * (24/8)) <= when)
                     return whichTime;
 		} catch (JSONException ex) {
     		ex.printStackTrace();
@@ -82,7 +83,7 @@ final class PAWSAPI {
      * @return Formatted weather timestamp string.
      */
 	static String getClockString(final Context context, final long ms, final boolean showMinutes) {
-        final boolean is24hr = PAWSAPI.preferredClockFormat(context.getSharedPreferences(
+        final boolean is24hr = PAWSAPI.preferred24HourFormat(context.getSharedPreferences(
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
         final String pattern = String.format(
                 "%s%s%s",
@@ -99,11 +100,14 @@ final class PAWSAPI {
      * @return Formatted weather timestamp string.
      */
 	static String getWeatherTimestampString(final Context context, final long ms) {
-	    final boolean is24hr = PAWSAPI.preferredClockFormat(context.getSharedPreferences(
+	    final boolean is24hr = PAWSAPI.preferred24HourFormat(context.getSharedPreferences(
 	            PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
-	    final String pattern = "dd/MM " + (is24hr ? "HH" : "hh") + ":mm" + (is24hr ? "" : "e");
+	    final String pattern = String.format("dd/MM %s:mm %s",
+                is24hr ? "HH" : "hh",
+                is24hr ? "" : "e");
 		return context.getString(R.string.home_weather_timestamp)
-                + " " + new SimpleDateFormat(pattern, Locale.getDefault()).format(ms);
+                + " " + new SimpleDateFormat(pattern, Locale.getDefault()).format(
+                        ms - 1000 * 60 * 60 * (24 / 8));
 	}
 
     /**
@@ -114,7 +118,7 @@ final class PAWSAPI {
      * @return Formatted timestamp string.
      */
 	static String getDateTimestampString(final Context context, final long ms, boolean newline) {
-	    final boolean is24hr = PAWSAPI.preferredClockFormat(context.getSharedPreferences(
+	    final boolean is24hr = PAWSAPI.preferred24HourFormat(context.getSharedPreferences(
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
 	    final String pattern = String.format(
 	            "%s:mm %s%sdd/MM/yyyy",

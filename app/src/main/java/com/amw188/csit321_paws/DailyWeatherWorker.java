@@ -128,6 +128,10 @@ public class DailyWeatherWorker extends Worker {
             // Fetch the last best weather forecast from storage
             final JSONObject weatherJson = new JSONObject(mSharedPref.getString(
                     PrefKeys.last_weather_json, PrefConstValues.empty_json));
+            if (weatherJson.length() < 1) {
+                Log.e(TAG, "Weather JSON was null.");
+                return null;
+            }
 
             // Choose the next best forecast 3hr time block
             final long now = System.currentTimeMillis();
@@ -157,7 +161,7 @@ public class DailyWeatherWorker extends Worker {
                     .getString("icon"));
 
             // Format the notification with the coming weather data
-            final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
+            final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
             weatherTitle = String.format(Locale.getDefault(), weatherTitle,
                     weatherJson.getJSONObject("city").getString("name"),
                     DateFormat.format(

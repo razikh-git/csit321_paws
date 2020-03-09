@@ -159,7 +159,7 @@ public class MapsActivity
 
         SharedPreferences sharedPref = this.getSharedPreferences(
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
-        final boolean isMetric = PAWSAPI.preferredUnits(sharedPref);
+        final boolean isMetric = PAWSAPI.preferredMetric(sharedPref);
 
         // Title - Location name
         String[] abbreviatedAddress = getAbbreviatedAddress(mSelectedAddressList).split(" ");
@@ -248,8 +248,8 @@ public class MapsActivity
         initButtons();
 
         // Prepare the map
-        mTileOverlayURL = getString(R.string.app_url_owm_map_root)
-                +"%s/%s/%d/%d.png?appid=%s";
+        mTileOverlayURL = OpenWeatherMapIntegration.app_url_owm_map_root
+                + "%s/%s/%d/%d.png?appid=%s";
         mMapView = findViewById(R.id.mapView);
         mMapView.onCreate(mBundle);
         mMapView.getMapAsync(this);
@@ -376,11 +376,11 @@ public class MapsActivity
         switch (view.getId()) {
             // Only one OpenWeatherMaps overlay may be visible at a time
             case R.id.btnMapOverlayWind: {
-                str = getString(R.string.app_url_map_layer_wind);
+                str = ConstStrings.app_url_map_layer_wind;
                 break;
             }
             case R.id.btnMapOverlayPrecip: {
-                str = getString(R.string.app_url_map_layer_precip);
+                str = ConstStrings.app_url_map_layer_precip;
                 break;
             }
             case R.id.btnMapOverlayRisk: {
@@ -657,10 +657,10 @@ public class MapsActivity
         String str = "";
         try {
             // Wind layer
-            str = getString(R.string.app_url_map_layer_wind);
+            str = ConstStrings.app_url_map_layer_wind;
             initTileOverlayMaps(str);
             // Precipitation layer
-            str = getString(R.string.app_url_map_layer_precip);
+            str = ConstStrings.app_url_map_layer_precip;
             initTileOverlayMaps(str);
 
         } catch (NullPointerException e) {

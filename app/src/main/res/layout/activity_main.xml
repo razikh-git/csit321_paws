@@ -24,14 +24,6 @@
             android:layout_height="212dp"
             app:srcCompat="@drawable/logo" />
 
-        <TextView
-            android:id="@+id/splashText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="@string/app_detail"
-            android:textSize="18sp"
-            android:typeface="sans" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

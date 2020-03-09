@@ -15,7 +15,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Calendar;
 
-public class SettingsActivity extends BottomNavBarActivity {
+public class SettingsActivity
+		extends BottomNavBarActivity
+		implements Preference.OnPreferenceChangeListener {
+
     private static final String TAG = PrefConstValues.tag_prefix + "settings";
 
     @Override
@@ -26,6 +29,12 @@ public class SettingsActivity extends BottomNavBarActivity {
 			Log.e(TAG, "Failed to initialise preferences.");
 		}
     }
+
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object newValue) {
+		Log.d(TAG, "Preference " + preference.getKey() + " changing to " + newValue);
+		return true;
+	}
 
     private boolean init() {
 		findViewById(R.id.btnReset).setOnClickListener(this::onClickReset);
