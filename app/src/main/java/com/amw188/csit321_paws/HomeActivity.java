@@ -105,21 +105,22 @@ public class HomeActivity
      */
     private boolean initWeatherDisplay(String response) {
         try {
-            final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
-
-            int index = 0;
+            final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
+            int whichTime;
             String str;
             Double dbl;
 
-            JSONObject weatherForecastJSON = null;
-            JSONObject weatherCurrentJSON = null;
+            JSONObject weatherForecastJSON;
+            JSONObject weatherCurrentJSON;
 
             try {
                 // Current weather object
                 weatherForecastJSON = new JSONObject(response);
+                whichTime = PAWSAPI.getWeatherJsonIndexForTime(
+                        weatherForecastJSON.getJSONArray("list"),
+                        System.currentTimeMillis());
                 weatherCurrentJSON = (JSONObject)(weatherForecastJSON.getJSONArray("list")
-                        .getJSONObject(index)
-                        .getJSONArray("weather").get(0));
+                        .getJSONObject(whichTime).getJSONArray("weather").get(0));
             } catch (JSONException ex) {
                 ex.printStackTrace();
                 return false;
@@ -153,25 +154,25 @@ public class HomeActivity
             // Time of forecast
             ((TextView)(findViewById(R.id.txtWeatherTimestamp))).setText(
                     PAWSAPI.getWeatherTimestampString(this,
-                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                             .getLong("dt") * 1000));
 
             // Fill in body data
 
             // Temperature (current)
-            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                             .getJSONObject("main").getDouble("temp");
             str = PAWSAPI.getTemperatureString(dbl, isMetric);
             ((TextView)findViewById(R.id.txtTempCurrent)).setText(str);
 
             // Wind (speed)
-            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                     .getJSONObject("wind").getDouble("speed");
             str = PAWSAPI.getWindSpeedString(dbl, isMetric);
             ((TextView)findViewById(R.id.txtWindSpeed)).setText(str);
 
             // Wind (bearing)
-            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+            dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                     .getJSONObject("wind").getDouble("deg");
             str = PAWSAPI.getWindBearingString(this, dbl);
             ((TextView)findViewById(R.id.txtWindBearing)).setText(str);
@@ -181,7 +182,7 @@ public class HomeActivity
             switch (str) {
                 case "Clear":
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                                     .getJSONObject("main").getString("humidity")
                             + "%");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
@@ -189,7 +190,7 @@ public class HomeActivity
                     break;
                 case "Clouds":
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(
-                            weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                            weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                                     .getJSONObject("clouds").getString("all")
                             + "%");
                     ((TextView)findViewById(R.id.txtPrecipAuxData2)).setText(
@@ -198,7 +199,7 @@ public class HomeActivity
                 case "Thunderstorm":
                 case "Drizzle":
                 case "Rain":
-                    dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                    dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                             .getJSONObject("rain").getDouble("3h");
                     str = PAWSAPI.getPrecipitationString(isMetric, dbl);
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(str);
@@ -206,7 +207,7 @@ public class HomeActivity
                             getString(R.string.home_precip_label));
                     break;
                 case "Snow" :
-                    dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(index)
+                    dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                             .getJSONObject("snow").getDouble("3h");
                     str = PAWSAPI.getPrecipitationString(isMetric, dbl);
                     ((TextView)findViewById(R.id.txtPrecipAuxData1)).setText(str);
@@ -233,10 +234,10 @@ public class HomeActivity
             if (mSelectedLocation != null) {
                 // Call and await an update to the weather JSON string in prefs
                 boolean success = true;
-                final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
+                final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
                 LatLng latLng = new LatLng(
                         mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
-                if (!new WeatherHandler(this).updateWeather(this, latLng, isMetric)) {
+                if (!new WeatherHandler(this).awaitWeatherUpdate(latLng, this, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
                     success = initWeatherDisplay(
                             mSharedPref.getString(PrefKeys.last_weather_json,
@@ -354,7 +355,7 @@ public class HomeActivity
 
     /**
      * Override of WeatherHandler.WeatherReceivedListener.
-     * Called from WeatherHandler.getWeather in WeatherHandler.updateWeather.
+     * Called from WeatherHandler.getWeather in WeatherHandler.awaitWeatherUpdate.
      * Acts on the weather forecast for the coming week.
      * Updates weather display fields in the activity, and handles
      * weather update notifictions from the service.

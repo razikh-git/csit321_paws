@@ -80,8 +80,8 @@ public class PlaceInfoActivity
         }
 
         // Call and await an update to the weather JSON string in shared prefs
-        final boolean isMetric = PAWSAPI.preferredUnits(mSharedPref);
-        if (!new WeatherHandler(this).updateWeather(this, latLng, isMetric)) {
+        final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
+        if (!new WeatherHandler(this).awaitWeatherUpdate(latLng, this, isMetric)) {
             // Initialise weather displays with last best values if none are being updated
             return initWeatherDisplay(
                     latLng,
@@ -568,6 +568,8 @@ public class PlaceInfoActivity
                         weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                                 .getLong("dt") * 1000);
                 ((TextView)findViewById(R.id.txtWeatherTimestamp)).setText(str);
+            } else {
+                Log.e(TAG, "Invalid or obsolete weather JSON.");
             }
         } catch (JSONException e) {
             e.printStackTrace();

@@ -31,6 +31,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,6 +63,7 @@ public class NotificationService
 	private static final String NOTIFICATION_CHANNEL_ID = "paws_notif_channel";
 
 	// Locations
+	SharedPreferences mSharedPref;
 	private Location mLastBestLocation;
 	private boolean mIsRequestingLocationUpdates;
 	private FusedLocationProviderClient mLocationClient;
@@ -132,6 +134,9 @@ public class NotificationService
 	private void init() {
 		Log.d(TAG, "Initialising notification service.");
 
+		mSharedPref = getApplicationContext().getSharedPreferences(
+				PrefKeys.app_global_preferences, MODE_PRIVATE);
+
 		// Initialise location utilities
 		mLocationClient = new FusedLocationProviderClient(getApplicationContext());
 		mLocationCallback = new LocationCallback() {
@@ -149,31 +154,11 @@ public class NotificationService
 			Log.e(TAG, "Notification manager failed to initialise.");
 			return;
 		}
-
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 			createNotificationChannels(manager);
 
-		// Generate service notification
-		Notification notif = getServiceNotification();
-		startForeground(NOTIFICATION_ID, notif);
-
-		// Push an initial weather notification
-		pushOneTimeWeatherNotification();
-
-		// Schedule regular weather notifications
-		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
-				PrefKeys.app_global_preferences, MODE_PRIVATE);
-		final int timeInterval = Integer.parseInt(
-				sharedPref.getString(PrefKeys.weather_notif_interval,
-				PrefDefValues.weather_notif_interval));
-		if (timeInterval > 0) {
-			final String[] timeInitial = sharedPref.getString(PrefKeys.weather_notif_time_start,
-					PrefDefValues.weather_notif_time_start)
-					.split(":");
-			scheduleWeatherNotifications(
-					Integer.parseInt(timeInitial[0]), Integer.parseInt(timeInitial[1]),
-					timeInterval);
-		}
+		// Schedule weather notifications when a weather forecast is received
+		updateWeatherData();
 	}
 
 	/**
@@ -253,13 +238,11 @@ public class NotificationService
 	private void startLocationUpdates() {
 		Log.d(TAG, "in startLocationUpdates()");
 
-		SharedPreferences sharedPref = getSharedPreferences(
-				PrefKeys.app_global_preferences, MODE_PRIVATE);
 		LocationRequest locationRequest = new LocationRequest()
-				.setPriority(Integer.parseInt(sharedPref.getString(
+				.setPriority(Integer.parseInt(mSharedPref.getString(
 						PrefKeys.location_priority,
 						PrefDefValues.location_priority)))
-				.setInterval(Integer.parseInt(sharedPref.getString(
+				.setInterval(Integer.parseInt(mSharedPref.getString(
 						PrefKeys.location_rate,
 						PrefDefValues.location_rate)));
 
@@ -298,6 +281,49 @@ public class NotificationService
 		// todo: assign hostListener when needed to reflect location changes in MapsActivity
 		if (mHostListener != null)
 			mHostListener.onLocationResultReceived(locationResult);
+
+		try {
+			final double errorMargin = 0.5d;
+			final LatLng resultLatLng = new LatLng(
+					locationResult.getLastLocation().getLatitude(),
+					locationResult.getLastLocation().getLongitude());
+
+			// Update the last best position for the device
+			final String lastBestPositionStr = String.format(
+					"{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
+					resultLatLng.latitude, resultLatLng.longitude);
+			SharedPreferences.Editor sharedEditor = mSharedPref.edit();
+			sharedEditor.putString(PrefKeys.last_best_position, lastBestPositionStr);
+			sharedEditor.apply();
+
+			// Update device location history
+			JSONArray historyJson = new JSONArray(mSharedPref.getString(
+					PrefKeys.position_history, PrefConstValues.empty_json));
+			for (int i = 0; i < historyJson.length(); ++i) {
+				final LatLng ll = new LatLng(
+						historyJson.getJSONObject(i).getDouble("latitude"),
+						historyJson.getJSONObject(i).getDouble("longitude"));
+				if (Math.abs(ll.latitude - resultLatLng.latitude) < errorMargin
+						&& Math.abs(ll.longitude - resultLatLng.longitude) < errorMargin) {
+
+					// Positions with a match in the device history add to their weighting,
+					// reflecting either their amount of visits or the duration spent there
+					int weight = 1;
+					if (historyJson.getJSONObject(i).has("weight"))
+						weight = historyJson.getJSONObject(i).getInt("weight");
+					historyJson.getJSONObject(i).put("weight", weight);
+					Log.d(TAG, "Matched coordinates: Location revisited: Weighted at " + weight);
+					sharedEditor.putString(PrefKeys.position_history, historyJson.toString());
+					return;
+				}
+
+				// New positions are added to the device history
+				Log.d(TAG, "Adding newly visited location to history.");
+				historyJson.put(new JSONObject(lastBestPositionStr));
+			}
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	/* Custom Weather Methods */
@@ -306,22 +332,33 @@ public class NotificationService
 		Toast.makeText(this,
 				"NotificationService.doSomethingWithWeather()",
 				Toast.LENGTH_LONG).show();
+		try {
+			if (WorkManager.getInstance(this).getWorkInfosByTag(
+					DailyWeatherWorker.WORK_TAG).get().size() <= 0) {
+				Log.d(TAG, "Scheduling weather notifications.");
+				scheduleWeatherNotifications();
+			}
+		} catch (Exception ex) {
+			Log.d(TAG, "Scheduling failure.");
+			ex.printStackTrace();
+		}
 	}
 
+	/**
+	 *
+	 */
 	private void updateWeatherData() {
 		try {
-			SharedPreferences sharedPref = getSharedPreferences(
-					PrefKeys.app_global_preferences, MODE_PRIVATE);
-			final boolean isMetric = PAWSAPI.preferredUnits(sharedPref);
-			final JSONObject weatherJson = new JSONObject(sharedPref.getString(
+			final JSONObject weatherJson = new JSONObject(mSharedPref.getString(
 					PrefKeys.last_weather_json, PrefConstValues.empty_json));
-			LatLng latLng = new LatLng(
+			final LatLng latLng = new LatLng(
 					weatherJson.getJSONObject("lat_lng").getDouble("latitude"),
 					weatherJson.getJSONObject("lat_lng").getDouble("longitude"));
 			WeatherHandler weatherHandler = new WeatherHandler(this);
-			if (!weatherHandler.updateWeather(this, latLng, isMetric))
+			if (!weatherHandler.awaitWeatherUpdate(latLng, this,
+					PAWSAPI.preferredMetric(mSharedPref)))
 				// Do something with weather immediately if it needn't wait to be updated
-				doSomethingWithWeather(sharedPref.getString(
+				doSomethingWithWeather(mSharedPref.getString(
 						PrefKeys.last_weather_json, PrefConstValues.empty_json));
 		} catch (JSONException ex) {
 			Log.e(TAG, "Failed to parse weather JSON in Service.updateWeatherData().");
@@ -331,7 +368,7 @@ public class NotificationService
 
 	/**
 	 * Override of WeatherHandler.WeatherReceivedListener.
-	 * Called from WeatherHandler.getWeather in WeatherHandler.updateWeather.
+	 * Called from WeatherHandler.getWeather in WeatherHandler.awaitWeatherUpdate.
 	 * @param latLng Latitude/longitude of weather data batch.
 	 * @param response Incredibly long string containing weather 5-day forecast.
 	 * @param isMetric Metric or imperial measurements.
@@ -362,14 +399,31 @@ public class NotificationService
 
 	/**
 	 * Schedule periodic weather notifications starting at a certain coming hour.
-	 * @param hour Hour where notifications may begin to be sent.
-	 * @param minute Minute of the hour where notifications may begin to be sent.
-	 * @param interval Hours between each notification.
 	 */
-	private void scheduleWeatherNotifications(int hour, int minute, int interval) {
+	private void scheduleWeatherNotifications() {
 		// todo: add an hour/minute picker in settings activity
 		// todo: ensure time intervals is a denominator of 24
 		// eg. once a day, twice a day, four times a day, every two days, every four days
+
+		// Generate service notification
+		Notification notif = getServiceNotification();
+		startForeground(NOTIFICATION_ID, notif);
+
+		// Push an initial weather notification
+		pushOneTimeWeatherNotification();
+
+		// Schedule regular weather notifications
+		final int timeInterval = Integer.parseInt(
+				mSharedPref.getString(PrefKeys.weather_notif_interval,
+						PrefDefValues.weather_notif_interval));
+		if (timeInterval <= 0)
+			return;
+
+		final String[] timeInitial = mSharedPref.getString(PrefKeys.weather_notif_time_start,
+				PrefDefValues.weather_notif_time_start)
+				.split(":");
+		final int hour = Integer.parseInt(timeInitial[0]);
+		final int minute = Integer.parseInt(timeInitial[1]);
 
 		long timeNow = System.currentTimeMillis();
 		long timeDelay = PAWSAPI.getTimeUntil(timeNow, hour, minute);
@@ -394,7 +448,7 @@ public class NotificationService
 
 		// Queue up daily weather notifications for the user
 		PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
-				DailyWeatherWorker.class, interval, TimeUnit.HOURS)
+				DailyWeatherWorker.class, timeInterval, TimeUnit.HOURS)
 				//DailyWeatherWorker.class, 15, TimeUnit.MINUTES)
 				.setConstraints(getWorkConstraints())
 				.setInitialDelay(timeDelay, TimeUnit.MILLISECONDS)

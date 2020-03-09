@@ -25,6 +25,6 @@ final class PrefKeys {
 	final static String last_weather_json = "last_weather_json";
 
 	// Locations
-	final static String last_best_location = "last_best_location";
-	final static String location_history = "location_history";
+	final static String last_best_position = "last_best_position";
+	final static String position_history = "position_history";
 }

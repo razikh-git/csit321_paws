@@ -36,8 +36,33 @@ class WeatherHandler {
         mHostListener = listener;
     }
 
-    boolean updateWeather(Context context, LatLng latLng, boolean isMetric) {
-        // Generate URL and request OWM data
+    /**
+     * Determines whether to await an updated weather forecast.
+     * @param latLng Target coordinates for the weather forecast.
+     * @param context Context.
+     * @param isMetric Units in metric or imperial.
+     * @return Returns true if the host should await an update, or false to act on current data.
+     */
+    boolean awaitWeatherUpdate(final LatLng latLng,
+							   final Context context, final boolean isMetric) {
+        if (shouldFetchWeatherUpdate(latLng, context, isMetric))
+            // Fetch a new batch of weather data for corrected coordinates
+            return fetchWeatherUpdate(latLng, context, isMetric);
+        return false;
+    }
+
+    /**
+     * Determines whether a weather update is required around the location of some coordinates.
+     * Updates are considered unnecessary if we already have a forecast for the given area
+     * in some relevant timeframe that allows us to keep a complete forecast.
+     * @param latLng Given coordinates for the weather forecast.
+     * @param context Context.
+     * @param isMetric Units in metric or imperial.
+     * @return Returns coordinates for weather update, or null if no update is required.
+     * Coordinates are corrected to the last values if near enough.
+     */
+    private boolean shouldFetchWeatherUpdate(LatLng latLng,
+                                             final Context context, final boolean isMetric) {
         try {
             SharedPreferences sharedPref = context.getSharedPreferences(
                     PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
@@ -46,71 +71,59 @@ class WeatherHandler {
             JSONObject lastWeather = new JSONObject(
                     sharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json));
 
-            if (lastWeather.toString().equals(PrefConstValues.empty_json) || lastWeather.length() == 0) {
+            if (lastWeather.toString().equals(PrefConstValues.empty_json)
+					|| lastWeather.length() == 0) {
                 Log.d(TAG,
-                        "Fetching new weather data: Last weather data does not exist.");
+                        "Last weather data does not exist.");
             } else {
                 // Embed dummy data in exceptional circumstances
                 if (!lastWeather.has("lat_lng")) {
-                    lastWeather.put("lat_lng", new JSONObject(
-                            "{"
-                            + "\"latitude\":\"0.00\","
-                            + "\"longitude\":\"0.00\""
-                            + "}"
-                    ));
+                    lastWeather.put("lat_lng", new JSONObject("{"
+                                    + "\"latitude\":\"0.00\","
+                                    + "\"longitude\":\"0.00\""
+                                    + "}"));
                 }
                 if (!lastWeather.has("is_metric")) {
-                    lastWeather.put("is_metric", !isMetric);
-                }
-
-                Log.d(TAG, "Checking data relevancy.\n"
-                        + "LatLng comparison:\n"
-                        + "sys:  " + new DecimalFormat("#.###").format(latLng.latitude)
-                        + " " + new DecimalFormat("#.###").format(latLng.longitude) + "\n"
-                        + "json: " + new DecimalFormat("#.###").format(lastWeather.getJSONObject("lat_lng").getDouble("latitude"))
-                        + " " + new DecimalFormat("#.###").format(lastWeather.getJSONObject("lat_lng").getDouble("longitude")));
-
-                // Request new data if the location has changed
+					// Embed false isMetric to encourage an update, as last data is assumed invalid
+					lastWeather.put("is_metric", !isMetric);
+				}
                 if (isMetric != lastWeather.getBoolean("is_metric")) {
-                    Log.d(TAG, "Units of measurement differ and an update will be retrieved.");
-                } else if (Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng").getDouble("latitude")) < LOC_CERTAINTY
-                && Math.abs(latLng.longitude - lastWeather.getJSONObject("lat_lng").getDouble("longitude")) < LOC_CERTAINTY) {
-                    Log.d(TAG, "Location differs significantly enough to warrant an update.");
+                	// Request new data if units have cahnged
+                    Log.d(TAG, "Units of measurement are different.");
+					return true;
+                } else if (Math.abs(latLng.latitude - lastWeather.getJSONObject("lat_lng")
+                        .getDouble("latitude")) < LOC_CERTAINTY
+                        && Math.abs(latLng.longitude - lastWeather.getJSONObject("lat_lng")
+                        .getDouble("longitude")) < LOC_CERTAINTY) {
+					// Request new data if the location has changed
+                    Log.d(TAG, "Weather data locations are different.");
 
                     // Don't request new data if the current data was received in the last 3 hours
-                    long timestamp = lastWeather.getJSONArray("list").getJSONObject(0)
-                            .getLong("dt") * 1000;
-
-                    Log.d(TAG, "Checking data recency.\n"
-                            + "Timestamp comparison:\n"
-                            + "sys:  " + System.currentTimeMillis() + "\njson:  " + timestamp);
+                    final long timestamp = lastWeather.getJSONArray("list")
+							.getJSONObject(0).getLong("dt") * 1000;
 
                     if (System.currentTimeMillis() - timestamp < 36000000) {
-                        Log.d(TAG, "Will not get new weather data. LastWeather data too recent:\n"
-                                + (System.currentTimeMillis() - timestamp));
-                        return false;
-                    }
-
-                    // Use the coordinates from the last weather data if the location hasn't changed
-                    Log.d(TAG, "Last weather data for this location exists, and is outdated.");
-                    latLng = new LatLng(lastWeather.getJSONObject("city").getJSONObject("coord")
-                            .getDouble("lat"),
-                            lastWeather.getJSONObject("city").getJSONObject("coord")
-                                    .getDouble("lon"));
+						Log.d(TAG, "Last weather data for this location is up-to-date.");
+						return false;
+					}
                 }
             }
-
-            // Fetch the complete weather data
-            getWeather(context, latLng, isMetric);
-
         } catch (JSONException ex) {
+        	Log.e(TAG, "Failed to read current weather data.");
             ex.printStackTrace();
         }
         return true;
     }
 
-    private void getWeather(Context context, LatLng latLng, boolean isMetric) {
-
+    /**
+     * Fetches a weather forecast for the given LatLng coordinates from OpenWeatherMaps.
+     * @param latLng Target coordinates for the weather forecast.
+     * @param context Context.
+     * @param isMetric Units in metric or imperial.
+	 * @return Returns success or failure to begin fetch request.
+     */
+    private boolean fetchWeatherUpdate(LatLng latLng,
+									   final Context context, final boolean isMetric) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
@@ -154,5 +167,6 @@ class WeatherHandler {
                 });
 
         queue.add(stringRequest);
+        return false;
     }
 }

@@ -19,17 +19,17 @@
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/mainAppTheme">
+        <activity android:name=".PlaceHistoryActivity"></activity>
 
         <service
             android:name=".FetchAddressIntentService"
             android:exported="false" />
-
         <service
             android:name=".NotificationService"
-            android:foregroundServiceType="location"
-            android:label="@string/label_service"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            android:foregroundServiceType="location"
+            android:label="@string/label_service" />
 
         <activity
             android:name=".SettingsActivity"
@@ -71,6 +71,7 @@
             android:theme="@style/splashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -78,7 +79,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
     </application>
 
 </manifest>
