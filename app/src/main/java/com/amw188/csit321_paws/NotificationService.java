@@ -64,7 +64,6 @@ public class NotificationService
 
 	// Locations
 	SharedPreferences mSharedPref;
-	private Location mLastBestLocation;
 	private boolean mIsRequestingLocationUpdates;
 	private FusedLocationProviderClient mLocationClient;
 	private LocationCallback mLocationCallback;
@@ -262,10 +261,6 @@ public class NotificationService
 		Toast.makeText(this,
 				"Stopped location updates.",
 				Toast.LENGTH_LONG).show();
-	}
-
-	protected Location getLastBestLocation() {
-		return mLastBestLocation;
 	}
 
 	/**

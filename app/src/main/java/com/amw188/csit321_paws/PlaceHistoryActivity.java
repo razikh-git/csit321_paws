@@ -64,10 +64,9 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 		public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 			try {
 				JSONObject placeJson = mHistoryJson.getJSONObject(position);
-				holder.txtTitle.setText();
-				holder.txtSubtitle.setText();
-				// todo: identify favourite in history data
-				if ()
+				//holder.txtTitle.setText();
+				//holder.txtSubtitle.setText();
+				if (placeJson.getBoolean("favorite"))
 					toggleFavorite(holder.btnFavorite);
 				holder.btnFavorite.setOnClickListener(this::toggleFavorite);
 				holder.btnOptions.setOnClickListener(this::toggleOptions);
@@ -85,7 +84,10 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 			Log.d(TAG, "in toggleFavorite()");
 
 			view.setBackgroundResource(R.drawable.ic_star);
-			// todo: swap favourite in history data
+
+			for (int i = 0; i < mHistoryJson.length() - 1; ++i) {
+				//if ()
+			}
 		}
 
 		private void toggleOptions(View view) {

@@ -59,7 +59,8 @@
     <!--       Activity strings       -->
 
     <!-- App. -->
-    <string name="app_reset_result">All profile data has been reset.</string>
+    <string name="app_reset_app">All app data has been reset.</string>
+    <string name="app_reset_survey">All profile data has been reset.</string>
 
     <!-- Home Screen Activity. -->
     <string name="home_warning_title">Survey incomplete</string>

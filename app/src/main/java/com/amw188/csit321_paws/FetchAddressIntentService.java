@@ -16,7 +16,7 @@ import java.util.Locale;
 
 public class FetchAddressIntentService extends IntentService {
 
-    private static final String TAG = PrefConstValues.tag_prefix + "fais";
+    private static final String TAG = PrefConstValues.tag_prefix + "fa_service";
 
     public FetchAddressIntentService() {
         super("FetchAddressIntentService");
@@ -30,8 +30,9 @@ public class FetchAddressIntentService extends IntentService {
      * @param receiver Activity to deliver result to.
      * @param location Location object to derive address from.
      */
-    public static void startActionFetchAddress(Context context,
-                                               ResultReceiver receiver, Location location) {
+    public static void startActionFetchAddress(final Context context,
+                                               final ResultReceiver receiver,
+                                               final Location location) {
         Intent intent = new Intent(context, FetchAddressIntentService.class);
         intent.setAction(FetchAddressCode.ACTION_FETCH_ADDRESS);
         intent.putExtra(FetchAddressCode.EXTRA_RECEIVER, receiver);
@@ -55,7 +56,7 @@ public class FetchAddressIntentService extends IntentService {
      * Handles address fetching in a background thread
      * @param location Location object to derive address from.
      */
-    private void handleActionFetchAddress(Location location) {
+    private void handleActionFetchAddress(final Location location) {
         String error = "";
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         ArrayList<Address> addressList = null;
@@ -93,8 +94,9 @@ public class FetchAddressIntentService extends IntentService {
      * @param addressList List of address data for this location.
      * @param message Extra message, contains error info.
      */
-    private void deliverResultToReceiver(int resultCode,
-                                         ArrayList<Address> addressList, String message) {
+    private void deliverResultToReceiver(final int resultCode,
+                                         final ArrayList<Address> addressList,
+                                         final String message) {
         Bundle bundle = new Bundle();
         bundle.putString(FetchAddressCode.RESULT_DATA_KEY, message);
         bundle.putParcelableArrayList(FetchAddressCode.RESULT_ADDRESSLIST_KEY, addressList);

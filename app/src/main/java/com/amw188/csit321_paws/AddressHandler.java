@@ -1,5 +1,6 @@
 package com.amw188.csit321_paws;
 
+import android.content.Context;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
@@ -7,43 +8,34 @@ import android.os.Handler;
 import android.support.v4.os.ResultReceiver;
 import android.util.Log;
 
-import com.google.android.gms.location.LocationServices;
-
 import java.util.ArrayList;
 
 class AddressHandler {
-	private static final String TAG = PrefConstValues.package_name + "_ah";
-	protected ArrayList<Address> mSelectedAddressList;
-	protected MapsActivity.AddressResultReceiver mAddressReceiver;
+	private static final String TAG = PrefConstValues.tag_prefix + "_ah";
 
-	class AddressResultReceiver extends ResultReceiver {
-		AddressResultReceiver(Handler handler) {
+	private AddressHandler.AddressReceivedListener mHostListener;
+
+	// Interface to send updates to host activity
+	interface AddressReceivedListener {
+		void onAddressReceived(int resultCode, Bundle resultData);
+	}
+
+	class AddressReceiver extends ResultReceiver {
+		AddressReceiver(Handler handler) {
 			super(handler);
 		}
 
 		@Override
 		protected void onReceiveResult(int resultCode, Bundle resultData) {
-			if (resultData == null)
-				return;
-			String error = resultData.getString(FetchAddressCode.RESULT_DATA_KEY);
-			if (error == null || error.equals(""))
-				mSelectedAddressList = resultData.getParcelableArrayList(
-						FetchAddressCode.RESULT_ADDRESSLIST_KEY);
-			else
-				return;
-			// Update the interface with the new location
-			onAddressReceived();
+			mHostListener.onAddressReceived(resultCode, resultData);
 		}
 	}
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-		mAddressReceiver = new AddressResultReceiver(new Handler());
+	AddressHandler(AddressReceivedListener listener) {
+		mHostListener = listener;
 	}
 
-	protected String[] getAddress(ArrayList<Address> addressList) {
+	static String[] getAddress(final ArrayList<Address> addressList) {
 		String[] addressLine = null;
 		try {
 			Log.d(TAG, "addressList: " + addressList.toString());
@@ -56,17 +48,17 @@ class AddressHandler {
 		return addressLine;
 	}
 
-	protected String getAbbreviatedAddress(ArrayList<Address> addressList) {
+	static String getAbbreviatedAddress(final ArrayList<Address> addressList) {
 		String[] addressLine = getAddress(addressList);
 		return addressLine.length > 0
 				? addressLine[Math.max(0, addressLine.length - 2)]
 				: null;
 	}
 
-	protected void awaitAddress(Location location) {
-		FetchAddressIntentService.startActionFetchAddress(this,
-				mAddressReceiver, location);
+	void awaitAddress(final Context context, final Location location) {
+		AddressReceiver addressReceiver =
+				new AddressHandler.AddressReceiver(new Handler());
+		FetchAddressIntentService.startActionFetchAddress(context,
+				addressReceiver, location);
 	}
-
-	protected void onAddressReceived() {}
 }

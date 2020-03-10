@@ -18,20 +18,15 @@ class WeatherHandler {
     private static final String TAG = PrefConstValues.tag_prefix + "wh";
 
     private static final double LOC_CERTAINTY = 0.1d;
+	private WeatherReceivedListener mHostListener;
 
     // Interface to send updates to host activity
     interface WeatherReceivedListener {
         void onWeatherReceived(LatLng latLng, String response, boolean isMetric);
     }
 
-    private WeatherReceivedListener mHostListener;
-
     WeatherHandler(WeatherReceivedListener listener) {
-        setHostListener(listener);
-    }
-
-    private void setHostListener(WeatherReceivedListener listener) {
-        mHostListener = listener;
+		mHostListener = listener;
     }
 
     /**
