@@ -14,9 +14,16 @@
         />
 
     <item
+        android:id="@+id/navPlaces"
+        android:title="@string/app_nav_places"
+        android:icon="@drawable/ic_map_clock"
+        />
+
+    <!--
+    <item
         android:id="@+id/navWeather"
         android:title="@string/app_nav_weather"
         android:icon="@drawable/ic_satellite"
         />
-
+    -->
 </menu>

@@ -32,6 +32,7 @@
             <!-- Today's weather
             Header summary and daily forecast. -->
             <LinearLayout
+                android:id="@+id/layPlaceInfoHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"

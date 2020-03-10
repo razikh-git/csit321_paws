@@ -12,45 +12,55 @@ public abstract class BottomNavBarActivity extends AppCompatActivity {
             = ((item) -> {
             switch (item.getItemId()) {
                 case R.id.navHome:
-                    onClickHome();
-                    return true;
+                    return onClickHome();
                 case R.id.navMaps:
-                    onClickMaps();
-                    return true;
-                case R.id.navWeather:
-                    onClickWeather();
-                    return true;
+                    return onClickMaps();
+                case R.id.navPlaces:
+                    return onClickPlaces();
+                //case R.id.navWeather:
+                    //return onClickWeather();
                 case R.id.navReturn:
-                    onClickReturn();
-                    return true;
+                    return onClickReturn();
                 default:
                     return false;
             }
         });
 
-    public void onClickHome() {
+    public boolean onClickHome() {
         // Redirect to home screen.
-        this.finish();
+        finish();
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
+        return true;
     }
 
-    public void onClickMaps() {
+    public boolean onClickMaps() {
         // Redirect to maps screen.
-        this.finish();
+        finish();
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
+        return true;
     }
 
-    public void onClickWeather() {
+    public boolean onClickPlaces() {
+        // Redirect to place history screen.
+        finish();
+        Intent intent = new Intent(this, PlaceHistoryActivity.class);
+        startActivity(intent);
+        return true;
+    }
+
+    public boolean onClickWeather() {
         // Redirect to home screen.
-        this.finish();
+        finish();
         Intent intent = new Intent(this, PlaceInfoActivity.class);
         startActivity(intent);
+        return true;
     }
 
-    public void onClickReturn() {
+    public boolean onClickReturn() {
         // Drop out of the current screen.
-        this.finish();
+        finish();
+        return true;
     }
 }

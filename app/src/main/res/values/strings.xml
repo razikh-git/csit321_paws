@@ -51,6 +51,7 @@
     <!-- Bottom navigation bar. -->
     <string name="app_nav_maps">Maps</string>
     <string name="app_nav_home">Home</string>
+    <string name="app_nav_places">Places</string>
     <string name="app_nav_weather">Weather</string>
     <string name="app_nav_return">Continue Later</string>
 
