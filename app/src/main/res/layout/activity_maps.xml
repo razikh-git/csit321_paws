@@ -150,16 +150,16 @@
                 android:tint="@color/color_on_primary"
                 android:visibility="gone"/>
 
-            <!-- Map Weather Redirect Button. -->
+            <!-- Map Last Location Button. -->
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/btnMapWeatherRedirect"
+                android:id="@+id/btnMapLastLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="@dimen/app_spacing_medium"
                 android:layout_marginBottom="@dimen/app_spacing_medium"
-                android:src="@drawable/ic_satellite"
+                android:src="@drawable/ic_map_marker"
                 android:tint="@color/color_on_primary"
                 android:visibility="visible"/>
 

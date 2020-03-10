@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static android.view.View.VISIBLE;
@@ -69,6 +68,7 @@ public class MapsActivity
         extends
                 LocationActivity
         implements
+                AddressHandler.AddressReceivedListener,
                 OnMapReadyCallback,
                 GoogleMap.OnPoiClickListener,
                 GoogleMap.OnMarkerClickListener
@@ -99,6 +99,7 @@ public class MapsActivity
     private Polyline mPolyLine;
     private List<Polygon> mPolyList = new ArrayList<>();
     private View mInfoWindow;
+    private ArrayList<Address> mSelectedAddressList;
 
     // OpenWeatherMaps
     private Map<String, TileOverlay> mTileOverlayMap;
@@ -162,7 +163,8 @@ public class MapsActivity
         final boolean isMetric = PAWSAPI.preferredMetric(sharedPref);
 
         // Title - Location name
-        String[] abbreviatedAddress = getAbbreviatedAddress(mSelectedAddressList).split(" ");
+        String[] abbreviatedAddress = AddressHandler.getAbbreviatedAddress(mSelectedAddressList)
+                .split(" ");
         StringBuilder title = new StringBuilder();
         final int end = Math.max(0, abbreviatedAddress.length - 2);
         for (int i = 0; i < end; ++i) {
@@ -184,16 +186,15 @@ public class MapsActivity
                 subtitle);
 
         // Subtitle - Distance from last best location
-        Location location = new Location(LocationManager.GPS_PROVIDER);
-        location.setLatitude(marker.getPosition().latitude);
-        location.setLongitude(marker.getPosition().longitude);
-        String distanceStr = "";
-        final Location lastBestLocation = mNotificationService.getLastBestLocation();
+        Location selectedLocation = new Location(LocationManager.GPS_PROVIDER);
+        selectedLocation.setLatitude(marker.getPosition().latitude);
+        selectedLocation.setLongitude(marker.getPosition().longitude);
+
+        Location lastBestLocation = PAWSAPI.getLastBestLocation(sharedPref);
         if (lastBestLocation != null)
-			distanceStr = PAWSAPI.getDistanceString(isMetric,
-					lastBestLocation.distanceTo(location));
-        ((TextView)mInfoWindow.findViewById(R.id.txtInfoDistance)).setText(
-                distanceStr);
+            ((TextView)mInfoWindow.findViewById(R.id.txtInfoDistance)).setText(
+                    PAWSAPI.getDistanceString(isMetric,
+                            lastBestLocation.distanceTo(selectedLocation)));
 
         // Body text - Place and weather summary
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoContent)).setText(
@@ -206,7 +207,19 @@ public class MapsActivity
 	}
 
 	private void onInfoWindowClick(Marker marker) {
-        onMapWeatherRedirectClick(mMapView);
+        weatherRedirect();
+    }
+
+    private void weatherRedirect() {
+        // Redirect to weather screen focusing on the current marker
+        Intent intent = new Intent(this, PlaceInfoActivity.class);
+        if (mSelectedLocation != null) {
+            intent.putExtra(RequestCodes.EXTRA_LATLNG,
+                    new LatLng(mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude()));
+            intent.putExtra(RequestCodes.EXTRA_PLACENAME,
+                    ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).getText());
+        }
+        startActivityForResult(intent, RequestCodes.REQUEST_WEATHER_BY_LOCATION);
     }
 
     @Override
@@ -218,7 +231,7 @@ public class MapsActivity
 		nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
 		if (!init(savedInstanceState)) {
-			Log.e(TAG, "Did not initialise MapsActivity immediately.");
+			Log.d(TAG, "Did not initialise MapsActivity immediately.");
 		}
     }
 
@@ -259,7 +272,7 @@ public class MapsActivity
 			findViewById(R.id.laySheetHeader).setOnClickListener(this::onSheetHeaderClick);
 			findViewById(R.id.btnMapPolyDraw).setOnClickListener(this::onMapPolyDrawClick);
 			findViewById(R.id.btnMapPolyErase).setOnClickListener(this::onMapPolyEraseClick);
-			findViewById(R.id.btnMapWeatherRedirect).setOnClickListener(this::onMapWeatherRedirectClick);
+			findViewById(R.id.btnMapLastLocation).setOnClickListener(this::onMapLastLocationClick);
 			findViewById(R.id.btnMapTypePopout).setOnClickListener(this::onMapTypePopoutClick);
 			findViewById(R.id.btnMapTypeDefault).setOnClickListener(this::onMapTypeButtonClick);
 			findViewById(R.id.btnMapTypeSatellite).setOnClickListener(this::onMapTypeButtonClick);
@@ -274,16 +287,15 @@ public class MapsActivity
 		return true;
 	}
 
-    private void onMapWeatherRedirectClick(View view) {
-        // Redirect to weather screen with data from the current marker
-        Intent intent = new Intent(this, PlaceInfoActivity.class);
-        if (mSelectedLocation != null) {
-            intent.putExtra(RequestCodes.EXTRA_LATLNG,
-                    new LatLng(mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude()));
-            intent.putExtra(RequestCodes.EXTRA_PLACENAME,
-                    ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).getText());
-        }
-        startActivityForResult(intent, RequestCodes.REQUEST_WEATHER_BY_LOCATION);
+    /**
+     * Relocate the last known location of this device on the map and mark it.
+     * @param view
+     */
+    private void onMapLastLocationClick(View view) {
+        SharedPreferences sharedPref = getSharedPreferences(
+                PrefKeys.app_global_preferences, MODE_PRIVATE);
+        Location lastBestLocation = PAWSAPI.getLastBestLocation(sharedPref);
+        new AddressHandler(this).awaitAddress(this, lastBestLocation);
     }
 
     private void onMapPolyDrawClick(View view) {
@@ -300,7 +312,7 @@ public class MapsActivity
                 findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
                         getDrawable(R.drawable.ic_draw_selected));
                 findViewById(R.id.btnMapPolyErase).setVisibility(View.GONE);
-                findViewById(R.id.btnMapWeatherRedirect).setVisibility(VISIBLE);
+                findViewById(R.id.btnMapLastLocation).setVisibility(VISIBLE);
                 // Reset click event listeners
                 mMap.setOnMapClickListener(this::onMapDefaultClick);
                 mMap.setOnMapLongClickListener(this::onMapDefaultLongClick);
@@ -311,7 +323,7 @@ public class MapsActivity
                 findViewById(R.id.btnMapPolyDraw).setBackgroundDrawable(
                         getDrawable(R.drawable.ic_draw));
                 findViewById(R.id.btnMapPolyErase).setVisibility(VISIBLE);
-                findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
+                findViewById(R.id.btnMapLastLocation).setVisibility(View.GONE);
                 // Use click event listeners for live drawing
                 mMap.setOnMapClickListener(this::onMapDrawingClick);
                 mMap.setOnMapLongClickListener(this::onMapDrawingLongClick);
@@ -449,7 +461,7 @@ public class MapsActivity
         Location location = new Location(LocationManager.GPS_PROVIDER);
         location.setLatitude(latLng.latitude);
         location.setLongitude(latLng.longitude);
-        awaitAddress(location);
+        new AddressHandler(this).awaitAddress(this, location);
         // todo: redirect marker to nearest location when address invalid or null
     }
 
@@ -608,7 +620,7 @@ public class MapsActivity
 
             // Reveal other FABs and hide the map type picker popout
             findViewById(R.id.btnMapPolyDraw).setVisibility(VISIBLE);
-            findViewById(R.id.btnMapWeatherRedirect).setVisibility(VISIBLE);
+            findViewById(R.id.btnMapLastLocation).setVisibility(VISIBLE);
             findViewById(R.id.cardMapType).setVisibility(View.GONE);
         } else {
             // Change button style
@@ -621,7 +633,7 @@ public class MapsActivity
             mIsPolyDrawing = true;
             onMapPolyDrawClick(null);
             findViewById(R.id.btnMapPolyDraw).setVisibility(View.GONE);
-            findViewById(R.id.btnMapWeatherRedirect).setVisibility(View.GONE);
+            findViewById(R.id.btnMapLastLocation).setVisibility(View.GONE);
             findViewById(R.id.cardMapType).setVisibility(VISIBLE);
         }
     }
@@ -723,7 +735,7 @@ public class MapsActivity
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
         	// Mark the location from a provided position, otherwise use last best location
-        	LatLng latLng = getIntentExtras(getIntent().getExtras());
+        	LatLng latLng = getLatLngFromIntent(getIntent().getExtras());
 			Location location = new Location(LocationManager.GPS_PROVIDER);
         	if (latLng == null) {
 				try {
@@ -731,8 +743,7 @@ public class MapsActivity
 							PrefKeys.app_global_preferences, MODE_PRIVATE);
 					JSONObject positionJson = new JSONObject(sharedPref.getString(
 							PrefKeys.last_best_position, PrefConstValues.empty_json_object));
-					if (positionJson.length() == 0 ||
-							positionJson.toString().equals(PrefConstValues.empty_json_object)) {
+					if (positionJson.length() == 0) {
 						Log.e(TAG, "Failed to read last best location.");
 						return;
 					}
@@ -747,7 +758,7 @@ public class MapsActivity
 			}
 			location.setLatitude(latLng.latitude);
 			location.setLongitude(latLng.longitude);
-			awaitAddress(location);
+			new AddressHandler(this).awaitAddress(this, location);
         } else {
             checkHasPermissions(RequestCodes.PERMISSION_MULTIPLE,
                     RequestCodes.REQUEST_PERMISSIONS_LOCATION);
@@ -803,15 +814,24 @@ public class MapsActivity
     @Override
     protected void onLocationReceived() {
         // Request an address from the current location
-        awaitAddress(mSelectedLocation);
+        new AddressHandler(this).awaitAddress(this, mSelectedLocation);
     }
 
     @Override
-    protected void onAddressReceived() {
+    public void onAddressReceived(int resultCode, Bundle resultData) {
+        if (resultData == null)
+            return;
+        String error = resultData.getString(FetchAddressCode.RESULT_DATA_KEY);
+        if (error == null || error.equals(""))
+            mSelectedAddressList = resultData.getParcelableArrayList(
+                    FetchAddressCode.RESULT_ADDRESSLIST_KEY);
+        else
+            return;
+
         placeNewMarker(mSelectedAddressList);
     }
 
-	private LatLng getIntentExtras(Bundle extras) {
+	private LatLng getLatLngFromIntent(Bundle extras) {
 		// Initialise all weather data
 		LatLng latLng = null;
 		if (extras != null)
@@ -847,7 +867,7 @@ public class MapsActivity
             // eg. 95 Iris St, Beacon Hill NSW 2100, Australia
             // ==> Beacon Hill NSW 2100
             ((TextView)findViewById(R.id.txtSheetTitle)).setText(
-                    getAbbreviatedAddress(mSelectedAddressList));
+                    AddressHandler.getAbbreviatedAddress(mSelectedAddressList));
 
             // Give address to the InfoWindow view to format
             str = mSelectedAddressList.get(0).getAddressLine(0);
