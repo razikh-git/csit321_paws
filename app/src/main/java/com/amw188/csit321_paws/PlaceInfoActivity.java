@@ -1,6 +1,7 @@
 package com.amw188.csit321_paws;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -32,6 +33,9 @@ public class PlaceInfoActivity
     private SharedPreferences mSharedPref;
 
     private String mNearbyPlace;
+    private LatLng mPlaceLatLng;
+
+    // todo: add uncertainty to precipitation measures to avoid 0.2mm showing as 'light rain'
 
     // todo: relocate weather calls to the foreground service
 
@@ -40,8 +44,17 @@ public class PlaceInfoActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_info);
 
-        if (!initActivity() || !initWeatherData(savedInstanceState))
+        if (!init(savedInstanceState))
             Log.e(TAG, "Failed to initialise weather for place info.");
+    }
+
+    private boolean init(Bundle savedInstanceState) {
+        return initActivity() && initClickables() && initWeatherData(savedInstanceState);
+    }
+
+    private boolean initClickables() {
+        findViewById(R.id.layPlaceInfoHeader).setOnClickListener(this::redirectToMapsActivity);
+        return true;
     }
 
     private boolean initActivity() {
@@ -60,15 +73,16 @@ public class PlaceInfoActivity
                 Bundle extras = getIntent().getExtras();
                 if (extras != null) {
                     Log.d(TAG, "PlaceInfoActivity identified parcelable extras.");
-                    latLng = extras.getParcelable(RequestCode.EXTRA_LATLNG);
-                    mNearbyPlace = extras.getString(RequestCode.EXTRA_PLACENAME);
+                    latLng = extras.getParcelable(RequestCodes.EXTRA_LATLNG);
+                    mNearbyPlace = extras.getString(RequestCodes.EXTRA_PLACENAME);
                 } else {
                     Log.d(TAG, "No parcelable extras bundled in call to PlaceInfoActivity.");
                 }
             }
             if (latLng == null) {
                 JSONObject lastWeather = new JSONObject(
-                        mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json));
+                        mSharedPref.getString(PrefKeys.last_weather_json,
+                                PrefConstValues.empty_json_object));
                 latLng = new LatLng(lastWeather.getJSONObject("city").getJSONObject("coord")
                         .getDouble("lat"),
                         lastWeather.getJSONObject("city").getJSONObject("coord")
@@ -81,14 +95,23 @@ public class PlaceInfoActivity
 
         // Call and await an update to the weather JSON string in shared prefs
         final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
-        if (!new WeatherHandler(this).awaitWeatherUpdate(latLng, this, isMetric)) {
+        if (!new WeatherHandler(this).awaitWeatherUpdate(this, latLng, isMetric)) {
             // Initialise weather displays with last best values if none are being updated
             return initWeatherDisplay(
-                    latLng,
-                    mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json),
+                    latLng, mSharedPref.getString(
+                            PrefKeys.last_weather_json, PrefConstValues.empty_json_object),
                     isMetric);
         }
         return true;
+    }
+
+    /**
+     * Open up MapsActivity focusing on the current place.
+     */
+    private void redirectToMapsActivity(View view) {
+        Intent intent = new Intent(this, MapsActivity.class)
+                .putExtra(RequestCodes.EXTRA_LATLNG, mPlaceLatLng);
+        startActivity(intent);
     }
 
     @Override
@@ -105,6 +128,9 @@ public class PlaceInfoActivity
     private boolean initWeatherDisplay(LatLng latLng, String response, boolean isMetric) {
         String str;
         Double dbl;
+
+        // Update LatLng value for returning to MapsActivity with the weather data location
+        mPlaceLatLng = latLng;
 
         final int elemsPerDay = 24 / 3;
         final int pad = Math.round(getResources().getDimension(R.dimen.app_spacing_medium));
@@ -378,7 +404,8 @@ public class PlaceInfoActivity
                     txt.setText(str);
                     txt.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                     txt.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
-                    txt.setTextColor(ContextCompat.getColor(this, R.color.color_accent_alt));
+                    txt.setTextColor(ContextCompat.getColor(
+                            this, R.color.color_accent_alt));
                     layTemp.addView(txt);
 
                     // Add the predicted low temperature
@@ -451,7 +478,8 @@ public class PlaceInfoActivity
                                     if (weatherForecastJSON.getJSONArray("list")
                                             .getJSONObject(i).getJSONObject("rain")
                                             .has("3h")) {
-                                        Log.d(TAG, "Sampling rain/3h from element " + i + ". ("
+                                        Log.d(TAG,
+                                                "Sampling rain/3h from element " + i + ". ("
                                                 + weatherForecastJSON.getJSONArray("list")
                                                 .getJSONObject(i).getJSONObject("rain")
                                                 .getDouble("3h") + ")");
@@ -474,9 +502,10 @@ public class PlaceInfoActivity
                                     + weatherForecastJSON.getJSONArray("list")
                                     .getJSONObject(i).getJSONObject("clouds")
                                     .getInt("all") + ")");
-                            dbl += Double.parseDouble(weatherForecastJSON.getJSONArray("list")
-                                    .getJSONObject(i)
-                                    .getJSONObject("clouds").getString("all"));
+                            dbl += Double.parseDouble(
+                                    weatherForecastJSON.getJSONArray("list")
+                                            .getJSONObject(i).getJSONObject("clouds")
+                                            .getString("all"));
                         }
                         str = PAWSAPI.getSimplePercentageString(dbl / elemsPerDay);
                     }
@@ -520,9 +549,10 @@ public class PlaceInfoActivity
                     tempLow = temp;
                 }
 
-                // Compare temperatures sampled every 3 hours to identify highs and lows for the day
+                // Compare temperatures sampled per 3 hours to identify highs and lows for the day
                 double temp = periodicWeatherJson.getJSONObject("main").getDouble("temp");
-                Log.d(TAG, "Sampling temperature/3h from element " + elem + ". (" + temp + ")");
+                Log.d(TAG, "Sampling temperature/3h from element "
+                        + elem + ". (" + temp + ")");
 
                 if (tempHigh < temp)
                     tempHigh = temp;

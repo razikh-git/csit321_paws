@@ -48,6 +48,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.android.PolyUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -98,7 +101,6 @@ public class MapsActivity
     private View mInfoWindow;
 
     // OpenWeatherMaps
-    private String mTileOverlayURL;
     private Map<String, TileOverlay> mTileOverlayMap;
     private Map<String, TileProvider> mTileProviderMap = new HashMap<>();
     private Map<String, TileOverlayOptions> mTileOverlayOptionsMap = new HashMap<>();
@@ -155,8 +157,6 @@ public class MapsActivity
     }
 
     private View setupInfoWindow(Marker marker) {
-        Log.d(TAG, "in setupInfoWindow()");
-
         SharedPreferences sharedPref = this.getSharedPreferences(
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         final boolean isMetric = PAWSAPI.preferredMetric(sharedPref);
@@ -206,65 +206,84 @@ public class MapsActivity
 	}
 
 	private void onInfoWindowClick(Marker marker) {
-        Log.d(TAG, "in onInfoWindowClick()");
         onMapWeatherRedirectClick(mMapView);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
 
-        // Load saved state
-        if (savedInstanceState != null) {
-            mBundle = savedInstanceState.getBundle(BUNDLE_KEY);
-            mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
-            mSelectedLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-        }
+		setContentView(R.layout.activity_maps);
+		BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+		nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        // Load the activity layout
-        setContentView(R.layout.activity_maps);
-
-        mInfoWindow = getLayoutInflater().inflate(
-        		R.layout.view_infowindow, mMapView, false);
-
-        // Bottom navigation bar functionality
-        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
-        nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-        // Beg for permissions. Block all further functionality without them
-        if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
-                RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
-            if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
-                    RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
-                // Continue with the activity
-                initActivity();
-            }
-        }
+		if (!init(savedInstanceState)) {
+			Log.e(TAG, "Did not initialise MapsActivity immediately.");
+		}
     }
 
-    private void initActivity() {
-        // Initialise buttons
-        initButtons();
+    private boolean init(Bundle savedInstanceState) {
+		// Load saved state
+		if (savedInstanceState != null) {
+			mBundle = savedInstanceState.getBundle(BUNDLE_KEY);
+			mCameraPosition = savedInstanceState.getParcelable(CAMERA_KEY);
+			mSelectedLocation = savedInstanceState.getParcelable(LOCATION_KEY);
+		}
 
+		mInfoWindow = getLayoutInflater().inflate(
+				R.layout.view_infowindow, mMapView, false);
+
+		// Beg for permissions
+		// Don't continue with loading the activity without necessary permits
+		if (checkHasPermissions(RequestCodes.PERMISSION_MULTIPLE,
+				RequestCodes.REQUEST_PERMISSIONS_LOCATION)) {
+			if (checkHasPermissions(RequestCodes.PERMISSION_MULTIPLE,
+					RequestCodes.REQUEST_PERMISSIONS_NETWORK)) {
+				return initActivity(savedInstanceState) && initClickables();
+			}
+		}
+    	return false;
+	}
+
+    private boolean initActivity(Bundle savedInstanceState) {
         // Prepare the map
-        mTileOverlayURL = OpenWeatherMapIntegration.app_url_owm_map_root
-                + "%s/%s/%d/%d.png?appid=%s";
         mMapView = findViewById(R.id.mapView);
         mMapView.onCreate(mBundle);
         mMapView.getMapAsync(this);
+        return true;
     }
+
+	private boolean initClickables() {
+		try {
+			//findViewById(R.id.cardSearch).setOnClickListener(this::onSearchClick);
+			findViewById(R.id.laySheetHeader).setOnClickListener(this::onSheetHeaderClick);
+			findViewById(R.id.btnMapPolyDraw).setOnClickListener(this::onMapPolyDrawClick);
+			findViewById(R.id.btnMapPolyErase).setOnClickListener(this::onMapPolyEraseClick);
+			findViewById(R.id.btnMapWeatherRedirect).setOnClickListener(this::onMapWeatherRedirectClick);
+			findViewById(R.id.btnMapTypePopout).setOnClickListener(this::onMapTypePopoutClick);
+			findViewById(R.id.btnMapTypeDefault).setOnClickListener(this::onMapTypeButtonClick);
+			findViewById(R.id.btnMapTypeSatellite).setOnClickListener(this::onMapTypeButtonClick);
+			findViewById(R.id.btnMapTypeTerrain).setOnClickListener(this::onMapTypeButtonClick);
+			findViewById(R.id.btnMapOverlayWind).setOnClickListener(this::onMapOverlayButtonClick);
+			findViewById(R.id.btnMapOverlayPrecip).setOnClickListener(this::onMapOverlayButtonClick);
+			findViewById(R.id.btnMapOverlayRisk).setOnClickListener(this::onMapOverlayButtonClick);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 
     private void onMapWeatherRedirectClick(View view) {
         // Redirect to weather screen with data from the current marker
         Intent intent = new Intent(this, PlaceInfoActivity.class);
         if (mSelectedLocation != null) {
-            intent.putExtra(RequestCode.EXTRA_LATLNG,
+            intent.putExtra(RequestCodes.EXTRA_LATLNG,
                     new LatLng(mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude()));
-            intent.putExtra(RequestCode.EXTRA_PLACENAME,
+            intent.putExtra(RequestCodes.EXTRA_PLACENAME,
                     ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).getText());
         }
-        startActivityForResult(intent, RequestCode.REQUEST_WEATHER_BY_LOCATION);
+        startActivityForResult(intent, RequestCodes.REQUEST_WEATHER_BY_LOCATION);
     }
 
     private void onMapPolyDrawClick(View view) {
@@ -607,49 +626,25 @@ public class MapsActivity
         }
     }
 
-    private boolean initButtons() {
-        // Button functionality
-        try {
-            //findViewById(R.id.cardSearch).setOnClickListener(this::onSearchClick);
-            findViewById(R.id.laySheetHeader).setOnClickListener(this::onSheetHeaderClick);
-            findViewById(R.id.btnMapPolyDraw).setOnClickListener(this::onMapPolyDrawClick);
-            findViewById(R.id.btnMapPolyErase).setOnClickListener(this::onMapPolyEraseClick);
-            findViewById(R.id.btnMapWeatherRedirect).setOnClickListener(this::onMapWeatherRedirectClick);
-            findViewById(R.id.btnMapTypePopout).setOnClickListener(this::onMapTypePopoutClick);
-            findViewById(R.id.btnMapTypeDefault).setOnClickListener(this::onMapTypeButtonClick);
-            findViewById(R.id.btnMapTypeSatellite).setOnClickListener(this::onMapTypeButtonClick);
-            findViewById(R.id.btnMapTypeTerrain).setOnClickListener(this::onMapTypeButtonClick);
-            findViewById(R.id.btnMapOverlayWind).setOnClickListener(this::onMapOverlayButtonClick);
-            findViewById(R.id.btnMapOverlayPrecip).setOnClickListener(this::onMapOverlayButtonClick);
-            findViewById(R.id.btnMapOverlayRisk).setOnClickListener(this::onMapOverlayButtonClick);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    private void initTileOverlayMaps(String key) {
+    private void initTileOverlayMaps(String layer) {
         mTileProviderMap.put(
-                key, new UrlTileProvider(MAP_TILE_WIDTH, MAP_TILE_WIDTH) {
+                layer, new UrlTileProvider(MAP_TILE_WIDTH, MAP_TILE_WIDTH) {
                     @Override
                     public URL getTileUrl(int x, int y, int zoom) {
-                        String s = String.format(Locale.US, mTileOverlayURL,
-                                key,
-                                zoom, x, y, getString(R.string.open_weather_maps_key));
+                        String url = OpenWeatherMapIntegration.getOWMTileURL(layer, x, y, zoom);
                         try {
-                            return new URL(s);
-                        } catch (MalformedURLException e) {
-                            throw new AssertionError(e);
+                            return new URL(url);
+                        } catch (MalformedURLException ex) {
+                            throw new AssertionError(ex);
                         }
                     }
                 }
         );
         mTileOverlayOptionsMap.put(
-                key, new TileOverlayOptions().visible(false).fadeIn(true)
-                        .tileProvider(mTileProviderMap.get(key)));
+                layer, new TileOverlayOptions().visible(false).fadeIn(true)
+                        .tileProvider(mTileProviderMap.get(layer)));
         mTileOverlayMap.put(
-                key, mMap.addTileOverlay(mTileOverlayOptionsMap.get(key)));
+                layer, mMap.addTileOverlay(mTileOverlayOptionsMap.get(layer)));
     }
 
     private void initTileOverlays() {
@@ -727,10 +722,35 @@ public class MapsActivity
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            awaitLocation();
+        	// Mark the location from a provided position, otherwise use last best location
+        	LatLng latLng = getIntentExtras(getIntent().getExtras());
+			Location location = new Location(LocationManager.GPS_PROVIDER);
+        	if (latLng == null) {
+				try {
+					SharedPreferences sharedPref = getSharedPreferences(
+							PrefKeys.app_global_preferences, MODE_PRIVATE);
+					JSONObject positionJson = new JSONObject(sharedPref.getString(
+							PrefKeys.last_best_position, PrefConstValues.empty_json_object));
+					if (positionJson.length() == 0 ||
+							positionJson.toString().equals(PrefConstValues.empty_json_object)) {
+						Log.e(TAG, "Failed to read last best location.");
+						return;
+					}
+					latLng = new LatLng(
+							positionJson.getDouble("latitude"),
+							positionJson.getDouble("longitude"));
+				} catch (JSONException ex) {
+					Log.e(TAG, "Failed to read last best location.");
+					ex.printStackTrace();
+					return;
+				}
+			}
+			location.setLatitude(latLng.latitude);
+			location.setLongitude(latLng.longitude);
+			awaitAddress(location);
         } else {
-            checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
-                    RequestCode.REQUEST_PERMISSIONS_LOCATION);
+            checkHasPermissions(RequestCodes.PERMISSION_MULTIPLE,
+                    RequestCodes.REQUEST_PERMISSIONS_LOCATION);
         }
     }
 
@@ -790,6 +810,14 @@ public class MapsActivity
     protected void onAddressReceived() {
         placeNewMarker(mSelectedAddressList);
     }
+
+	private LatLng getIntentExtras(Bundle extras) {
+		// Initialise all weather data
+		LatLng latLng = null;
+		if (extras != null)
+			latLng = extras.getParcelable(RequestCodes.EXTRA_LATLNG);
+		return latLng;
+	}
 
     private void updateLocationDisplay() {
         Log.d(TAG, "updateLocationDisplay");
@@ -856,7 +884,9 @@ public class MapsActivity
     @Override
     protected void onAllPermissionsGranted(String[] permissions) {
         // Reinitialise the activity
-        initActivity();
+        if (!init(null)) {
+        	Log.e(TAG, "Failed to initialise MapsActivity after permissions granted.");
+		}
     }
 
     @Override

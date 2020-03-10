@@ -6,7 +6,8 @@ final class PrefConstValues {
 	final static String tag_prefix = "paws_";
 
 	// General
-	final static String empty_json = "{}";
+	final static String empty_json_object = "{}";
+	final static String empty_json_array = "[]";
 	final static String units_metric = "metric";
 	final static String units_imperial = "imperial";
 	final static String hourformat_24 = "24";

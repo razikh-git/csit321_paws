@@ -50,14 +50,14 @@ public class HomeActivity
      * @return Operation success.
      */
     private boolean init() {
-        return initStringMaps() && initButtons() && initInterface();
+        return initStringMaps() && initClickables() && initInterface();
     }
 
     /**
      * Adds button functionalities.
      * @return Operation success.
      */
-    private boolean initButtons() {
+    private boolean initClickables() {
         try {
             findViewById(R.id.cardWarningBanner).setOnClickListener(this::onClickProfiling);
             findViewById(R.id.cardWeather).setOnClickListener(this::onClickWeather);
@@ -88,8 +88,8 @@ public class HomeActivity
         }
 
         // Attempt to initialise location elements
-        if (checkHasPermissions(RequestCode.PERMISSION_MULTIPLE,
-                RequestCode.REQUEST_PERMISSIONS_LOCATION)) {
+        if (checkHasPermissions(RequestCodes.PERMISSION_MULTIPLE,
+                RequestCodes.REQUEST_PERMISSIONS_LOCATION)) {
             Log.i(TAG, "HomeActivity.initInterface.hasPermssions TRUE");
             awaitLocation();
         }
@@ -230,18 +230,17 @@ public class HomeActivity
      */
     private boolean initLocationDisplay() {
         if (checkHasPermissions(
-                RequestCode.PERMISSION_MULTIPLE, RequestCode.REQUEST_PERMISSIONS_NETWORK)) {
+                RequestCodes.PERMISSION_MULTIPLE, RequestCodes.REQUEST_PERMISSIONS_NETWORK)) {
             if (mSelectedLocation != null) {
                 // Call and await an update to the weather JSON string in prefs
                 boolean success = true;
                 final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
                 LatLng latLng = new LatLng(
                         mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
-                if (!new WeatherHandler(this).awaitWeatherUpdate(latLng, this, isMetric)) {
+                if (!new WeatherHandler(this).awaitWeatherUpdate(this, latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
-                    success = initWeatherDisplay(
-                            mSharedPref.getString(PrefKeys.last_weather_json,
-                                    PrefConstValues.empty_json));
+                    success = initWeatherDisplay(mSharedPref.getString(
+                            PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
                 }
                 return success;
             }
@@ -260,14 +259,14 @@ public class HomeActivity
             mCodeMap = new HashMap<>();
             // Location
             mCodeMap.put(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    RequestCode.PERMISSION_LOCATION_COARSE);
+                    RequestCodes.PERMISSION_LOCATION_COARSE);
             mCodeMap.put(Manifest.permission.ACCESS_FINE_LOCATION,
-                    RequestCode.PERMISSION_LOCATION_FINE);
+                    RequestCodes.PERMISSION_LOCATION_FINE);
             // Network
             mCodeMap.put(Manifest.permission.INTERNET,
-                    RequestCode.PERMISSION_INTERNET);
+                    RequestCodes.PERMISSION_INTERNET);
             mCodeMap.put(Manifest.permission.ACCESS_NETWORK_STATE,
-                    RequestCode.PERMISSION_NETWORK_STATE);
+                    RequestCodes.PERMISSION_NETWORK_STATE);
 
             // Render immutable
             mCodeMap = Collections.unmodifiableMap(mCodeMap);

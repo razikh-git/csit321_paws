@@ -32,7 +32,7 @@ public class SurveyInfosheetActivity extends AppCompatActivity {
     }
 
     private boolean init() {
-        return initActivity() && initLayout() && initButtons();
+        return initActivity() && initLayout() && initClickables();
     }
 
     private boolean initActivity() {
@@ -41,7 +41,7 @@ public class SurveyInfosheetActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean initButtons() {
+    private boolean initClickables() {
         findViewById(R.id.btnDecline).setOnClickListener(this::onClickDecline);
         findViewById(R.id.btnAccept).setOnClickListener(this::onClickAccept);
         findViewById(R.id.cardInfo).setOnClickListener(this::onNextInfo);

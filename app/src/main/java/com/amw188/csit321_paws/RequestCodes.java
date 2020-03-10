@@ -2,7 +2,7 @@ package com.amw188.csit321_paws;
 
 import android.Manifest;
 
-interface RequestCode {
+interface RequestCodes {
     int PERMISSION_MULTIPLE = 0;
     int PERMISSION_LOCATION_FINE = 1;
     int PERMISSION_LOCATION_COARSE = 2;

@@ -13,8 +13,6 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DecimalFormat;
-
 class WeatherHandler {
 
     private static final String TAG = PrefConstValues.tag_prefix + "wh";
@@ -43,11 +41,10 @@ class WeatherHandler {
      * @param isMetric Units in metric or imperial.
      * @return Returns true if the host should await an update, or false to act on current data.
      */
-    boolean awaitWeatherUpdate(final LatLng latLng,
-							   final Context context, final boolean isMetric) {
-        if (shouldFetchWeatherUpdate(latLng, context, isMetric))
-            // Fetch a new batch of weather data for corrected coordinates
-            return fetchWeatherUpdate(latLng, context, isMetric);
+    boolean awaitWeatherUpdate(final Context context, final LatLng latLng,
+							   final boolean isMetric) {
+        if (shouldFetchWeatherUpdate(context, latLng, isMetric))
+            return fetchWeatherUpdate(context, latLng, isMetric);
         return false;
     }
 
@@ -55,23 +52,23 @@ class WeatherHandler {
      * Determines whether a weather update is required around the location of some coordinates.
      * Updates are considered unnecessary if we already have a forecast for the given area
      * in some relevant timeframe that allows us to keep a complete forecast.
-     * @param latLng Given coordinates for the weather forecast.
      * @param context Context.
+     * @param latLng Given coordinates for the weather forecast.
      * @param isMetric Units in metric or imperial.
      * @return Returns coordinates for weather update, or null if no update is required.
      * Coordinates are corrected to the last values if near enough.
      */
-    private boolean shouldFetchWeatherUpdate(LatLng latLng,
-                                             final Context context, final boolean isMetric) {
+    private boolean shouldFetchWeatherUpdate(final Context context,
+                                             final LatLng latLng, final boolean isMetric) {
         try {
             SharedPreferences sharedPref = context.getSharedPreferences(
                     PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
 
             // Decide whether to update current weather data
-            JSONObject lastWeather = new JSONObject(
-                    sharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json));
+            JSONObject lastWeather = new JSONObject(sharedPref.getString(
+                    PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
 
-            if (lastWeather.toString().equals(PrefConstValues.empty_json)
+            if (lastWeather.toString().equals(PrefConstValues.empty_json_object)
 					|| lastWeather.length() == 0) {
                 Log.d(TAG,
                         "Last weather data does not exist.");
@@ -99,10 +96,8 @@ class WeatherHandler {
                     Log.d(TAG, "Weather data locations are different.");
 
                     // Don't request new data if the current data was received in the last 3 hours
-                    final long timestamp = lastWeather.getJSONArray("list")
-							.getJSONObject(0).getLong("dt") * 1000;
-
-                    if (System.currentTimeMillis() - timestamp < 36000000) {
+                    if (PAWSAPI.getWeatherJsonIndexForTime(lastWeather.getJSONArray("list"),
+                            System.currentTimeMillis()) == 0) {
 						Log.d(TAG, "Last weather data for this location is up-to-date.");
 						return false;
 					}
@@ -122,15 +117,15 @@ class WeatherHandler {
      * @param isMetric Units in metric or imperial.
 	 * @return Returns success or failure to begin fetch request.
      */
-    private boolean fetchWeatherUpdate(LatLng latLng,
-									   final Context context, final boolean isMetric) {
+    private boolean fetchWeatherUpdate(final Context context,
+                                       final LatLng latLng, final boolean isMetric) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Generate URL and request queue
         RequestQueue queue = Volley.newRequestQueue(context);
-        String url = OpenWeatherMapIntegration.getOWMURL(context, latLng, true);
+        String url = OpenWeatherMapIntegration.getOWMWeatherURL(context, latLng, true);
         Log.d(TAG, "URL:\n" + url);
 
         // Generate and post the request.

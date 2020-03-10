@@ -43,7 +43,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
     }
 
     private boolean init() {
-        return initActivity() && initButtons() && initSurveyLayout();
+        return initActivity() && initClickables() && initSurveyLayout();
     }
 
     private boolean initActivity() {
@@ -57,7 +57,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
     }
 
     // Initialise all answer buttons
-    private boolean initButtons() {
+    private boolean initClickables() {
         try {
             findViewById(R.id.btnAnswer1).setOnClickListener(this::onClickAnswer);
             findViewById(R.id.btnAnswer2).setOnClickListener(this::onClickAnswer);
@@ -67,7 +67,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
             findViewById(R.id.btnAnswer6).setOnClickListener(this::onClickAnswer);
             findViewById(R.id.btnAnswer7).setOnClickListener(this::onClickAnswer);
         } catch (NullPointerException ex) {
-            Log.e(TAG, "Failed in initButtons");
+            Log.e(TAG, "Failed in initClickables");
             return false;
         }
         return true;
@@ -218,7 +218,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
             // Continue to the completed splash
             setResult(RESULT_OK, new Intent().putExtra(
-                    AnalysisEntryCodes.EXTRA_KEY, ResultCode.RESULT_COMPLETE));
+                    AnalysisEntryCodes.EXTRA_KEY, ResultCodes.RESULT_COMPLETE));
             finish();
             Intent intent = new Intent(this, SurveyCompleteActivity.class);
             intent.putExtra(AnalysisEntryCodes.EXTRA_KEY, AnalysisEntryCodes.ENTRY_SURVEY);

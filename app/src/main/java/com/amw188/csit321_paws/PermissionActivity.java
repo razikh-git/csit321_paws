@@ -24,7 +24,7 @@ abstract class PermissionActivity extends BottomNavBarActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         // Identify full-allowed permission batches.
-        if (requestCode == RequestCode.PERMISSION_MULTIPLE) {
+        if (requestCode == RequestCodes.PERMISSION_MULTIPLE) {
             boolean areAllPermissionsGranted = true;
             for (int grantResult : grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
@@ -62,7 +62,7 @@ abstract class PermissionActivity extends BottomNavBarActivity {
         // Check against all required permissions.
         List<String> missingPerms = new ArrayList<>();
         if (permissions.length > 0) {
-            if (requestCode == RequestCode.PERMISSION_MULTIPLE) {
+            if (requestCode == RequestCodes.PERMISSION_MULTIPLE) {
                 for (String perm : permissions) {
                     if (ActivityCompat.checkSelfPermission(this, perm)
                             != PackageManager.PERMISSION_GRANTED) {

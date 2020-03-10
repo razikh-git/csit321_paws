@@ -298,7 +298,7 @@ public class NotificationService
 
 			// Update device location history
 			JSONArray historyJson = new JSONArray(mSharedPref.getString(
-					PrefKeys.position_history, PrefConstValues.empty_json));
+					PrefKeys.position_history, PrefConstValues.empty_json_array));
 			for (int i = 0; i < historyJson.length(); ++i) {
 				final LatLng ll = new LatLng(
 						historyJson.getJSONObject(i).getDouble("latitude"),
@@ -312,7 +312,8 @@ public class NotificationService
 					if (historyJson.getJSONObject(i).has("weight"))
 						weight = historyJson.getJSONObject(i).getInt("weight");
 					historyJson.getJSONObject(i).put("weight", weight);
-					Log.d(TAG, "Matched coordinates: Location revisited: Weighted at " + weight);
+					Log.d(TAG, "Matched coordinates: "
+							+ "Location revisited, weighted at " + weight);
 					sharedEditor.putString(PrefKeys.position_history, historyJson.toString());
 					return;
 				}
@@ -350,16 +351,16 @@ public class NotificationService
 	private void updateWeatherData() {
 		try {
 			final JSONObject weatherJson = new JSONObject(mSharedPref.getString(
-					PrefKeys.last_weather_json, PrefConstValues.empty_json));
+					PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
 			final LatLng latLng = new LatLng(
 					weatherJson.getJSONObject("lat_lng").getDouble("latitude"),
 					weatherJson.getJSONObject("lat_lng").getDouble("longitude"));
 			WeatherHandler weatherHandler = new WeatherHandler(this);
-			if (!weatherHandler.awaitWeatherUpdate(latLng, this,
+			if (!weatherHandler.awaitWeatherUpdate(this, latLng,
 					PAWSAPI.preferredMetric(mSharedPref)))
 				// Do something with weather immediately if it needn't wait to be updated
 				doSomethingWithWeather(mSharedPref.getString(
-						PrefKeys.last_weather_json, PrefConstValues.empty_json));
+						PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
 		} catch (JSONException ex) {
 			Log.e(TAG, "Failed to parse weather JSON in Service.updateWeatherData().");
 			ex.printStackTrace();

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -15,12 +14,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.TextViewCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.InputStream;
 
@@ -48,7 +45,7 @@ public class SurveyEntryActivity
     }
 
     private boolean init() {
-        return initActivity() && initInterface() && initButtons();
+        return initActivity() && initInterface() && initClickables();
     }
 
     private boolean initActivity() {
@@ -76,7 +73,7 @@ public class SurveyEntryActivity
         return true;
     }
 
-    private boolean initButtons() {
+    private boolean initClickables() {
         // Button functionality
         try {
             findViewById(R.id.btnContinue).setOnClickListener(this::onClickContinue);
@@ -187,7 +184,7 @@ public class SurveyEntryActivity
 
         // Redirect to live survey screen
         Intent intent = new Intent(this, SurveyQuestionActivity.class);
-        startActivityForResult(intent, RequestCode.SURVEY_CONTINUE);
+        startActivityForResult(intent, RequestCodes.SURVEY_CONTINUE);
     }
 
     @Override

@@ -97,12 +97,12 @@ public class DailyWeatherWorker extends Worker {
     private Notification getWeatherNotification() {
         // debug code
         try {
-        	final JSONObject debugJSON = new JSONObject(
-					mSharedPref.getString(PrefKeys.last_weather_json, PrefConstValues.empty_json))
+        	final JSONObject debugJSON = new JSONObject(mSharedPref.getString(
+        	        PrefKeys.last_weather_json, PrefConstValues.empty_json_object))
 					.getJSONObject("lat_lng");
 			final LatLng latLng = new LatLng(debugJSON.getDouble("latitude"),
 					debugJSON.getDouble("longitude"));
-			Log.d(TAG, "URL: " + OpenWeatherMapIntegration.getOWMURL(
+			Log.d(TAG, "URL: " + OpenWeatherMapIntegration.getOWMWeatherURL(
 			        mContext, latLng, true));
 		} catch (JSONException ex) {
         	Log.e(TAG, "couldnt get URL, we blew it");
@@ -127,7 +127,7 @@ public class DailyWeatherWorker extends Worker {
         try {
             // Fetch the last best weather forecast from storage
             final JSONObject weatherJson = new JSONObject(mSharedPref.getString(
-                    PrefKeys.last_weather_json, PrefConstValues.empty_json));
+                    PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
             if (weatherJson.length() < 1) {
                 Log.e(TAG, "Weather JSON was null.");
                 return null;

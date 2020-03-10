@@ -93,9 +93,8 @@ abstract class LocationActivity extends PermissionActivity {
 				SharedPreferences sharedPref = this.getSharedPreferences(
 						PrefKeys.app_global_preferences,
 						Context.MODE_PRIVATE);
-				JSONObject lastWeather = new JSONObject(
-						sharedPref.getString(
-								PrefKeys.last_weather_json, PrefConstValues.empty_json));
+				JSONObject lastWeather = new JSONObject(sharedPref.getString(
+						PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
 				mSelectedLocation = new Location(LocationManager.GPS_PROVIDER);
 				mSelectedLocation.setLatitude(
 						Float.parseFloat(
