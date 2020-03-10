@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,8 +29,7 @@ final class PAWSAPI {
     private static double msToKilometresPerHour(final double ms) { return ms * 3.6d; }
     private static double msToMilesPerHour(final double ms) { return ms * 2.237d; }
     private static double millimetresToInches(final double mm) { return mm / 25.4d; }
-
-    static double metresToMiles(final double m) { return m * 0.62d; }
+    private static double metresToMiles(final double m) { return m * 0.62d; }
 
     static boolean preferredMetric(SharedPreferences sharedPref) {
         return sharedPref.getString(PrefKeys.units, PrefDefValues.units)
@@ -36,14 +37,39 @@ final class PAWSAPI {
     }
 
     private static boolean preferred24HourFormat(SharedPreferences sharedPref) {
-        final String hourformat = sharedPref.getString(PrefKeys.hourformat, PrefDefValues.hourformat);
+        final String hourformat = sharedPref.getString(
+                PrefKeys.hourformat, PrefDefValues.hourformat);
         Log.d(TAG, "Using " + hourformat + " hour time.");
         return hourformat.equals(PrefConstValues.hourformat_24);
     }
 
+    /**
+     * Formats a decimal value in metres to a short distance in kilometres, or converting to miles.
+     * @param isMetric Whether to use metric or imperial units.
+     * @param m Decimal value in metres.
+     * @return Formatted distance string in km/mi.
+     */
     static String getDistanceString(final boolean isMetric, final double m) {
-    	return (isMetric ? m / 1000.0f : metresToMiles(m)) + (isMetric ? "km" : "mi");
+    	return new DecimalFormat("#.##").format(isMetric ? m / 1000.0f : metresToMiles(m))
+				+ (isMetric ? "km" : "mi");
 	}
+
+	static Location getLastBestLocation(SharedPreferences sharedPref) {
+        Location location = null;
+        try {
+            JSONObject lastBestPosition = new JSONObject(sharedPref.getString(
+                    PrefKeys.last_best_position, PrefConstValues.empty_json_object));
+            if (lastBestPosition.length() > 0) {
+                location = new Location(LocationManager.GPS_PROVIDER);
+                location.setLatitude(lastBestPosition.getDouble("latitude"));
+                location.setLongitude(lastBestPosition.getDouble("longitude"));
+            }
+        } catch (JSONException ex) {
+            Log.e(TAG, "Failed to parse last best location.");
+            ex.printStackTrace();
+        }
+        return location;
+    }
 
 	// todo: resolve 12-hour time not taking effect
 
@@ -135,8 +161,18 @@ final class PAWSAPI {
 	 */
 	static int roundToTen(final double dbl) { return (int)(10 * Math.round(dbl / 10)); }
 
+    /**
+     * Formats a decimal value as a percentage rounded to the nearest 10% out of 100.
+     * @param dbl Decimal value.
+     * @return Formatted percentage string.
+     */
 	static String getSimplePercentageString(final double dbl) { return roundToTen(dbl) + "%"; }
 
+    /**
+     * Fetches the complete personality survey file as a JSON.
+     * @param context Context.
+     * @return Survey as a JSON object.
+     */
 	static JSONObject getSurveyJson(final Context context) {
         try {
             InputStream in = context.getResources().openRawResource(R.raw.paws_survey_json);
@@ -149,6 +185,11 @@ final class PAWSAPI {
         }
     }
 
+    /**
+     * Reads the number of questions in the survey JSON.
+     * @param context Context.
+     * @return Question count.
+     */
 	static int getSurveyQuestionCount(final Context context) {
         try {
             return getSurveyJson(context).getJSONArray("questions").length();
@@ -228,6 +269,11 @@ final class PAWSAPI {
         return new DecimalFormat("#").format(temperature) + (isMetric ? "°C" : "°F");
     }
 
+    /**
+     * Fetches the drawable weather icon ID appropriate to the given OpenWeatherMaps icon ID.
+     * @param icon OWM icon ID.
+     * @return Drawable weather icon ID.
+     */
     static int getWeatherIconId(final String icon) {
         int id = -1;
         switch (icon) {
@@ -383,12 +429,46 @@ final class PAWSAPI {
         return tempList;
     }
 
-    static void resetProfileData(final Context context) {
-        // Load global preferences
+    /**
+     * Wipes all data created by the app, including survey and personalisation data.
+     * @param context Context.
+     */
+    static void resetAppData(final Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
         sharedEditor.putBoolean(PrefKeys.app_init, false);
+
+        // Notifications
+        sharedEditor.putString(PrefKeys.weather_notif_time_start,
+                PrefDefValues.weather_notif_time_start);
+        sharedEditor.putString(PrefKeys.weather_notif_time_end,
+                PrefDefValues.weather_notif_time_end);
+        sharedEditor.putString(PrefKeys.weather_notif_interval,
+                PrefDefValues.weather_notif_interval);
+        // Locations
+        sharedEditor.putString(PrefKeys.last_best_position,
+                PrefConstValues.empty_json_object);
+        sharedEditor.putString(PrefKeys.position_history,
+                PrefConstValues.empty_json_array);
+        // Survey
+        PAWSAPI.resetProfileData(context);
+
+        sharedEditor.apply();
+
+        Toast.makeText(context,
+                R.string.app_reset_survey,
+                Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Wipes all data related to the personalisation features and personality survey.
+     * @param context Context.
+     */
+    static void resetProfileData(final Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Reset all survey profile data
         final int end = getSurveyQuestionCount(context);
@@ -399,7 +479,7 @@ final class PAWSAPI {
         sharedEditor.apply();
 
         Toast.makeText(context,
-                R.string.app_reset_result,
+                R.string.app_reset_survey,
                 Toast.LENGTH_LONG).show();
     }
 }

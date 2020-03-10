@@ -39,15 +39,8 @@ public class MainActivity extends AppCompatActivity {
             enterHome();
         } else {
             // Initialise all preferences to defaults
-            sharedEditor.putInt(PrefKeys.survey_last_question, 0);
-            sharedEditor.putLong(PrefKeys.survey_time_completed, 0);
+            PAWSAPI.resetAppData(this);
             sharedEditor.putBoolean(PrefKeys.app_init, true);
-            sharedEditor.putString(PrefKeys.weather_notif_time_start,
-                    PrefDefValues.weather_notif_time_start);
-            sharedEditor.putString(PrefKeys.weather_notif_time_end,
-                    PrefDefValues.weather_notif_time_end);
-            sharedEditor.putString(PrefKeys.weather_notif_interval,
-                    PrefDefValues.weather_notif_interval);
             sharedEditor.apply();
 
             // Display a prompt for the user to begin profiling
