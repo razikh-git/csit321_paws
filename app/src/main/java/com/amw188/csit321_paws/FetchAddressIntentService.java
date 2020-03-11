@@ -34,9 +34,9 @@ public class FetchAddressIntentService extends IntentService {
                                                final ResultReceiver receiver,
                                                final Location location) {
         Intent intent = new Intent(context, FetchAddressIntentService.class);
-        intent.setAction(FetchAddressCode.ACTION_FETCH_ADDRESS);
-        intent.putExtra(FetchAddressCode.EXTRA_RECEIVER, receiver);
-        intent.putExtra(FetchAddressCode.EXTRA_LOCATION, location);
+        intent.setAction(FetchAddressCodes.ACTION_FETCH_ADDRESS);
+        intent.putExtra(FetchAddressCodes.EXTRA_RECEIVER, receiver);
+        intent.putExtra(FetchAddressCodes.EXTRA_LOCATION, location);
         context.startService(intent);
     }
 
@@ -44,9 +44,9 @@ public class FetchAddressIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (action.equals(FetchAddressCode.ACTION_FETCH_ADDRESS)) {
-                mReceiver = intent.getParcelableExtra(FetchAddressCode.EXTRA_RECEIVER);
-                Location location = intent.getParcelableExtra(FetchAddressCode.EXTRA_LOCATION);
+            if (action.equals(FetchAddressCodes.ACTION_FETCH_ADDRESS)) {
+                mReceiver = intent.getParcelableExtra(FetchAddressCodes.EXTRA_RECEIVER);
+                Location location = intent.getParcelableExtra(FetchAddressCodes.EXTRA_LOCATION);
                 handleActionFetchAddress(location);
             }
         }
@@ -80,10 +80,10 @@ public class FetchAddressIntentService extends IntentService {
                 error = getString(R.string.sv_fa_no_address);
                 Log.e(TAG, error);
             }
-            deliverResultToReceiver(FetchAddressCode.FAILURE_RESULT,
+            deliverResultToReceiver(FetchAddressCodes.FAILURE_RESULT,
                     addressList, error);
         } else {
-            deliverResultToReceiver(FetchAddressCode.SUCCESS_RESULT,
+            deliverResultToReceiver(FetchAddressCodes.SUCCESS_RESULT,
                     addressList, "");
         }
     }
@@ -98,8 +98,8 @@ public class FetchAddressIntentService extends IntentService {
                                          final ArrayList<Address> addressList,
                                          final String message) {
         Bundle bundle = new Bundle();
-        bundle.putString(FetchAddressCode.RESULT_DATA_KEY, message);
-        bundle.putParcelableArrayList(FetchAddressCode.RESULT_ADDRESSLIST_KEY, addressList);
+        bundle.putString(FetchAddressCodes.RESULT_DATA_KEY, message);
+        bundle.putParcelableArrayList(FetchAddressCodes.RESULT_ADDRESSLIST_KEY, addressList);
         mReceiver.send(resultCode, bundle);
     }
 }

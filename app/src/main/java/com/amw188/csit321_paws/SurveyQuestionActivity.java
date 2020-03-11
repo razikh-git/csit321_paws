@@ -23,7 +23,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
 
     SharedPreferences mSharedPref;
 
-    private static final String TAG = PrefConstValues.tag_prefix + "sq";
+    private static final String TAG = PrefConstValues.tag_prefix + "a_squ";
 
     private static final String TAG_PROGRESS = "progress";
     private JSONObject mSurveyJson = null;

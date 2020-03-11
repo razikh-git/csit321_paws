@@ -29,7 +29,7 @@ public class HomeActivity
         extends LocationActivity
         implements WeatherHandler.WeatherReceivedListener
 {
-    private static final String TAG = PrefConstValues.tag_prefix + "home";
+    private static final String TAG = PrefConstValues.tag_prefix + "a_home";
 
     private SharedPreferences mSharedPref;
 

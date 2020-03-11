@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:padding="@dimen/app_spacing_medium">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/layPlaceFavorite"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <ImageView
+                    android:id="@+id/imgPlaceFavorite"
+                    android:layout_width="@dimen/dimen_icon_large"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_star_outline"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layPlaceSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/layPlaceFavorite"
+                android:paddingTop="@dimen/app_spacing_medium"
+                android:paddingBottom="@dimen/app_spacing_medium"
+                android:paddingStart="@dimen/app_spacing_large"
+                android:paddingEnd="@dimen/app_spacing_large"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtPlaceTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Paws.Large"
+                    android:textColor="@color/color_on_background"
+                    android:text="@string/app_txt_placeholder"/>
+
+                <TextView
+                    android:id="@+id/txtPlaceSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Paws.Caption"
+                    android:textColor="@color/color_on_background"
+                    android:text="@string/app_txt_placeholder"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layPlaceOptions"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/imgPlaceOptions"
+                    android:layout_width="@dimen/dimen_icon_large"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_dots_vertical"/>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

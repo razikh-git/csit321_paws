@@ -1,6 +1,6 @@
 package com.amw188.csit321_paws;
 
-interface FetchAddressCode {
+interface FetchAddressCodes {
     int SUCCESS_RESULT = 0;
     int FAILURE_RESULT = 1;
     String RESULT_DATA_KEY = PrefConstValues.package_name + ".RESULT_DATA_KEY";

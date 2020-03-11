@@ -22,7 +22,9 @@ import java.util.ArrayList;
 
 abstract class LocationActivity extends PermissionActivity {
 
-	private static final String TAG = PrefConstValues.tag_prefix + "la";
+	// todo: deprecate LocationActivity and repurpose into LocationHandler
+
+	private static final String TAG = PrefConstValues.tag_prefix + "a_loc";
 
 	protected Location mSelectedLocation;
 	protected FusedLocationProviderClient mFusedLocationClient;

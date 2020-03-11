@@ -19,7 +19,6 @@
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/mainAppTheme">
-        <activity android:name=".PlaceHistoryActivity"></activity>
 
         <service
             android:name=".FetchAddressIntentService"
@@ -31,6 +30,9 @@
             android:foregroundServiceType="location"
             android:label="@string/label_service" />
 
+        <activity android:name=".PlaceHistoryActivity"
+            android:label="@string/label_history"
+            android:screenOrientation="sensorPortrait"/>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"

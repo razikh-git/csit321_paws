@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
 
-public class DailyWeatherWorker extends Worker {
+public class DailyWeatherWorker
+        extends Worker
+        implements WeatherHandler.WeatherReceivedListener {
     private static final String TAG = PrefConstValues.tag_prefix + "dww";
 
     private static final int WEATHER_ID = 1338;
@@ -63,12 +65,36 @@ public class DailyWeatherWorker extends Worker {
 
         if (timeUntilStart < 0 && timeUntilEnd > 0) {
             Log.d(TAG, "Within hourly bounds for sending notification.");
-            result = pushWeatherNotification();
+
+            try {
+                final JSONObject debugJSON = new JSONObject(mSharedPref.getString(
+                        PrefKeys.last_weather_json, PrefConstValues.empty_json_object))
+                        .getJSONObject("lat_lng");
+                final LatLng latLng = new LatLng(debugJSON.getDouble("latitude"),
+                        debugJSON.getDouble("longitude"));
+                Log.d(TAG, "Weather Notification URL: " +
+                        OpenWeatherMapIntegration.getOWMWeatherURL(
+                                mContext, latLng, true));
+
+                if (!new WeatherHandler(this).awaitWeatherUpdate(mContext,
+                        latLng, PAWSAPI.preferredMetric(mSharedPref))) {
+                    result = pushWeatherNotification();
+                }
+            } catch (JSONException ex) {
+                Log.e(TAG, "Failed to start scheduled weather notification.");
+                ex.printStackTrace();
+                result = Result.failure();
+            }
         } else {
             Log.d(TAG, "Was not in hourly bounds for sending notification.");
         }
 
         return result;
+    }
+
+    @Override
+    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
+        pushWeatherNotification();
     }
 
     /**
@@ -95,20 +121,6 @@ public class DailyWeatherWorker extends Worker {
      * @return Assembled weather notification.
      */
     private Notification getWeatherNotification() {
-        // debug code
-        try {
-        	final JSONObject debugJSON = new JSONObject(mSharedPref.getString(
-        	        PrefKeys.last_weather_json, PrefConstValues.empty_json_object))
-					.getJSONObject("lat_lng");
-			final LatLng latLng = new LatLng(debugJSON.getDouble("latitude"),
-					debugJSON.getDouble("longitude"));
-			Log.d(TAG, "URL: " + OpenWeatherMapIntegration.getOWMWeatherURL(
-			        mContext, latLng, true));
-		} catch (JSONException ex) {
-        	Log.e(TAG, "couldnt get URL, we blew it");
-		}
-		// debug code
-
         // todo: include weather information local to some place
         // store recent and favourite places to refer to
 
@@ -178,7 +190,8 @@ public class DailyWeatherWorker extends Worker {
                     PAWSAPI.getWindSpeedString(
                             timeJSON.getJSONObject("wind").getDouble("speed"), isMetric),
                     PAWSAPI.getWindBearingString(mContext,
-                            timeJSON.getJSONObject("wind").getDouble("deg"), true),
+                            timeJSON.getJSONObject("wind").getDouble("deg"),
+                            true),
 
                     // Temperature range
                     PAWSAPI.getTemperatureString(
@@ -186,7 +199,8 @@ public class DailyWeatherWorker extends Worker {
                     PAWSAPI.getTemperatureString(
                             Collections.min(mDailyTemps)),
                     PAWSAPI.getTemperatureString(
-                            timeJSON.getJSONObject("main").getDouble("feels_like"), isMetric));
+                            timeJSON.getJSONObject("main").getDouble("feels_like"),
+                            isMetric));
 
             Log.d(TAG, "Finished building notification.");
         } catch (JSONException ex) {

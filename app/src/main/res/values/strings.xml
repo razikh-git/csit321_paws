@@ -9,6 +9,7 @@
     <string name="label_maps">Mapping</string>
     <string name="label_weather">Weather</string>
     <string name="label_surveys">Profiling</string>
+    <string name="label_history">Your Places</string>
     <string name="label_service">PAWS Manager Services</string>
 
     <!-- Generic button strings. -->
@@ -61,6 +62,7 @@
     <!-- App. -->
     <string name="app_reset_app">All app data has been reset.</string>
     <string name="app_reset_survey">All profile data has been reset.</string>
+    <string name="app_reset_location">All location data has been reset.</string>
 
     <!-- Home Screen Activity. -->
     <string name="home_warning_title">Survey incomplete</string>
@@ -209,7 +211,11 @@
     </string>
     <string name="fe_fallback">No existing profile found.</string>
 
-    <!-- Weather Activity. -->
+    <!-- Place History Activity. -->
+    <string name="ph_recent">Recent places</string>
+    <string name="ph_favorite">Favourite places</string>
+
+    <!-- Place Info Activity. -->
     <string name="wa_north">north</string>
     <string name="wa_south">south</string>
     <string name="wa_east">east</string>

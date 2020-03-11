@@ -5,10 +5,13 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -179,8 +182,8 @@ final class PAWSAPI {
             byte[] b = new byte[in.available()];
             in.read(b);
             return new JSONObject(new String(b));
-        } catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception ex){
+            ex.printStackTrace();
             return null;
         }
     }
@@ -429,6 +432,96 @@ final class PAWSAPI {
         return tempList;
     }
 
+    static String getLatLngJsonObjectString(final double latitude, final double longitude) {
+		return String.format(
+				"{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
+				latitude, longitude);
+	}
+
+	static int getPlaceIndexInHistory(final JSONArray historyJson, final LatLng latLng) {
+		int index = -1;
+		try {
+			final double nearbyMargin = 0.5d;
+			for (int i = 0; i < historyJson.length(); ++i) {
+				final LatLng ll = new LatLng(
+						historyJson.getJSONObject(i).getJSONObject("lat_lng")
+								.getDouble("latitude"),
+						historyJson.getJSONObject(i).getJSONObject("lat_lng")
+								.getDouble("longitude"));
+				if (Math.abs(ll.latitude - latLng.latitude) < nearbyMargin
+						&& Math.abs(ll.longitude - latLng.longitude) < nearbyMargin) {
+					index = i;
+					break;
+				}
+			}
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+		}
+		return index;
+	}
+
+    static boolean addPlaceToHistory(final Context context,
+									 final ArrayList<Address> addressResults) {
+		try {
+			SharedPreferences sharedPref = context.getSharedPreferences(
+					PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+			SharedPreferences.Editor sharedEditor = sharedPref.edit();
+
+			JSONArray historyJson = new JSONArray(sharedPref.getString(
+					PrefKeys.position_history, PrefConstValues.empty_json_array));
+
+			final Address address = addressResults.get(0);
+			final int index = getPlaceIndexInHistory(historyJson,
+					new LatLng(address.getLatitude(), address.getLongitude()));
+			if (index >= 0) {
+				// Positions with a match in the device history add to their weighting,
+				// reflecting either their amount of visits or the duration spent there
+				int weight = 1;
+				if (historyJson.getJSONObject(index).has("weight"))
+					weight += historyJson.getJSONObject(index).getInt("weight");
+				historyJson.getJSONObject(index).put("weight", weight);
+				Log.d(TAG, "Matched coordinates: "
+						+ "Location revisited, weighted at " + weight
+						+ ", favourited: " + historyJson.getJSONObject(index).get("favorite"));
+				sharedEditor.putString(PrefKeys.position_history, historyJson.toString());
+				sharedEditor.apply();
+			} else {
+				// New positions are added to the device history
+
+				// Add new element
+				final int i = historyJson.length();
+				historyJson.put(i, new JSONObject());
+
+				Log.d(TAG, "Adding newly visited location to element " + i + ".");
+
+				// Add values
+				historyJson.getJSONObject(i).put("title",
+						AddressHandler.getBestAddressTitle(address));
+				historyJson.getJSONObject(i).put("subtitle",
+						String.format("%s %s",
+								AddressHandler.getAustralianStateCode(address),
+								address.getPostalCode()));
+				historyJson.getJSONObject(i).put("lat_lng",
+						new JSONObject(getLatLngJsonObjectString(
+								address.getLatitude(), address.getLongitude())));
+				historyJson.getJSONObject(i).put("favorite",
+						false);
+				historyJson.getJSONObject(i).put("weight",
+						1);
+
+				// Apply changes to live JSON in preferences
+				sharedEditor.putString(PrefKeys.position_history,
+						historyJson.toString());
+				sharedEditor.apply();
+				Log.d(TAG, "Added: " + historyJson.getJSONObject(i).toString());
+			}
+			return true;
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+		}
+		return false;
+	}
+
     /**
      * Wipes all data created by the app, including survey and personalisation data.
      * @param context Context.
@@ -446,11 +539,8 @@ final class PAWSAPI {
                 PrefDefValues.weather_notif_time_end);
         sharedEditor.putString(PrefKeys.weather_notif_interval,
                 PrefDefValues.weather_notif_interval);
-        // Locations
-        sharedEditor.putString(PrefKeys.last_best_position,
-                PrefConstValues.empty_json_object);
-        sharedEditor.putString(PrefKeys.position_history,
-                PrefConstValues.empty_json_array);
+		// Locations
+		PAWSAPI.resetLocationData(context);
         // Survey
         PAWSAPI.resetProfileData(context);
 
@@ -460,6 +550,24 @@ final class PAWSAPI {
                 R.string.app_reset_survey,
                 Toast.LENGTH_LONG).show();
     }
+
+    static void resetLocationData(final Context context) {
+		SharedPreferences sharedPref = context.getSharedPreferences(
+				PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+		SharedPreferences.Editor sharedEditor = sharedPref.edit();
+
+		// Clear last location and full location history
+		sharedEditor.putString(PrefKeys.last_best_position,
+				PrefConstValues.empty_json_object);
+		sharedEditor.putString(PrefKeys.position_history,
+				PrefConstValues.empty_json_array);
+		
+		sharedEditor.apply();
+		
+		Toast.makeText(context,
+				R.string.app_reset_location,
+				Toast.LENGTH_LONG).show();
+	}
 
     /**
      * Wipes all data related to the personalisation features and personality survey.

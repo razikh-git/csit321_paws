@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -21,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -48,6 +48,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.android.PolyUtil;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,11 +70,13 @@ public class MapsActivity
                 LocationActivity
         implements
                 AddressHandler.AddressReceivedListener,
+                LocationHandler.LocationReceivedListener,
+				ServiceHandler.ConnectionListener,
                 OnMapReadyCallback,
                 GoogleMap.OnPoiClickListener,
                 GoogleMap.OnMarkerClickListener
 {
-    private static final String TAG = PrefConstValues.tag_prefix + "ma";
+    private static final String TAG = PrefConstValues.tag_prefix + "a_map";
 
     private static final String BUNDLE_KEY = "MapViewBundleKey";
     private static final String CAMERA_KEY = "MapCameraPositionKey";
@@ -99,48 +102,17 @@ public class MapsActivity
     private Polyline mPolyLine;
     private List<Polygon> mPolyList = new ArrayList<>();
     private View mInfoWindow;
-    private ArrayList<Address> mSelectedAddressList;
 
     // OpenWeatherMaps
     private Map<String, TileOverlay> mTileOverlayMap;
     private Map<String, TileProvider> mTileProviderMap = new HashMap<>();
     private Map<String, TileOverlayOptions> mTileOverlayOptionsMap = new HashMap<>();
 
-    // Notification services
-    private NotificationService mNotificationService;
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.d(TAG, "in onServiceConnected()");
-            NotificationService.LocalBinder binder = (NotificationService.LocalBinder) service;
-            mNotificationService = binder.getService();
+    // Locations
+    private Address mSelectedAddress;
 
-            // Debug code: Reveal test buttons.
-			findViewById(R.id.btnDebugSendNotification).setOnClickListener(
-					this::debugSendNotification);
-			findViewById(R.id.btnDebugSendNotification).setVisibility(VISIBLE);
-			findViewById(R.id.btnDebugToggleLocation).setOnClickListener(
-					this::debugToggleLocation);
-			findViewById(R.id.btnDebugToggleLocation).setVisibility(VISIBLE);
-		}
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            Log.d(TAG, "in onServiceDisconnected()");
-            if (mNotificationService.isRequestingLocationUpdates())
-            	mNotificationService.toggleLocationUpdates();
-        }
-
-		private void debugSendNotification(View view) {
-			Log.d(TAG, "in debugSendNotification()");
-			mNotificationService.pushOneTimeWeatherNotification();
-		}
-
-		private void debugToggleLocation(View view) {
-			Log.d(TAG, "in debugToggleLocation()");
-			mNotificationService.toggleLocationUpdates();
-		}
-    };
+    // Notification Service connections
+	private ServiceHandler mServiceHandler;
 
     /**
      * Custom info window implementation for location map markers.
@@ -163,27 +135,14 @@ public class MapsActivity
         final boolean isMetric = PAWSAPI.preferredMetric(sharedPref);
 
         // Title - Location name
-        String[] abbreviatedAddress = AddressHandler.getAbbreviatedAddress(mSelectedAddressList)
-                .split(" ");
-        StringBuilder title = new StringBuilder();
-        final int end = Math.max(0, abbreviatedAddress.length - 2);
-        for (int i = 0; i < end; ++i) {
-            title.append(abbreviatedAddress[i]);
-            if (i < end - 1)
-                title.append(' ');
-        }
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).setText(
-                title);
+                AddressHandler.getBestAddressTitle(mSelectedAddress));
 
         // Subtitle - Location broader area
-        StringBuilder subtitle = new StringBuilder();
-        for (int i = end; i < abbreviatedAddress.length; ++i) {
-            subtitle.append(abbreviatedAddress[i]);
-            if (i < abbreviatedAddress.length - 1)
-                subtitle.append(' ');
-        }
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoSubtitle)).setText(
-                subtitle);
+                String.format("%s %s",
+                        AddressHandler.getAustralianStateCode(mSelectedAddress),
+                        mSelectedAddress.getPostalCode()));
 
         // Subtitle - Distance from last best location
         Location selectedLocation = new Location(LocationManager.GPS_PROVIDER);
@@ -201,8 +160,20 @@ public class MapsActivity
                 marker.getSnippet());
 
         // todo: check for favourite location
-        mInfoWindow.findViewById(R.id.imgFavorite).setBackgroundResource(
-                R.drawable.ic_star);
+        try {
+            JSONArray historyJson = new JSONArray(sharedPref.getString(
+                    PrefKeys.position_history, PrefConstValues.empty_json_array));
+            final int index = PAWSAPI.getPlaceIndexInHistory(historyJson,
+                    new LatLng(selectedLocation.getLatitude(), selectedLocation.getLongitude()));
+            if (index >= 0)
+                if (historyJson.getJSONObject(index) != null)
+                    if (historyJson.getJSONObject(index).getBoolean("favorite"))
+                        mInfoWindow.findViewById(R.id.imgFavorite).setBackgroundResource(
+                                R.drawable.ic_star);
+        } catch (JSONException ex) {
+            Log.e(TAG, "Failed to parse history JSON for infowindow init.");
+            ex.printStackTrace();
+        }
     	return mInfoWindow;
 	}
 
@@ -245,6 +216,9 @@ public class MapsActivity
 
 		mInfoWindow = getLayoutInflater().inflate(
 				R.layout.view_infowindow, mMapView, false);
+
+		// Bind to the notification service
+		mServiceHandler = new ServiceHandler(this);
 
 		// Beg for permissions
 		// Don't continue with loading the activity without necessary permits
@@ -289,7 +263,6 @@ public class MapsActivity
 
     /**
      * Relocate the last known location of this device on the map and mark it.
-     * @param view
      */
     private void onMapLastLocationClick(View view) {
         SharedPreferences sharedPref = getSharedPreferences(
@@ -426,7 +399,7 @@ public class MapsActivity
             }
         }
         // Toggle tile overlay
-        if (str != null && mTileOverlayMap.containsKey(str)) {
+        if (str != null && mTileOverlayMap.containsKey(str) && mTileOverlayMap.get(str) != null) {
             mTileOverlayMap.get(str).setVisible(!mTileOverlayMap.get(str).isVisible());
         }
     }
@@ -465,15 +438,17 @@ public class MapsActivity
         // todo: redirect marker to nearest location when address invalid or null
     }
 
-    private void placeNewMarker(ArrayList<Address> addressList) {
+    private void placeNewMarker(ArrayList<Address> addressResults) {
         try {
-            if (addressList == null || addressList.size() <= 0)
+            if (addressResults == null || addressResults.size() <= 0)
                 return;
 
             // Values outside of Australia are excluded and ignored
-            final Address address = addressList.get(0);
+            final Address address = addressResults.get(0);
             if (!address.getCountryCode().equals("AU"))
                 return;
+
+            mSelectedAddress = address;
 
             // Remove existing marker
             if (mMarker != null)
@@ -489,9 +464,10 @@ public class MapsActivity
             mSelectedLocation.setLongitude(address.getLongitude());
 
             // Update activity
-            updateLocationDisplay();
+            updateLocationDisplay(address);
         } catch (NullPointerException ex) {
             Log.e(TAG, "Failed to generate marker from null address.");
+            ex.printStackTrace();
         }
     }
 
@@ -670,9 +646,9 @@ public class MapsActivity
             str = ConstStrings.app_url_map_layer_precip;
             initTileOverlayMaps(str);
 
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ex) {
             Log.e(TAG, "No tile overlay was returned by provider for " + str + ".");
-            e.printStackTrace();
+            ex.printStackTrace();
         }
     }
 
@@ -744,6 +720,7 @@ public class MapsActivity
 					JSONObject positionJson = new JSONObject(sharedPref.getString(
 							PrefKeys.last_best_position, PrefConstValues.empty_json_object));
 					if (positionJson.length() == 0) {
+					    mServiceHandler.service().awaitLocation(this);
 						Log.e(TAG, "Failed to read last best location.");
 						return;
 					}
@@ -812,23 +789,27 @@ public class MapsActivity
     }
 
     @Override
+    public void onLastLocationReceived(Location location) {
+        mSelectedLocation = location;
+        onLocationReceived();
+    }
+
+    @Override
+    public void onLocationReceived(LocationResult locationResult) {
+        // Request an address from the current location
+        new AddressHandler(this).awaitAddress(this,
+                locationResult.getLastLocation());
+    }
+
+    @Override
     protected void onLocationReceived() {
         // Request an address from the current location
         new AddressHandler(this).awaitAddress(this, mSelectedLocation);
     }
 
     @Override
-    public void onAddressReceived(int resultCode, Bundle resultData) {
-        if (resultData == null)
-            return;
-        String error = resultData.getString(FetchAddressCode.RESULT_DATA_KEY);
-        if (error == null || error.equals(""))
-            mSelectedAddressList = resultData.getParcelableArrayList(
-                    FetchAddressCode.RESULT_ADDRESSLIST_KEY);
-        else
-            return;
-
-        placeNewMarker(mSelectedAddressList);
+    public void onAddressReceived(ArrayList<Address> addressResults) {
+        placeNewMarker(addressResults);
     }
 
 	private LatLng getLatLngFromIntent(Bundle extras) {
@@ -839,21 +820,14 @@ public class MapsActivity
 		return latLng;
 	}
 
-    private void updateLocationDisplay() {
+    private void updateLocationDisplay(Address address) {
         Log.d(TAG, "updateLocationDisplay");
         String str;
 
-        // Debug print the full address
-        for (Address address : mSelectedAddressList) {
-            for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                Log.d(TAG, address.getAddressLine(i));
-            }
-        }
-
         // Reposition the camera away from the default position,
         // and zoom in to a reasonably broad scope
-        if (0.0 - mCameraPosition.target.latitude <= 1
-                && 0.0 - mCameraPosition.target.longitude <= 1)
+        if (0.0d - mCameraPosition.target.latitude <= 1.0d
+                && 0.0d - mCameraPosition.target.longitude <= 1.0d)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(mMarker.getPosition().latitude, mMarker.getPosition().longitude),
                     DEFAULT_ZOOM));
@@ -861,16 +835,17 @@ public class MapsActivity
         // Add marker info
         ((TextView)findViewById(R.id.txtSheetTitle)).setText("");
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText("");
-        if (mSelectedAddressList != null) {
+        if (address != null) {
 
             // Set the location title
             // eg. 95 Iris St, Beacon Hill NSW 2100, Australia
             // ==> Beacon Hill NSW 2100
-            ((TextView)findViewById(R.id.txtSheetTitle)).setText(
-                    AddressHandler.getAbbreviatedAddress(mSelectedAddressList));
+            str = address.getLocality() +
+                    ", " + AddressHandler.getAustralianStateCode(address) +
+                    " " + address.getPostalCode();
+            ((TextView)findViewById(R.id.txtSheetTitle)).setText(str);
 
             // Give address to the InfoWindow view to format
-            str = mSelectedAddressList.get(0).getAddressLine(0);
             mMarker.setTitle(str);
 
             // todo: infowindow body text
@@ -880,13 +855,8 @@ public class MapsActivity
             mMarker.showInfoWindow();
 
             // Set the coordinates setupInfoWindow.
-            str = new DecimalFormat("#.##").format(mSelectedAddressList.get(0).getLongitude());
-            str += " " + new DecimalFormat("#.##").format(mSelectedAddressList.get(0).getLatitude());
-            ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
-
-            // Set the coordinates setupInfoWindow.
-            final double lng = mSelectedAddressList.get(0).getLongitude();
-            final double lat = mSelectedAddressList.get(0).getLatitude();
+            final double lng = address.getLongitude();
+            final double lat = address.getLatitude();
             final char bearingLng = lng > 0 ? 'E' : 'W';
             final char bearingLat = lat > 0 ? 'N' : 'S';
             str = new DecimalFormat("#.##").format(Math.abs(lng)) + " " + bearingLng
@@ -894,6 +864,36 @@ public class MapsActivity
             ((TextView)findViewById(R.id.txtSheetCoordinates)).setText(str);
         }
     }
+
+	@Override
+	public void onServiceConnected(ComponentName className, IBinder service) {
+		Log.d(TAG, "in onServiceConnected()");
+
+		// Debug code: Reveal test buttons.
+		findViewById(R.id.btnDebugSendNotification).setOnClickListener(
+				this::debugSendNotification);
+		findViewById(R.id.btnDebugSendNotification).setVisibility(VISIBLE);
+		findViewById(R.id.btnDebugToggleLocation).setOnClickListener(
+				this::debugToggleLocation);
+		findViewById(R.id.btnDebugToggleLocation).setVisibility(VISIBLE);
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName arg0) {
+		Log.d(TAG, "in onServiceDisconnected()");
+		if (mServiceHandler.service().isRequestingLocationUpdates())
+			mServiceHandler.service().toggleLocationUpdates();
+	}
+
+	private void debugSendNotification(View view) {
+		Log.d(TAG, "in debugSendNotification()");
+		mServiceHandler.service().pushOneTimeWeatherNotification();
+	}
+
+	private void debugToggleLocation(View view) {
+		Log.d(TAG, "in debugToggleLocation()");
+		mServiceHandler.service().toggleLocationUpdates();
+	}
 
     @Override
     protected void onPermissionGranted(String perm) {}
@@ -951,14 +951,13 @@ public class MapsActivity
         if (mMapView != null)
             mMapView.onStart();
         // Bind to the notification service
-        Intent intent = new Intent(this, NotificationService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+		mServiceHandler.bind(this);
     }
 
     @Override
     protected void onStop() {
         // Unbind from the notification service
-        unbindService(mConnection);
+		mServiceHandler.unbind(this);
 		// Disable the map view
         if (mMapView != null)
             mMapView.onStop();

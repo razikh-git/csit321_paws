@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 class WeatherHandler {
 
-    private static final String TAG = PrefConstValues.tag_prefix + "wh";
+    private static final String TAG = PrefConstValues.tag_prefix + "h_w";
 
     private static final double LOC_CERTAINTY = 0.1d;
 	private WeatherReceivedListener mHostListener;
@@ -70,10 +70,8 @@ class WeatherHandler {
             } else {
                 // Embed dummy data in exceptional circumstances
                 if (!lastWeather.has("lat_lng")) {
-                    lastWeather.put("lat_lng", new JSONObject("{"
-                                    + "\"latitude\":\"0.00\","
-                                    + "\"longitude\":\"0.00\""
-                                    + "}"));
+                    lastWeather.put("lat_lng", new JSONObject(
+                            PAWSAPI.getLatLngJsonObjectString(0.00d, 0.00d)));
                 }
                 if (!lastWeather.has("is_metric")) {
 					// Embed false isMetric to encourage an update, as last data is assumed invalid

@@ -28,7 +28,7 @@ public class PlaceInfoActivity
                 WeatherHandler.WeatherReceivedListener,
                 Preference.OnPreferenceChangeListener
 {
-    private static final String TAG = PrefConstValues.tag_prefix + "wa";
+    private static final String TAG = PrefConstValues.tag_prefix + "a_inf";
 
     private SharedPreferences mSharedPref;
 
@@ -62,6 +62,7 @@ public class PlaceInfoActivity
                 PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         return true;
     }
 
@@ -191,6 +192,7 @@ public class PlaceInfoActivity
 
             /* Populate today's weather: */
 
+            // todo: prevent today's weather from accumulating
             LinearLayout layParent = findViewById(R.id.layWeatherToday);
             for (int elem = 0; elem < elemsPerDay + 1; elem++) {
                 final JSONObject periodicWeatherJson = weatherForecastJSON
@@ -286,6 +288,8 @@ public class PlaceInfoActivity
             }
 
             /* Populate the 5-day forecast: */
+
+            // todo: prevent the 5-day forecast from accumulating
 
             // todo: rewrite the 4 (!) different loops over the week in every iteration of this loop
 

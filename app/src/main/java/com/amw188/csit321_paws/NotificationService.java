@@ -6,19 +6,17 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
@@ -31,18 +29,22 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class NotificationService
 		extends Service
-		implements WeatherHandler.WeatherReceivedListener {
-
+		implements
+		AddressHandler.AddressReceivedListener,
+		LocationHandler.LocationReceivedListener,
+		WeatherHandler.WeatherReceivedListener
+{
 	// Logging
 	private static final String TAG = PrefConstValues.tag_prefix + "service";
 
@@ -51,7 +53,7 @@ public class NotificationService
 			".extra.STARTED_FROM_NOTIFICATION";
 
 	// Binder
-	private final IBinder binder = new LocalBinder();
+	private final IBinder mBinder = new LocalBinder();
 	class LocalBinder extends Binder {
 		NotificationService getService() {
 			return NotificationService.this;
@@ -65,12 +67,8 @@ public class NotificationService
 	// Locations
 	SharedPreferences mSharedPref;
 	private boolean mIsRequestingLocationUpdates;
-	private FusedLocationProviderClient mLocationClient;
-	private LocationCallback mLocationCallback;
-	private LocationResultListener mHostListener;
-	interface LocationResultListener {
-		void onLocationResultReceived(LocationResult locationResult);
-	}
+	private LocationHandler mLocationHandler;
+	private LocationHandler.LocationReceivedListener mLocationListener;
 
 	public NotificationService() {}
 
@@ -79,7 +77,7 @@ public class NotificationService
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.d(TAG, "in onBind()");
-		return binder;
+		return mBinder;
 	}
 
 	/* Service Methods */
@@ -137,14 +135,7 @@ public class NotificationService
 				PrefKeys.app_global_preferences, MODE_PRIVATE);
 
 		// Initialise location utilities
-		mLocationClient = new FusedLocationProviderClient(getApplicationContext());
-		mLocationCallback = new LocationCallback() {
-			@Override
-			public void onLocationResult(LocationResult locationResult) {
-				super.onLocationResult(locationResult);
-				NotificationService.this.onLocationResult(locationResult);
-			}
-		};
+		mLocationHandler = new LocationHandler(this);
 		startLocationUpdates();
 
 		// Create notification channel
@@ -210,7 +201,7 @@ public class NotificationService
 						servicePendingIntent)
 				.setOngoing(true)
 				.setPriority(Notification.PRIORITY_HIGH)
-				.setSmallIcon(R.drawable.ic_paws_logo)
+				.setSmallIcon(R.drawable.ic_paws_icon)
 				.setWhen(System.currentTimeMillis());
 
 		Notification notif = builder.build();
@@ -218,9 +209,20 @@ public class NotificationService
 		return notif;
 	}
 
+	/* Custom Address Methods */
+
+	@Override
+	public void onAddressReceived(ArrayList<Address> addressResults) {
+		// Update device location history
+		PAWSAPI.addPlaceToHistory(this, addressResults);
+	}
+
 	/* Custom Location Methods */
 
-	protected void setHostListener(LocationResultListener hostListener) { mHostListener = hostListener; }
+	void awaitLocation(LocationHandler.LocationReceivedListener listener) {
+		mLocationListener = listener;
+		mLocationHandler.getLastBestLocation(this);
+	}
 
 	boolean isRequestingLocationUpdates() {
 		return mIsRequestingLocationUpdates;
@@ -235,7 +237,7 @@ public class NotificationService
 	}
 
 	private void startLocationUpdates() {
-		Log.d(TAG, "in startLocationUpdates()");
+		Log.d(TAG, "in start()");
 
 		LocationRequest locationRequest = new LocationRequest()
 				.setPriority(Integer.parseInt(mSharedPref.getString(
@@ -245,81 +247,58 @@ public class NotificationService
 						PrefKeys.location_rate,
 						PrefDefValues.location_rate)));
 
-		mIsRequestingLocationUpdates = true;
-		mLocationClient.requestLocationUpdates(
-				locationRequest, mLocationCallback, Looper.getMainLooper());
-
-		Toast.makeText(this,
-				"Started location updates.",
-				Toast.LENGTH_LONG).show();
+		mIsRequestingLocationUpdates = mLocationHandler.start(locationRequest);
+		if (mIsRequestingLocationUpdates)
+			Toast.makeText(this,
+					"Started location updates.",
+					Toast.LENGTH_LONG).show();
 	}
 
 	private void stopLocationUpdates() {
-		mIsRequestingLocationUpdates = false;
-		mLocationClient.removeLocationUpdates(mLocationCallback);
+		mIsRequestingLocationUpdates = mLocationHandler.stop();
+		if (!mIsRequestingLocationUpdates)
+			Toast.makeText(this,
+					"Stopped location updates.",
+					Toast.LENGTH_LONG).show();
+	}
 
-		Toast.makeText(this,
-				"Stopped location updates.",
-				Toast.LENGTH_LONG).show();
+	@Override
+	public void onLastLocationReceived(Location location) {
+		mLocationListener.onLastLocationReceived(location);
 	}
 
 	/**
 	 * Location result was received when awaiting update on device location.
 	 * @param locationResult Last best location result for this device.
 	 */
-	private void onLocationResult(LocationResult locationResult) {
+	@Override
+	public void onLocationReceived(LocationResult locationResult) {
+		//Toast.makeText(this, "onLocationResult()", Toast.LENGTH_LONG).show();
+
 		if (locationResult == null) {
 			Log.e(TAG, "Location result or request was null.");
 			return;
 		}
 
 		// todo: assign hostListener when needed to reflect location changes in MapsActivity
+		/*
 		if (mHostListener != null)
 			mHostListener.onLocationResultReceived(locationResult);
+		*/
 
-		try {
-			final double errorMargin = 0.5d;
-			final LatLng resultLatLng = new LatLng(
-					locationResult.getLastLocation().getLatitude(),
-					locationResult.getLastLocation().getLongitude());
+		// Await an address to add to the device position history
+		final LatLng latLng = new LatLng(
+				locationResult.getLastLocation().getLatitude(),
+				locationResult.getLastLocation().getLongitude());
+		new AddressHandler(this).awaitAddress(this, latLng);
 
-			// Update the last best position for the device
-			final String lastBestPositionStr = String.format(
-					"{\"latitude\":\"%s\",\"longitude\":\"%s\"}",
-					resultLatLng.latitude, resultLatLng.longitude);
-			SharedPreferences.Editor sharedEditor = mSharedPref.edit();
-			sharedEditor.putString(PrefKeys.last_best_position, lastBestPositionStr);
-			sharedEditor.apply();
+		// Update the last best position for the device
+		final String lastBestPositionStr = PAWSAPI.getLatLngJsonObjectString(
+				latLng.latitude, latLng.longitude);
+		SharedPreferences.Editor sharedEditor = mSharedPref.edit();
+		sharedEditor.putString(PrefKeys.last_best_position, lastBestPositionStr);
+		sharedEditor.apply();
 
-			// Update device location history
-			JSONArray historyJson = new JSONArray(mSharedPref.getString(
-					PrefKeys.position_history, PrefConstValues.empty_json_array));
-			for (int i = 0; i < historyJson.length(); ++i) {
-				final LatLng ll = new LatLng(
-						historyJson.getJSONObject(i).getDouble("latitude"),
-						historyJson.getJSONObject(i).getDouble("longitude"));
-				if (Math.abs(ll.latitude - resultLatLng.latitude) < errorMargin
-						&& Math.abs(ll.longitude - resultLatLng.longitude) < errorMargin) {
-
-					// Positions with a match in the device history add to their weighting,
-					// reflecting either their amount of visits or the duration spent there
-					int weight = 1;
-					if (historyJson.getJSONObject(i).has("weight"))
-						weight = historyJson.getJSONObject(i).getInt("weight");
-					historyJson.getJSONObject(i).put("weight", weight);
-					Log.d(TAG, "Matched coordinates: "
-							+ "Location revisited, weighted at " + weight);
-					sharedEditor.putString(PrefKeys.position_history, historyJson.toString());
-					return;
-				}
-
-				// New positions are added to the device history
-				Log.d(TAG, "Adding newly visited location to history.");
-				historyJson.put(new JSONObject(lastBestPositionStr));
-			}
-		} catch (JSONException ex) {
-			ex.printStackTrace();
-		}
 	}
 
 	/* Custom Weather Methods */
@@ -455,5 +434,26 @@ public class NotificationService
 				periodicWorkRequest);
 
 		// todo: re-enqueue the work from settings activity when initial/interval time is changed
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	boolean rescheduleNotifications() {
+		try {
+			if (WorkManager.getInstance(this).getWorkInfosByTag(
+					DailyWeatherWorker.WORK_TAG).get().size() > 0) {
+				// Cancel existing work
+				WorkManager.getInstance(this).cancelAllWorkByTag(DailyWeatherWorker.WORK_TAG);
+
+				// Schedule new work with new parameters from settings
+				scheduleWeatherNotifications();
+				return true;
+			}
+		} catch (ExecutionException | InterruptedException ex) {
+			ex.printStackTrace();
+		}
+		return false;
 	}
 }

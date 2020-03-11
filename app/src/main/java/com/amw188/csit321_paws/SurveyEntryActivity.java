@@ -27,7 +27,7 @@ import static android.view.View.VISIBLE;
 public class SurveyEntryActivity
         extends BottomNavBarActivity {
 
-    private static final String TAG = PrefConstValues.tag_prefix + "se";
+    private static final String TAG = PrefConstValues.tag_prefix + "a_sey";
 
     private SharedPreferences mSharedPref;
 

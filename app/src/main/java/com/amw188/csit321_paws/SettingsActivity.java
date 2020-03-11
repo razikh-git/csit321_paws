@@ -1,8 +1,10 @@
 package com.amw188.csit321_paws;
 
 import android.app.TimePickerDialog;
+import android.content.ComponentName;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -17,9 +19,13 @@ import java.util.Calendar;
 
 public class SettingsActivity
 		extends BottomNavBarActivity
-		implements Preference.OnPreferenceChangeListener {
+		implements
+		Preference.OnPreferenceChangeListener,
+		ServiceHandler.ConnectionListener {
 
-    private static final String TAG = PrefConstValues.tag_prefix + "settings";
+    private static final String TAG = PrefConstValues.tag_prefix + "a_settings";
+
+    private ServiceHandler mServiceHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +35,6 @@ public class SettingsActivity
 			Log.e(TAG, "Failed to initialise preferences.");
 		}
     }
-
-	@Override
-	public boolean onPreferenceChange(Preference preference, Object newValue) {
-		Log.d(TAG, "Preference " + preference.getKey() + " changing to " + newValue);
-		return true;
-	}
 
     private boolean init() {
 		findViewById(R.id.btnReset).setOnClickListener(this::onClickReset);
@@ -50,6 +50,10 @@ public class SettingsActivity
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+
+		// Bind to the notification service
+		mServiceHandler = new ServiceHandler(this);
+
 		return true;
 	}
 
@@ -145,4 +149,41 @@ public class SettingsActivity
     public void onClickReset(View view) {
     	PAWSAPI.resetProfileData(this);
     }
+
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object newValue) {
+    	Log.d(TAG, "in onPreferenceChange");
+    	if (preference.getKey().equals(PrefKeys.location_rate))
+    		if (mServiceHandler.service().rescheduleNotifications())
+    			Log.d(TAG, "Rescheduled notifications.");
+    		else
+    			Log.d(TAG, "No notifications were scheduled already.");
+		return true;
+	}
+
+	@Override
+	public void onServiceConnected(ComponentName className, IBinder service) {
+		Log.d(TAG, "in onServiceConnected()");
+
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName arg0) {
+		Log.d(TAG, "in onServiceDisconnected()");
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		// Bind to the notification service
+		mServiceHandler.bind(this);
+	}
+
+	@Override
+	protected void onStop() {
+		// Unbind from the notification service
+		mServiceHandler.unbind(this);
+		super.onStop();
+	}
+
 }
