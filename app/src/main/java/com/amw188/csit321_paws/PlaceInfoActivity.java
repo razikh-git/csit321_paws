@@ -3,6 +3,7 @@ package com.amw188.csit321_paws;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -21,12 +23,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class PlaceInfoActivity
-        extends
-                BottomNavBarActivity
+        extends BottomNavBarActivity
         implements
-                WeatherHandler.WeatherReceivedListener,
-                Preference.OnPreferenceChangeListener
+        AddressHandler.AddressReceivedListener,
+        WeatherHandler.WeatherReceivedListener,
+        Preference.OnPreferenceChangeListener
 {
     private static final String TAG = PrefConstValues.tag_prefix + "a_inf";
 
@@ -49,7 +53,9 @@ public class PlaceInfoActivity
     }
 
     private boolean init(Bundle savedInstanceState) {
-        return initActivity() && initClickables() && initWeatherData(savedInstanceState);
+        if (initActivity() && initClickables())
+            return initWeatherData(getTargetPositionFromExtras(savedInstanceState));
+        return false;
     }
 
     private boolean initClickables() {
@@ -58,28 +64,27 @@ public class PlaceInfoActivity
     }
 
     private boolean initActivity() {
-        mSharedPref = this.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
         nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         return true;
     }
 
-    private boolean initWeatherData(Bundle savedInstanceState) {
-        // Initialise all weather data
+    private LatLng getTargetPositionFromExtras(Bundle savedInstanceState) {
         LatLng latLng = null;
-        try {
-            if (savedInstanceState == null) {
-                Bundle extras = getIntent().getExtras();
-                if (extras != null) {
-                    Log.d(TAG, "PlaceInfoActivity identified parcelable extras.");
-                    latLng = extras.getParcelable(RequestCodes.EXTRA_LATLNG);
-                    mNearbyPlace = extras.getString(RequestCodes.EXTRA_PLACENAME);
-                } else {
-                    Log.d(TAG, "No parcelable extras bundled in call to PlaceInfoActivity.");
-                }
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+                latLng = extras.getParcelable(RequestCodes.EXTRA_LATLNG);
+                mNearbyPlace = extras.getString(RequestCodes.EXTRA_PLACENAME);
             }
+        }
+        return latLng;
+    }
+
+    private boolean initWeatherData(LatLng latLng) {
+        try {
             if (latLng == null) {
                 JSONObject lastWeather = new JSONObject(
                         mSharedPref.getString(PrefKeys.last_weather_json,
@@ -89,14 +94,17 @@ public class PlaceInfoActivity
                         lastWeather.getJSONObject("city").getJSONObject("coord")
                                 .getDouble("lon"));
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return false;
+        } catch (JSONException ex) {
+            ex.printStackTrace();
         }
+
+        // Fetch the address to try and add this place to history
+        new AddressHandler(this, this).awaitAddress(latLng);
 
         // Call and await an update to the weather JSON string in shared prefs
         final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
-        if (!new WeatherHandler(this).awaitWeatherUpdate(this, latLng, isMetric)) {
+        if (!new WeatherHandler(this, this).awaitWeatherUpdate(
+                latLng, isMetric)) {
             // Initialise weather displays with last best values if none are being updated
             return initWeatherDisplay(
                     latLng, mSharedPref.getString(
@@ -113,6 +121,11 @@ public class PlaceInfoActivity
         Intent intent = new Intent(this, MapsActivity.class)
                 .putExtra(RequestCodes.EXTRA_LATLNG, mPlaceLatLng);
         startActivity(intent);
+    }
+
+    @Override
+    public void onAddressReceived(ArrayList<Address> addressResults) {
+        PAWSAPI.addPlaceToHistory(this, addressResults);
     }
 
     @Override

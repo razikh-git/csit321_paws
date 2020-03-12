@@ -11,6 +11,8 @@ import android.location.LocationManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.preference.PreferenceManager;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -30,9 +32,8 @@ final class PAWSAPI {
     private static final String TAG = PrefConstValues.tag_prefix + "api";
 
     private static double msToKilometresPerHour(final double ms) { return ms * 3.6d; }
-    private static double msToMilesPerHour(final double ms) { return ms * 2.237d; }
     private static double millimetresToInches(final double mm) { return mm / 25.4d; }
-    private static double metresToMiles(final double m) { return m * 0.62d; }
+    private static double kmToMiles(final double km) { return km * 0.62d; }
 
     static boolean preferredMetric(SharedPreferences sharedPref) {
         return sharedPref.getString(PrefKeys.units, PrefDefValues.units)
@@ -53,7 +54,8 @@ final class PAWSAPI {
      * @return Formatted distance string in km/mi.
      */
     static String getDistanceString(final boolean isMetric, final double m) {
-    	return new DecimalFormat("#.##").format(isMetric ? m / 1000.0f : metresToMiles(m))
+    	final double km = m / 1000d;
+    	return new DecimalFormat("#.##").format(isMetric ? km : kmToMiles(km))
 				+ (isMetric ? "km" : "mi");
 	}
 
@@ -112,8 +114,8 @@ final class PAWSAPI {
      * @return Formatted weather timestamp string.
      */
 	static String getClockString(final Context context, final long ms, final boolean showMinutes) {
-        final boolean is24hr = PAWSAPI.preferred24HourFormat(context.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
+        final boolean is24hr = PAWSAPI.preferred24HourFormat(
+        		PreferenceManager.getDefaultSharedPreferences(context));
         final String pattern = String.format(
                 "%s%s%s",
                 is24hr ? "HH" : "h",
@@ -129,11 +131,11 @@ final class PAWSAPI {
      * @return Formatted weather timestamp string.
      */
 	static String getWeatherTimestampString(final Context context, final long ms) {
-	    final boolean is24hr = PAWSAPI.preferred24HourFormat(context.getSharedPreferences(
-	            PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
+	    final boolean is24hr = PAWSAPI.preferred24HourFormat(
+	    		PreferenceManager.getDefaultSharedPreferences(context));
 	    final String pattern = String.format("dd/MM %s:mm %s",
                 is24hr ? "HH" : "hh",
-                is24hr ? "" : "e");
+                is24hr ? "" : "a");
 		return context.getString(R.string.home_weather_timestamp)
                 + " " + new SimpleDateFormat(pattern, Locale.getDefault()).format(
                         ms - 1000 * 60 * 60 * (24 / 8));
@@ -147,8 +149,8 @@ final class PAWSAPI {
      * @return Formatted timestamp string.
      */
 	static String getDateTimestampString(final Context context, final long ms, boolean newline) {
-	    final boolean is24hr = PAWSAPI.preferred24HourFormat(context.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE));
+	    final boolean is24hr = PAWSAPI.preferred24HourFormat(
+	    		PreferenceManager.getDefaultSharedPreferences(context));
 	    final String pattern = String.format(
 	            "%s:mm %s%sdd/MM/yyyy",
                 is24hr ? "HH" : "hh",
@@ -223,7 +225,7 @@ final class PAWSAPI {
     static String getWindSpeedString(final double speed, final boolean isMetric) {
         return isMetric
                 ? new DecimalFormat("#").format(msToKilometresPerHour(speed)) + " km/h"
-                : new DecimalFormat("#").format(msToMilesPerHour(speed)) + " mph";
+                : new DecimalFormat("#").format(speed) + " mph";
     }
 
     /**
@@ -438,18 +440,11 @@ final class PAWSAPI {
 				latitude, longitude);
 	}
 
-	static int getPlaceIndexInHistory(final JSONArray historyJson, final LatLng latLng) {
+	static int getPlaceIndexInHistory(final JSONArray historyJson, final String title) {
 		int index = -1;
 		try {
-			final double nearbyMargin = 0.5d;
 			for (int i = 0; i < historyJson.length(); ++i) {
-				final LatLng ll = new LatLng(
-						historyJson.getJSONObject(i).getJSONObject("lat_lng")
-								.getDouble("latitude"),
-						historyJson.getJSONObject(i).getJSONObject("lat_lng")
-								.getDouble("longitude"));
-				if (Math.abs(ll.latitude - latLng.latitude) < nearbyMargin
-						&& Math.abs(ll.longitude - latLng.longitude) < nearbyMargin) {
+				if (historyJson.getJSONObject(i).getString("title").equals(title)) {
 					index = i;
 					break;
 				}
@@ -463,8 +458,7 @@ final class PAWSAPI {
     static boolean addPlaceToHistory(final Context context,
 									 final ArrayList<Address> addressResults) {
 		try {
-			SharedPreferences sharedPref = context.getSharedPreferences(
-					PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 			SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
 			JSONArray historyJson = new JSONArray(sharedPref.getString(
@@ -472,7 +466,7 @@ final class PAWSAPI {
 
 			final Address address = addressResults.get(0);
 			final int index = getPlaceIndexInHistory(historyJson,
-					new LatLng(address.getLatitude(), address.getLongitude()));
+					AddressHandler.getBestAddressTitle(address));
 			if (index >= 0) {
 				// Positions with a match in the device history add to their weighting,
 				// reflecting either their amount of visits or the duration spent there
@@ -527,8 +521,7 @@ final class PAWSAPI {
      * @param context Context.
      */
     static void resetAppData(final Context context) {
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
         sharedEditor.putBoolean(PrefKeys.app_init, false);
 
@@ -552,8 +545,7 @@ final class PAWSAPI {
     }
 
     static void resetLocationData(final Context context) {
-		SharedPreferences sharedPref = context.getSharedPreferences(
-				PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 		SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
 		// Clear last location and full location history
@@ -574,8 +566,7 @@ final class PAWSAPI {
      * @param context Context.
      */
     static void resetProfileData(final Context context) {
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Reset all survey profile data

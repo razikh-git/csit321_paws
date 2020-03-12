@@ -2,6 +2,7 @@ package com.amw188.csit321_paws;
 
 import androidx.constraintlayout.widget.Constraints;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import android.content.Context;
 import android.content.Intent;
@@ -47,8 +48,7 @@ public class SurveyQuestionActivity extends BottomNavBarActivity {
     }
 
     private boolean initActivity() {
-        mSharedPref = this.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Bottom navigation bar functionality
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);

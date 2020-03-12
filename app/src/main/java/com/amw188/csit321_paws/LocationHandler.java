@@ -12,16 +12,15 @@ import com.google.android.gms.location.LocationResult;
 class LocationHandler {
 	private FusedLocationProviderClient mLocationClient;
 	private LocationCallback mLocationCallback;
-	private LocationReceivedListener mOneTimeListener;
 	private LocationReceivedListener mHostListener;
 	interface LocationReceivedListener {
 		void onLastLocationReceived(Location location);
 		void onLocationReceived(LocationResult locationResult);
 	}
 
-	LocationHandler(LocationReceivedListener listener) {
+	LocationHandler(final LocationReceivedListener listener, final Context context) {
 		mHostListener = listener;
-		mLocationClient = new FusedLocationProviderClient((Context)listener);
+		mLocationClient = new FusedLocationProviderClient(context);
 		mLocationCallback = new LocationCallback() {
 			@Override
 			public void onLocationResult(LocationResult locationResult) {
@@ -31,16 +30,12 @@ class LocationHandler {
 		};
 	}
 
-	void getLastBestLocation(LocationReceivedListener listener) {
-		mOneTimeListener = listener;
+	void getLastBestLocation(final LocationReceivedListener listener) {
 		mLocationClient.getLastLocation().addOnSuccessListener(
-				location -> {
-					mOneTimeListener.onLastLocationReceived(location);
-				}
-		);
+				listener::onLastLocationReceived);
 	}
 
-	boolean start(LocationRequest locationRequest) {
+	boolean start(final LocationRequest locationRequest) {
 		mLocationClient.requestLocationUpdates(
 				locationRequest, mLocationCallback, Looper.getMainLooper());
 		return true;

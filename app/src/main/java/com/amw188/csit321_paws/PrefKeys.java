@@ -2,7 +2,6 @@ package com.amw188.csit321_paws;
 
 final class PrefKeys {
 	// App
-	final static String app_global_preferences = "app_global_preferences";
 	final static String app_init = "app_init";
 
 	// General

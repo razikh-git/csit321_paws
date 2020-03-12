@@ -1,7 +1,7 @@
 package com.amw188.csit321_paws;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -29,9 +28,6 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 
 	private static final String TAG = PrefConstValues.tag_prefix + "a_his";
 
-	private static final int TAG_FAVORITE_FALSE = 40;
-	private static final int TAG_FAVORITE_TRUE = 41;
-
 	private SharedPreferences mSharedPref;
 	private SharedPreferences.Editor mSharedEditor;
 
@@ -45,22 +41,21 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 
 		class ViewHolder extends RecyclerView.ViewHolder {
 			View heldView;
-			ImageView btnFavorite;
-			LinearLayout btnPlace;
+			LinearLayout layFavorite;
+			LinearLayout layPlace;
 			TextView txtTitle;
 			TextView txtSubtitle;
-			ImageView btnOptions;
+			LinearLayout layOptions;
 
 			ViewHolder(View view) {
 				super(view);
 
 				heldView = view;
-				btnFavorite = view.findViewById(R.id.imgPlaceFavorite);
-				btnPlace = view.findViewById(R.id.layPlaceSummary);
+				layFavorite = view.findViewById(R.id.layPlaceFavorite);
+				layPlace = view.findViewById(R.id.layPlaceSummary);
 				txtTitle = view.findViewById(R.id.txtPlaceTitle);
 				txtSubtitle = view.findViewById(R.id.txtPlaceSubtitle);
-				btnOptions = view.findViewById(R.id.imgPlaceOptions);
-				btnFavorite.setTag(TAG_FAVORITE_FALSE);
+				layOptions = view.findViewById(R.id.layPlaceOptions);
 			}
 		}
 
@@ -91,17 +86,19 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 				holder.txtTitle.setText(placeJson.getString("title"));
 				holder.txtSubtitle.setText(placeJson.getString("subtitle"));
 
-				// Initialise clickables
-				holder.btnPlace.setOnClickListener(this::redirectPlaceInfo);
-				holder.btnFavorite.setOnClickListener(this::toggleFavorite);
-				holder.btnOptions.setOnClickListener(this::toggleOptions);
-				if (placeJson.getBoolean("favorite"))
-					toggleFavorite(holder.btnFavorite);
-
 				// Pin the index in the history JSON to the PlaceInfo redirect
-				holder.btnPlace.setTag(position);
+				holder.layPlace.setTag(position);
+				holder.layFavorite.setTag(position);
+
+				// Initialise clickables
+				holder.layPlace.setOnClickListener(this::redirectPlaceInfo);
+				holder.layFavorite.setOnClickListener(this::toggleFavorite);
+				holder.layOptions.setOnClickListener(this::toggleOptions);
+				if (placeJson.getBoolean("favorite"))
+					((ImageView)holder.layFavorite.findViewById(R.id.imgPlaceFavorite))
+							.setImageDrawable(getDrawable(R.drawable.ic_star));
 			} catch (JSONException ex) {
-				Log.e(TAG, "Failed to parse place history JSON.");
+				Log.e(TAG, "Failed to parse place history JSON for bind.");
 				ex.printStackTrace();
 			}
 		}
@@ -120,34 +117,47 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 				final LatLng latLng = new LatLng(
 						placeJson.getJSONObject("lat_lng").getDouble("latitude"),
 						placeJson.getJSONObject("lat_lng").getDouble("longitude"));
-				final Intent intent = new Intent(getApplicationContext(), PlaceInfoActivity.class);
+				final Intent intent = new Intent(
+						getApplicationContext(), PlaceInfoActivity.class);
 				intent.putExtra(RequestCodes.EXTRA_LATLNG, latLng);
 				startActivity(intent);
 			} catch (JSONException ex) {
-				Log.e(TAG, "Failed to parse history JSON with index: " + (int)view.getTag());
+				Log.e(TAG, "Failed to parse history JSON for redirect.");
 				ex.printStackTrace();
 			}
 		}
 
 		private void toggleFavorite(View view) {
-			Log.d(TAG, "in toggleFavorite()");
+			Log.d(TAG, "in toggleFavorite(" + view.getTag() + ")");
 
-			// todo: reflect changes to sharedprefs live history json
-			int tag = TAG_FAVORITE_FALSE;
-			int drawable = R.drawable.ic_star_outline;
+			try {
+				JSONObject placeJson = mHistoryJson.getJSONObject((int)view.getTag());
+				final boolean isFav = !placeJson.getBoolean("favorite");
 
-			if ((int)view.getTag() == TAG_FAVORITE_FALSE) {
-				drawable = R.drawable.ic_star;
-				tag = TAG_FAVORITE_TRUE;
+				// Update the recyc view element
+				((ImageView)view.findViewById(R.id.imgPlaceFavorite)).setImageDrawable(getDrawable(
+						isFav ? R.drawable.ic_star : R.drawable.ic_star_outline));
+
+				// Toggle the favorite value for this place
+				placeJson.put("favorite", isFav);
+
+				// Update live history JSON
+				mHistoryJson.put((int)view.getTag(), placeJson);
+				mSharedEditor.putString(PrefKeys.position_history, mHistoryJson.toString());
+				mSharedEditor.apply();
+
+			} catch (JSONException ex) {
+				Log.e(TAG, "Failed to parse history JSON for favorite.");
+				ex.printStackTrace();
 			}
-
-			view.setTag(tag);
-			((ImageView)view).setImageDrawable(getDrawable(drawable));
 		}
 
 		private void toggleOptions(View view) {
 			Log.d(TAG, "in toggleOptions()");
 
+			//todo: add options button functionalities:
+			// remove
+			// ignore
 		}
 	}
 
@@ -165,8 +175,7 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 	}
 
 	private boolean initActivity() {
-		mSharedPref = this.getSharedPreferences(
-				PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+		mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 		mSharedEditor = mSharedPref.edit();
 		BottomNavigationView nav = findViewById(R.id.bottomNavigation);
 		nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -190,9 +199,5 @@ public class PlaceHistoryActivity extends BottomNavBarActivity {
 			return false;
 		}
 		return true;
-	}
-
-	private void redirectPlaceInfo() {
-
 	}
 }

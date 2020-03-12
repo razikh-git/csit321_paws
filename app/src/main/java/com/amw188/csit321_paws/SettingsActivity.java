@@ -12,20 +12,16 @@ import android.view.View;
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Calendar;
 
 public class SettingsActivity
-		extends BottomNavBarActivity
-		implements
-		Preference.OnPreferenceChangeListener,
-		ServiceHandler.ConnectionListener {
+		extends BottomNavBarActivity {
 
     private static final String TAG = PrefConstValues.tag_prefix + "a_settings";
-
-    private ServiceHandler mServiceHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,19 +47,27 @@ public class SettingsActivity
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
-		// Bind to the notification service
-		mServiceHandler = new ServiceHandler(this);
-
 		return true;
 	}
 
-    public static class SettingsFragment extends PreferenceFragmentCompat {
-        @Override
+    public static class SettingsFragment
+			extends PreferenceFragmentCompat
+			implements
+			Preference.OnPreferenceChangeListener,
+			ServiceHandler.ConnectionListener
+	{
+		SharedPreferences mSharedPref;
+
+		private ServiceHandler mServiceHandler;
+
+		@Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
-            SharedPreferences sharedPref = getContext().getSharedPreferences(
-            		PrefKeys.app_global_preferences, MODE_PRIVATE);
+            mSharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+			// Bind to the notification service
+			mServiceHandler = new ServiceHandler(this, getContext());
 
             // todo: add listpreference picker of notification frequency to arrays / stringperfs
 
@@ -75,9 +79,12 @@ public class SettingsActivity
 			pref = findPreference("notif_time_heading");
 			pref.setEnabled(false);
 
+			findPreference(PrefKeys.hourformat).setOnPreferenceChangeListener(
+					this::onPreferenceChange);
+
             pref = findPreference("notif_time_start");
             pref.setOnPreferenceClickListener(this::onClickNotifTimePreference);
-            str = sharedPref.getString(PrefKeys.weather_notif_time_start,
+            str = mSharedPref.getString(PrefKeys.weather_notif_time_start,
 					PrefDefValues.weather_notif_time_start)
 					.split(":");
 			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
@@ -87,7 +94,7 @@ public class SettingsActivity
 
             pref = findPreference("notif_time_end");
             pref.setOnPreferenceClickListener(this::onClickNotifTimePreference);
-			str = sharedPref.getString(PrefKeys.weather_notif_time_end,
+			str = mSharedPref.getString(PrefKeys.weather_notif_time_end,
 					PrefDefValues.weather_notif_time_end)
 					.split(":");
 			now.set(Calendar.HOUR_OF_DAY, Integer.parseInt(str[0]));
@@ -96,16 +103,30 @@ public class SettingsActivity
 					now.getTimeInMillis(), true));
         }
 
+		@Override
+		public boolean onPreferenceChange(Preference preference, Object newValue) {
+			Log.d(TAG, "in onPreferenceChange");
+			Log.d(TAG, preference.getKey() + ": " +
+					mSharedPref.getString(preference.getKey(), "NIL") +
+					" => " + newValue);
+			if (preference.getKey().equals(PrefKeys.location_rate)) {
+				if (mServiceHandler.service().rescheduleNotifications())
+					Log.d(TAG, "Rescheduled notifications.");
+				else
+					Log.d(TAG, "No notifications were scheduled already.");
+			} else if (preference.getKey().equals(PrefKeys.hourformat)) {
+			}
+			return true;
+		}
+
         private boolean onClickNotifTimePreference(Preference pref) {
-            SharedPreferences sharedPref = getContext().getSharedPreferences(
-                    PrefKeys.app_global_preferences, MODE_PRIVATE);
 
             final boolean isStartTimePref = pref.getKey().equals("notif_time_start");
 
 			String[] str = (isStartTimePref
-					? sharedPref.getString(PrefKeys.weather_notif_time_start,
+					? mSharedPref.getString(PrefKeys.weather_notif_time_start,
 					PrefDefValues.weather_notif_time_start)
-					: sharedPref.getString(PrefKeys.weather_notif_time_end,
+					: mSharedPref.getString(PrefKeys.weather_notif_time_end,
 					PrefDefValues.weather_notif_time_end))
 					.split(":");
 
@@ -125,7 +146,7 @@ public class SettingsActivity
 						pref.setTitle(DateFormat.format("hh:mm a", now));
 
 						// Push changes to shared preferences
-						SharedPreferences.Editor sharedEditor = sharedPref.edit();
+						SharedPreferences.Editor sharedEditor = mSharedPref.edit();
 						sharedEditor.putString(prefKey, timeStr);
 						sharedEditor.apply();
 
@@ -144,46 +165,34 @@ public class SettingsActivity
             timePickerDialog.show();
             return true;
         }
-    }
+
+		@Override
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			Log.d(TAG, "in onServiceConnected()");
+
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			Log.d(TAG, "in onServiceDisconnected()");
+		}
+
+		@Override
+		public void onStart() {
+			super.onStart();
+			// Bind to the notification service
+			mServiceHandler.bind();
+		}
+
+		@Override
+		public void onStop() {
+			// Unbind from the notification service
+			mServiceHandler.unbind();
+			super.onStop();
+		}
+	}
 
     public void onClickReset(View view) {
     	PAWSAPI.resetProfileData(this);
     }
-
-	@Override
-	public boolean onPreferenceChange(Preference preference, Object newValue) {
-    	Log.d(TAG, "in onPreferenceChange");
-    	if (preference.getKey().equals(PrefKeys.location_rate))
-    		if (mServiceHandler.service().rescheduleNotifications())
-    			Log.d(TAG, "Rescheduled notifications.");
-    		else
-    			Log.d(TAG, "No notifications were scheduled already.");
-		return true;
-	}
-
-	@Override
-	public void onServiceConnected(ComponentName className, IBinder service) {
-		Log.d(TAG, "in onServiceConnected()");
-
-	}
-
-	@Override
-	public void onServiceDisconnected(ComponentName arg0) {
-		Log.d(TAG, "in onServiceDisconnected()");
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		// Bind to the notification service
-		mServiceHandler.bind(this);
-	}
-
-	@Override
-	protected void onStop() {
-		// Unbind from the notification service
-		mServiceHandler.unbind(this);
-		super.onStop();
-	}
-
 }

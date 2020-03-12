@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 
 import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
@@ -49,8 +50,8 @@ public class NotificationService
 	private static final String TAG = PrefConstValues.tag_prefix + "service";
 
 	// Intent extras
-	private static final String EXTRA_STARTED_FROM_NOTIFICATION = PrefConstValues.package_name +
-			".extra.STARTED_FROM_NOTIFICATION";
+	private static final String EXTRA_STARTED_FROM_NOTIFICATION =
+			PrefConstValues.package_name + ".extra.STARTED_FROM_NOTIFICATION";
 
 	// Binder
 	private final IBinder mBinder = new LocalBinder();
@@ -65,7 +66,7 @@ public class NotificationService
 	private static final String NOTIFICATION_CHANNEL_ID = "paws_notif_channel";
 
 	// Locations
-	SharedPreferences mSharedPref;
+	private SharedPreferences mSharedPref;
 	private boolean mIsRequestingLocationUpdates;
 	private LocationHandler mLocationHandler;
 	private LocationHandler.LocationReceivedListener mLocationListener;
@@ -131,15 +132,16 @@ public class NotificationService
 	private void init() {
 		Log.d(TAG, "Initialising notification service.");
 
-		mSharedPref = getApplicationContext().getSharedPreferences(
-				PrefKeys.app_global_preferences, MODE_PRIVATE);
+		mSharedPref = PreferenceManager
+				.getDefaultSharedPreferences(getApplicationContext());
 
 		// Initialise location utilities
-		mLocationHandler = new LocationHandler(this);
+		mLocationHandler = new LocationHandler(this, this);
 		startLocationUpdates();
 
 		// Create notification channel
-		NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		NotificationManager manager = (NotificationManager)
+				getSystemService(NOTIFICATION_SERVICE);
 		if (manager == null) {
 			Log.e(TAG, "Notification manager failed to initialise.");
 			return;
@@ -189,16 +191,9 @@ public class NotificationService
 	@TargetApi(23)
 	private Notification getServiceNotification() {
 		// Generate a notification with a simple template of content
-		PendingIntent servicePendingIntent = PendingIntent.getService(
-				this, 0, new Intent(
-						this, this.getClass()),
-				PendingIntent.FLAG_UPDATE_CURRENT);
-
 		NotificationCompat.Builder builder;
 		builder = new NotificationCompat.Builder(
 				this, NOTIFICATION_CHANNEL_ID)
-				.addAction(R.drawable.ic_paws_icon, getString(R.string.label_service),
-						servicePendingIntent)
 				.setOngoing(true)
 				.setPriority(Notification.PRIORITY_HIGH)
 				.setSmallIcon(R.drawable.ic_paws_icon)
@@ -290,7 +285,7 @@ public class NotificationService
 		final LatLng latLng = new LatLng(
 				locationResult.getLastLocation().getLatitude(),
 				locationResult.getLastLocation().getLongitude());
-		new AddressHandler(this).awaitAddress(this, latLng);
+		new AddressHandler(this, this).awaitAddress(latLng);
 
 		// Update the last best position for the device
 		final String lastBestPositionStr = PAWSAPI.getLatLngJsonObjectString(
@@ -303,13 +298,20 @@ public class NotificationService
 
 	/* Custom Weather Methods */
 
-	private void doSomethingWithWeather(String weatherStr) {
-		Toast.makeText(this,
-				"NotificationService.doSomethingWithWeather()",
-				Toast.LENGTH_LONG).show();
+	private boolean isWeatherScheduled() {
 		try {
-			if (WorkManager.getInstance(this).getWorkInfosByTag(
-					DailyWeatherWorker.WORK_TAG).get().size() <= 0) {
+			return WorkManager.getInstance(this).getWorkInfosByTag(
+					DailyWeatherWorker.WORK_TAG).get().size() <= 0;
+		} catch (ExecutionException | InterruptedException ex) {
+			ex.printStackTrace();
+		}
+		return false;
+	}
+
+	private void doSomethingWithWeather(final String weatherStr) {
+		//Toast.makeText(this, "doSomethingWithWeather()", Toast.LENGTH_LONG).show();
+		try {
+			if (isWeatherScheduled()) {
 				Log.d(TAG, "Scheduling weather notifications.");
 				scheduleWeatherNotifications();
 			}
@@ -326,17 +328,19 @@ public class NotificationService
 		try {
 			final JSONObject weatherJson = new JSONObject(mSharedPref.getString(
 					PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
+			if (!weatherJson.has("lat_lng")) {
+				mLocationHandler.getLastBestLocation(this);
+			}
 			final LatLng latLng = new LatLng(
 					weatherJson.getJSONObject("lat_lng").getDouble("latitude"),
 					weatherJson.getJSONObject("lat_lng").getDouble("longitude"));
-			WeatherHandler weatherHandler = new WeatherHandler(this);
-			if (!weatherHandler.awaitWeatherUpdate(this, latLng,
-					PAWSAPI.preferredMetric(mSharedPref)))
-				// Do something with weather immediately if it needn't wait to be updated
+			if (!new WeatherHandler(this, this).awaitWeatherUpdate(
+					latLng, PAWSAPI.preferredMetric(mSharedPref)))
+				// Do something with weather data immediately if it needn't wait to be updated
 				doSomethingWithWeather(mSharedPref.getString(
 						PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
 		} catch (JSONException ex) {
-			Log.e(TAG, "Failed to parse weather JSON in Service.updateWeatherData().");
+			Log.e(TAG, "Failed to parse weather JSON in updateWeatherData().");
 			ex.printStackTrace();
 		}
 	}
@@ -394,8 +398,9 @@ public class NotificationService
 		if (timeInterval <= 0)
 			return;
 
-		final String[] timeInitial = mSharedPref.getString(PrefKeys.weather_notif_time_start,
-				PrefDefValues.weather_notif_time_start)
+		final String[] timeInitial =
+				mSharedPref.getString(PrefKeys.weather_notif_time_start,
+						PrefDefValues.weather_notif_time_start)
 				.split(":");
 		final int hour = Integer.parseInt(timeInitial[0]);
 		final int minute = Integer.parseInt(timeInitial[1]);
@@ -432,8 +437,6 @@ public class NotificationService
 		WorkManager.getInstance(this).enqueueUniquePeriodicWork(
 				DailyWeatherWorker.WORK_TAG, ExistingPeriodicWorkPolicy.REPLACE,
 				periodicWorkRequest);
-
-		// todo: re-enqueue the work from settings activity when initial/interval time is changed
 	}
 
 	/**
@@ -441,18 +444,13 @@ public class NotificationService
 	 * @return
 	 */
 	boolean rescheduleNotifications() {
-		try {
-			if (WorkManager.getInstance(this).getWorkInfosByTag(
-					DailyWeatherWorker.WORK_TAG).get().size() > 0) {
-				// Cancel existing work
-				WorkManager.getInstance(this).cancelAllWorkByTag(DailyWeatherWorker.WORK_TAG);
+		if (isWeatherScheduled()) {
+			// Cancel existing work
+			WorkManager.getInstance(this).cancelAllWorkByTag(DailyWeatherWorker.WORK_TAG);
 
-				// Schedule new work with new parameters from settings
-				scheduleWeatherNotifications();
-				return true;
-			}
-		} catch (ExecutionException | InterruptedException ex) {
-			ex.printStackTrace();
+			// Schedule new work with new parameters from settings
+			scheduleWeatherNotifications();
+			return true;
 		}
 		return false;
 	}

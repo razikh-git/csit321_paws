@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
@@ -49,8 +50,7 @@ public class SurveyEntryActivity
     }
 
     private boolean initActivity() {
-        mSharedPref = this.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Bottom navigation bar functionality
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
@@ -62,12 +62,15 @@ public class SurveyEntryActivity
             InputStream in = res.openRawResource(R.raw.se_info);
             byte[] b = new byte[in.available()];
             in.read(b);
-            ((TextView)findViewById(R.id.txtInfo)).setText(new String(b));
-            ((TextView)findViewById(R.id.txtInfo)).setMovementMethod(new ScrollingMovementMethod());
+            ((TextView)findViewById(R.id.txtInfo)).setText(
+                    new String(b));
+            ((TextView)findViewById(R.id.txtInfo)).setMovementMethod(
+                    new ScrollingMovementMethod());
 
         } catch (Exception e){
             e.printStackTrace();
-            ((TextView)findViewById(R.id.txtInfo)).setText(R.string.app_txt_fallback);
+            ((TextView)findViewById(R.id.txtInfo)).setText(
+                    R.string.app_txt_fallback);
             return false;
         }
         return true;
@@ -102,7 +105,8 @@ public class SurveyEntryActivity
                 mSharedPref.getInt(PrefKeys.survey_last_question, 0)
                         + " / " + surveyQuestionCount);
 
-        if (mSharedPref.getInt(PrefKeys.survey_last_question, 0) < surveyQuestionCount) {
+        if (mSharedPref.getInt(PrefKeys.survey_last_question, 0)
+                < surveyQuestionCount) {
             // Incomplete profiling surveys:
 
             if (mSharedPref.getInt(PrefKeys.survey_last_question, 0) == 0) {
@@ -128,7 +132,8 @@ public class SurveyEntryActivity
                 progressBar.setIndeterminate(false);
                 progressBar.setVisibility(VISIBLE);
                 progressBar.setProgress(
-                        (int)((double)(mSharedPref.getInt(PrefKeys.survey_last_question, 1)
+                        (int)((double)(mSharedPref.getInt(
+                                PrefKeys.survey_last_question, 1)
                             / (double)surveyQuestionCount
                             * 100)));
             }

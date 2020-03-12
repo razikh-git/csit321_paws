@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -130,13 +131,12 @@ public class MapsActivity
     }
 
     private View setupInfoWindow(Marker marker) {
-        SharedPreferences sharedPref = this.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         final boolean isMetric = PAWSAPI.preferredMetric(sharedPref);
 
         // Title - Location name
-        ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).setText(
-                AddressHandler.getBestAddressTitle(mSelectedAddress));
+		final String title = AddressHandler.getBestAddressTitle(mSelectedAddress);
+        ((TextView)mInfoWindow.findViewById(R.id.txtInfoTitle)).setText(title);
 
         // Subtitle - Location broader area
         ((TextView)mInfoWindow.findViewById(R.id.txtInfoSubtitle)).setText(
@@ -163,8 +163,7 @@ public class MapsActivity
         try {
             JSONArray historyJson = new JSONArray(sharedPref.getString(
                     PrefKeys.position_history, PrefConstValues.empty_json_array));
-            final int index = PAWSAPI.getPlaceIndexInHistory(historyJson,
-                    new LatLng(selectedLocation.getLatitude(), selectedLocation.getLongitude()));
+            final int index = PAWSAPI.getPlaceIndexInHistory(historyJson, title);
             if (index >= 0)
                 if (historyJson.getJSONObject(index) != null)
                     if (historyJson.getJSONObject(index).getBoolean("favorite"))
@@ -218,7 +217,7 @@ public class MapsActivity
 				R.layout.view_infowindow, mMapView, false);
 
 		// Bind to the notification service
-		mServiceHandler = new ServiceHandler(this);
+		mServiceHandler = new ServiceHandler(this, this);
 
 		// Beg for permissions
 		// Don't continue with loading the activity without necessary permits
@@ -265,10 +264,9 @@ public class MapsActivity
      * Relocate the last known location of this device on the map and mark it.
      */
     private void onMapLastLocationClick(View view) {
-        SharedPreferences sharedPref = getSharedPreferences(
-                PrefKeys.app_global_preferences, MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         Location lastBestLocation = PAWSAPI.getLastBestLocation(sharedPref);
-        new AddressHandler(this).awaitAddress(this, lastBestLocation);
+        new AddressHandler(this, this).awaitAddress(lastBestLocation);
     }
 
     private void onMapPolyDrawClick(View view) {
@@ -434,7 +432,7 @@ public class MapsActivity
         Location location = new Location(LocationManager.GPS_PROVIDER);
         location.setLatitude(latLng.latitude);
         location.setLongitude(latLng.longitude);
-        new AddressHandler(this).awaitAddress(this, location);
+        new AddressHandler(this, this).awaitAddress(location);
         // todo: redirect marker to nearest location when address invalid or null
     }
 
@@ -715,8 +713,8 @@ public class MapsActivity
 			Location location = new Location(LocationManager.GPS_PROVIDER);
         	if (latLng == null) {
 				try {
-					SharedPreferences sharedPref = getSharedPreferences(
-							PrefKeys.app_global_preferences, MODE_PRIVATE);
+					SharedPreferences sharedPref = PreferenceManager
+                            .getDefaultSharedPreferences(this);
 					JSONObject positionJson = new JSONObject(sharedPref.getString(
 							PrefKeys.last_best_position, PrefConstValues.empty_json_object));
 					if (positionJson.length() == 0) {
@@ -735,7 +733,7 @@ public class MapsActivity
 			}
 			location.setLatitude(latLng.latitude);
 			location.setLongitude(latLng.longitude);
-			new AddressHandler(this).awaitAddress(this, location);
+			new AddressHandler(this, this).awaitAddress(location);
         } else {
             checkHasPermissions(RequestCodes.PERMISSION_MULTIPLE,
                     RequestCodes.REQUEST_PERMISSIONS_LOCATION);
@@ -797,14 +795,15 @@ public class MapsActivity
     @Override
     public void onLocationReceived(LocationResult locationResult) {
         // Request an address from the current location
-        new AddressHandler(this).awaitAddress(this,
+        new AddressHandler(this, this).awaitAddress(
                 locationResult.getLastLocation());
     }
 
     @Override
     protected void onLocationReceived() {
         // Request an address from the current location
-        new AddressHandler(this).awaitAddress(this, mSelectedLocation);
+        new AddressHandler(this, this).awaitAddress(
+                mSelectedLocation);
     }
 
     @Override
@@ -851,7 +850,7 @@ public class MapsActivity
             // todo: infowindow body text
             // Fill out body text summary for the location
             str = getString(R.string.app_txt_placeholder);
-            mMarker.setSnippet(str);
+            mMarker.setSnippet("");
             mMarker.showInfoWindow();
 
             // Set the coordinates setupInfoWindow.
@@ -951,13 +950,13 @@ public class MapsActivity
         if (mMapView != null)
             mMapView.onStart();
         // Bind to the notification service
-		mServiceHandler.bind(this);
+		mServiceHandler.bind();
     }
 
     @Override
     protected void onStop() {
         // Unbind from the notification service
-		mServiceHandler.unbind(this);
+		mServiceHandler.unbind();
 		// Disable the map view
         if (mMapView != null)
             mMapView.onStop();

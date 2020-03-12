@@ -16,6 +16,7 @@ import java.util.ArrayList;
 class AddressHandler {
 	private static final String TAG = PrefConstValues.tag_prefix + "_h_a";
 
+	private Context mContext;
 	private AddressHandler.AddressReceivedListener mHostListener;
 
 	// Interface to send updates to host activity
@@ -38,17 +39,18 @@ class AddressHandler {
 						FetchAddressCodes.RESULT_ADDRESSLIST_KEY);
 
 				// Debug print the full address
-				for (Address address : addressResults) {
-					for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+				if (addressResults != null)
+				for (Address address : addressResults)
+					for (int i = 0; i < address.getMaxAddressLineIndex(); i++)
 						Log.d(TAG, address.getAddressLine(i));
-					}
-				}
+
 				mHostListener.onAddressReceived(addressResults);
 			}
 		}
 	}
 
-	AddressHandler(AddressReceivedListener listener) {
+	AddressHandler(final AddressReceivedListener listener, final Context context) {
+		mContext = context;
 		mHostListener = listener;
 	}
 
@@ -72,8 +74,8 @@ class AddressHandler {
 		final String[] area = address.getAddressLine(0)
 				.split(", ")[areaInfoIndex]
 				.split(" ");
-		final int stateCodeIndex = area.length > 2
-				? 1 : 0 ;
+		final int stateCodeIndex = area.length < 2
+				? area.length - 1 : area.length - 2 ;
 		if (area.length > 0)
 			return area[stateCodeIndex];
 		return null;
@@ -98,17 +100,17 @@ class AddressHandler {
 				: null;
 	}
 
-	void awaitAddress(final Context context, final LatLng latLng) {
+	void awaitAddress(final LatLng latLng) {
 		Location location = new Location(LocationManager.GPS_PROVIDER);
 		location.setLatitude(latLng.latitude);
 		location.setLongitude(latLng.longitude);
-		awaitAddress(context, location);
+		awaitAddress(location);
 	}
 
-	void awaitAddress(final Context context, final Location location) {
+	void awaitAddress(final Location location) {
 		AddressReceiver addressReceiver =
 				new AddressHandler.AddressReceiver(new Handler());
-		FetchAddressIntentService.startActionFetchAddress(context,
-				addressReceiver, location);
+		FetchAddressIntentService.startActionFetchAddress(
+				mContext, addressReceiver, location);
 	}
 }

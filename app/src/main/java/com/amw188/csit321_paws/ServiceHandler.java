@@ -11,6 +11,7 @@ class ServiceHandler {
 
 	private static final String TAG = PrefConstValues.tag_prefix + "h_service";
 
+	private Context mContext;
 	private ConnectionListener mHostListener;
 	interface ConnectionListener {
 		void onServiceConnected(ComponentName className, IBinder service);
@@ -35,19 +36,20 @@ class ServiceHandler {
 		}
 	};
 
-	ServiceHandler(ConnectionListener listener) {
+	ServiceHandler(final ConnectionListener listener, final Context context) {
+		mContext = context;
 		mHostListener = listener;
-		bind((Context)listener);
+		bind();
 	}
 
 	NotificationService service() { return mNotificationService; }
 
-	void bind(final Context context) {
-		Intent intent = new Intent(context, NotificationService.class);
-		context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+	void bind() {
+		Intent intent = new Intent(mContext, NotificationService.class);
+		mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 	}
 
-	void unbind(final Context context) {
-		context.unbindService(mConnection);
+	void unbind() {
+		mContext.unbindService(mConnection);
 	}
 }

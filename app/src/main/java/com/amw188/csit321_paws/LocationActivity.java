@@ -12,6 +12,8 @@ import android.support.v4.os.ResultReceiver;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.preference.PreferenceManager;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -44,9 +46,8 @@ abstract class LocationActivity extends PermissionActivity {
 		if (mSelectedLocation == null) {
 			try {
 				// TODO remove debug functionality
-				SharedPreferences sharedPref = this.getSharedPreferences(
-						PrefKeys.app_global_preferences,
-						Context.MODE_PRIVATE);
+				SharedPreferences sharedPref = PreferenceManager
+						.getDefaultSharedPreferences(this);
 				JSONObject lastWeather = new JSONObject(sharedPref.getString(
 						PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
 				mSelectedLocation = new Location(LocationManager.GPS_PROVIDER);

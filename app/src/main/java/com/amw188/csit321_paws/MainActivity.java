@@ -1,6 +1,7 @@
 package com.amw188.csit321_paws;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import android.content.Context;
 import android.content.Intent;
@@ -29,8 +30,7 @@ public class MainActivity extends AppCompatActivity {
         context.startService(intent);
 
         // Load global preferences
-        SharedPreferences sharedPref = this.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Handle first-time launches
@@ -52,11 +52,13 @@ public class MainActivity extends AppCompatActivity {
         // Redirect to user profiling prompt and  information screen
         Intent intent = new Intent(this, SurveyInfosheetActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void enterHome() {
         // Redirect to app landing screen
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
+		finish();
     }
 }

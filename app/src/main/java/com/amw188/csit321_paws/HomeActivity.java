@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -38,8 +39,7 @@ public class HomeActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        mSharedPref = this.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         if (!init()) {
             Log.e(TAG, "Failed to completely initialise HomeActivity.");
         }
@@ -237,7 +237,8 @@ public class HomeActivity
                 final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
                 LatLng latLng = new LatLng(
                         mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
-                if (!new WeatherHandler(this).awaitWeatherUpdate(this, latLng, isMetric)) {
+                if (!new WeatherHandler(this, this).awaitWeatherUpdate(
+                        latLng, isMetric)) {
                     // Initialise weather displays with last best values if none are being updated
                     success = initWeatherDisplay(mSharedPref.getString(
                             PrefKeys.last_weather_json, PrefConstValues.empty_json_object));

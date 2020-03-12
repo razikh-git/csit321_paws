@@ -3,6 +3,8 @@ package com.amw188.csit321_paws;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.preference.PreferenceManager;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Locale;
@@ -14,8 +16,7 @@ class OpenWeatherMapIntegration {
     private static final String app_owm_api_key = "442dabf9a4b790d1198c03fbd0d31550";
 
     static String getOWMWeatherURL(final Context context, final LatLng latLng, boolean isWeekly) {
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         final String units = sharedPref.getString(PrefKeys.units, PrefDefValues.units);
         return app_url_owm_weather_root
                 + "data/2.5/"

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.preference.PreferenceManager;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -19,27 +21,27 @@ class WeatherHandler {
 
     private static final double LOC_CERTAINTY = 0.1d;
 	private WeatherReceivedListener mHostListener;
+	private Context mContext;
 
     // Interface to send updates to host activity
     interface WeatherReceivedListener {
         void onWeatherReceived(LatLng latLng, String response, boolean isMetric);
     }
 
-    WeatherHandler(WeatherReceivedListener listener) {
-		mHostListener = listener;
+    WeatherHandler(final WeatherReceivedListener listener, final Context context) {
+        mContext = context;
+        mHostListener = listener;
     }
 
     /**
      * Determines whether to await an updated weather forecast.
      * @param latLng Target coordinates for the weather forecast.
-     * @param context Context.
      * @param isMetric Units in metric or imperial.
      * @return Returns true if the host should await an update, or false to act on current data.
      */
-    boolean awaitWeatherUpdate(final Context context, final LatLng latLng,
-							   final boolean isMetric) {
-        if (shouldFetchWeatherUpdate(context, latLng, isMetric))
-            return fetchWeatherUpdate(context, latLng, isMetric);
+    boolean awaitWeatherUpdate(final LatLng latLng, final boolean isMetric) {
+        if (shouldFetchWeatherUpdate(latLng, isMetric))
+            return fetchWeatherUpdate(latLng, isMetric);
         return false;
     }
 
@@ -47,17 +49,15 @@ class WeatherHandler {
      * Determines whether a weather update is required around the location of some coordinates.
      * Updates are considered unnecessary if we already have a forecast for the given area
      * in some relevant timeframe that allows us to keep a complete forecast.
-     * @param context Context.
      * @param latLng Given coordinates for the weather forecast.
      * @param isMetric Units in metric or imperial.
      * @return Returns coordinates for weather update, or null if no update is required.
      * Coordinates are corrected to the last values if near enough.
      */
-    private boolean shouldFetchWeatherUpdate(final Context context,
-                                             final LatLng latLng, final boolean isMetric) {
+    private boolean shouldFetchWeatherUpdate(final LatLng latLng, final boolean isMetric) {
         try {
-            SharedPreferences sharedPref = context.getSharedPreferences(
-                    PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+            SharedPreferences sharedPref = PreferenceManager
+                    .getDefaultSharedPreferences(mContext);
 
             // Decide whether to update current weather data
             JSONObject lastWeather = new JSONObject(sharedPref.getString(
@@ -106,19 +106,17 @@ class WeatherHandler {
     /**
      * Fetches a weather forecast for the given LatLng coordinates from OpenWeatherMaps.
      * @param latLng Target coordinates for the weather forecast.
-     * @param context Context.
      * @param isMetric Units in metric or imperial.
 	 * @return Returns success or failure to begin fetch request.
      */
-    private boolean fetchWeatherUpdate(final Context context,
-                                       final LatLng latLng, final boolean isMetric) {
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+    private boolean fetchWeatherUpdate(final LatLng latLng, final boolean isMetric) {
+        SharedPreferences sharedPref = PreferenceManager
+                .getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
         // Generate URL and request queue
-        RequestQueue queue = Volley.newRequestQueue(context);
-        String url = OpenWeatherMapIntegration.getOWMWeatherURL(context, latLng, true);
+        RequestQueue queue = Volley.newRequestQueue(mContext);
+        String url = OpenWeatherMapIntegration.getOWMWeatherURL(mContext, latLng, true);
         Log.d(TAG, "URL:\n" + url);
 
         // Generate and post the request.

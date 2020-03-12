@@ -12,6 +12,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -52,8 +53,7 @@ public class DailyWeatherWorker
 
         Result result = Result.success();
         mContext = getApplicationContext();
-        mSharedPref = mContext.getSharedPreferences(
-                PrefKeys.app_global_preferences, Context.MODE_PRIVATE);
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         final long timeNow = System.currentTimeMillis();
         final long timeUntilStart = PAWSAPI.getTimeUntil(
@@ -76,8 +76,8 @@ public class DailyWeatherWorker
                         OpenWeatherMapIntegration.getOWMWeatherURL(
                                 mContext, latLng, true));
 
-                if (!new WeatherHandler(this).awaitWeatherUpdate(mContext,
-                        latLng, PAWSAPI.preferredMetric(mSharedPref))) {
+                if (!new WeatherHandler(this, mContext).awaitWeatherUpdate(
+                		latLng, PAWSAPI.preferredMetric(mSharedPref))) {
                     result = pushWeatherNotification();
                 }
             } catch (JSONException ex) {
