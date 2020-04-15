@@ -81,6 +81,12 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory/>
+    <PreferenceCategory app:title="@string/pref_heading_storage">
+
+        <Preference
+            android:layout="@layout/layout_prefs_buttons"
+            android:key="btn_reset"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

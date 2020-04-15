@@ -66,38 +66,29 @@
                         android:textAppearance="@style/TextAppearance.Paws.Caption"
                         android:textColor="@color/color_on_primary"/>
 
-                    <TextView android:id="@+id/txtInfoDistance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_weight="1"
-                        android:textAlignment="viewEnd"
-                        android:text="20km"
-                        android:textAppearance="@style/TextAppearance.Paws.Caption"
-                        android:textColor="@color/color_on_primary"/>
-
                 </LinearLayout>
+
+                <TextView android:id="@+id/txtInfoDistance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_weight="1"
+                    android:layout_marginTop="@dimen/app_spacing_tiny"
+                    android:textAlignment="viewStart"
+                    android:text="20km"
+                    android:textAppearance="@style/TextAppearance.Paws.Caption"
+                    android:textColor="@color/color_on_primary"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
+        <!-- Info body content -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Body text
-            Weather summary for the location nearest the marker. -->
-            <TextView android:id="@+id/txtInfoContent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/app_spacing_large"
-                android:layout_marginStart="@dimen/app_spacing_medium"
-                android:layout_marginEnd="@dimen/app_spacing_medium"
-                android:text="@string/noti_action_view"
-                android:textAppearance="@style/TextAppearance.Paws.Small"
-                android:textColor="@color/color_on_background"/>
+            android:orientation="vertical"
+            android:background="@color/color_primary">
 
             <!-- More Info button
             Not necessarily functional, as the info window is a button in itself. -->
@@ -110,7 +101,8 @@
                 android:layout_marginBottom="@dimen/app_spacing_large"
                 android:padding="@dimen/app_spacing_tiny"
                 android:text="@string/app_btn_info"
-                android:backgroundTint="@color/color_primary"/>
+                android:textColor="@color/color_primary"
+                android:backgroundTint="@color/color_on_primary"/>
 
         </LinearLayout>
 

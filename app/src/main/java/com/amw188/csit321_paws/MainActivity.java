@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.mainAppTheme);
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
 
         // Initialise config for image downloader

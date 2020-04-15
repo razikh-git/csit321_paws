@@ -25,6 +25,8 @@
     <dimen name="height_buttons_large">65dp</dimen>
     <dimen name="height_buttons_block">110dp</dimen>
 
+    <dimen name="height_chart_feature">200dp</dimen>
+
     <dimen name="width_info_windows">250dp</dimen>
 
     <dimen name="width_stroke">2dp</dimen>

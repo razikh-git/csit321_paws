@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.Preference;
@@ -33,7 +32,6 @@ public class SettingsActivity
     }
 
     private boolean init() {
-		findViewById(R.id.btnReset).setOnClickListener(this::onClickReset);
 		BottomNavigationView nav = findViewById(R.id.bottomNavigation);
 		nav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
@@ -71,11 +69,15 @@ public class SettingsActivity
 
             // todo: add listpreference picker of notification frequency to arrays / stringperfs
 
-			// Update time picker preference display and interactions
 			Preference pref;
 			String[] str;
 			Calendar now = Calendar.getInstance();
 
+			// Add clicky to reset profile button
+			pref = findPreference("btn_reset");
+			pref.setOnPreferenceClickListener(this::onClickReset);
+
+			// Update time picker preference display and interactions
 			pref = findPreference("notif_time_heading");
 			pref.setEnabled(false);
 
@@ -166,6 +168,10 @@ public class SettingsActivity
             return true;
         }
 
+		private boolean onClickReset(Preference pref) {
+			return PAWSAPI.resetProfileData(getActivity().getApplicationContext());
+		}
+
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			Log.d(TAG, "in onServiceConnected()");
@@ -191,8 +197,4 @@ public class SettingsActivity
 			super.onStop();
 		}
 	}
-
-    public void onClickReset(View view) {
-    	PAWSAPI.resetProfileData(this);
-    }
 }

@@ -232,6 +232,11 @@
     <string name="wa_precip">Precipitation</string>
     <string name="wa_wind">Wind</string>
 
+    <string name="wa_chart_title">Surf Conditions</string>
+    <string name="wa_chart_tides_label">Tide</string>
+    <string name="wa_chart_swell_label">Swell</string>
+    <string name="wa_chart_no_data">No data</string>
+
     <!-- Mapping Activity. -->
     <string name="ma_map_type">Map Type</string>
     <string name="ma_default">Default</string>
@@ -253,7 +258,7 @@
     </string>
 
     <!-- Fetch Address ServiceIntent. -->
-    <string name="sv_fa_service_unavailable">The service encountered a critical error.</string>
+    <string name="sv_fa_service_unavailable">No network service available.</string>
     <string name="sv_fa_invalid_lat_lng">An invalid lat/long value pair was provided.</string>
     <string name="sv_fa_no_address">No address was found for the given coordinates.</string>
     <string name="sv_fa_geocoder_unavailable">The service geocoder was unavailable.</string>
@@ -266,6 +271,7 @@
     <string name="pref_heading_general">General</string>
     <string name="pref_heading_usage">Data and Battery Usage</string>
     <string name="pref_heading_notifications">Notifications</string>
+    <string name="pref_heading_storage">Storage and Personal Data</string>
 
     <!-- Units Preferences. -->
     <string name="pref_title_units">Units of measurement</string>
@@ -303,7 +309,21 @@
         SurfWatch Weather
     </string>
 
+    <string name="notif_name_alert">
+        Alert Channel
+    </string>
+    <string name="notif_desc_alert">
+        Suggestions for weather and climate conditions
+    </string>
+
+    <string name="notif_title_alert">
+        SurfWatch Alerts
+    </string>
+
     <string name="noti_action_view">MAPPING</string>
     <string name="noti_action_dismiss">STOP TRACKING</string>
+
+    <string name="units_feet">feet</string>
+    <string name="units_meters">metres</string>
 
 </resources>

@@ -29,13 +29,24 @@
 
             <!-- Debug one-time weather notification push. -->
             <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/btnDebugSendNotification"
+                android:id="@+id/btnDebugSendWeather"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_marginTop="@dimen/app_spacing_medium"
                 android:adjustViewBounds="true"
-                android:src="@drawable/ic_error"
+                android:src="@drawable/ic_info"
+                android:visibility="gone"/>
+
+            <!-- Debug one-time weather notification push. -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnDebugSendAlert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginTop="@dimen/app_spacing_medium"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_warning"
                 android:visibility="gone"/>
 
             <!-- Debug location tracking toggle. -->

@@ -5,7 +5,6 @@ import com.google.android.gms.location.LocationRequest;
 final class PrefDefValues {
 	// App
 	final static boolean app_init = false;
-	final static String app_global_preferences = PrefConstValues.package_name + "_preferences";
 
 	// General
 	final static String units = "metric";

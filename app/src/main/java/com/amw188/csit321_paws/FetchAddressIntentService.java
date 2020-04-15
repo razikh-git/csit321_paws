@@ -9,6 +9,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.os.ResultReceiver;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class FetchAddressIntentService extends IntentService {
      * @param receiver Activity to deliver result to.
      * @param location Location object to derive address from.
      */
-    public static void startActionFetchAddress(final Context context,
+    public void startActionFetchAddress(final Context context,
                                                final ResultReceiver receiver,
                                                final Location location) {
         Intent intent = new Intent(context, FetchAddressIntentService.class);
@@ -65,19 +66,19 @@ public class FetchAddressIntentService extends IntentService {
                     location.getLatitude(),
                     location.getLongitude(),
                     1);
-        } catch (IOException e) {
-            error = getString(R.string.sv_fa_service_unavailable);
-            e.printStackTrace();
+        } catch (IOException ex) {
+            error += getString(R.string.sv_fa_service_unavailable) + "\n";
+            ex.printStackTrace();
             Log.e(TAG, error);
-        } catch (IllegalArgumentException e) {
-            error = getString(R.string.sv_fa_invalid_lat_lng);
-            e.printStackTrace();
+        } catch (IllegalArgumentException ex) {
+            error += getString(R.string.sv_fa_invalid_lat_lng) + "\n";
+            ex.printStackTrace();
             Log.e(TAG, error);
         }
 
         if (addressList == null || addressList.size() == 0) {
             if (!error.isEmpty()) {
-                error = getString(R.string.sv_fa_no_address);
+                error += getString(R.string.sv_fa_no_address) + "\n";
                 Log.e(TAG, error);
             }
             deliverResultToReceiver(FetchAddressCodes.FAILURE_RESULT,

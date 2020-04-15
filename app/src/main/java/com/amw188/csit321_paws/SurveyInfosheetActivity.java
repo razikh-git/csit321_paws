@@ -105,13 +105,13 @@ public class SurveyInfosheetActivity extends AppCompatActivity {
         }
     }
 
-    public void onClickDecline(View view){
+    public void onClickDecline(View view) {
         // Redirect to app landing screen
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
     }
 
-    public void onClickAccept(View view){
+    public void onClickAccept(View view) {
         // Redirect to app landing screen
         Intent intent = new Intent(this, SurveyEntryActivity.class);
         startActivity(intent);
