@@ -13,17 +13,17 @@ import android.widget.Toast;
 
 import androidx.preference.PreferenceManager;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 final class PAWSAPI {
@@ -34,6 +34,7 @@ final class PAWSAPI {
     private static double msToKilometresPerHour(final double ms) { return ms * 3.6d; }
     private static double millimetresToInches(final double mm) { return mm / 25.4d; }
     private static double kmToMiles(final double km) { return km * 0.62d; }
+    private static double metersToFeet(final double m) { return m * 3.281; }
 
     static boolean preferredMetric(SharedPreferences sharedPref) {
         return sharedPref.getString(PrefKeys.units, PrefDefValues.units)
@@ -53,21 +54,32 @@ final class PAWSAPI {
      * @param m Decimal value in metres.
      * @return Formatted distance string in km/mi.
      */
-    static String getDistanceString(final boolean isMetric, final double m) {
+    static String getLongDistanceString(final boolean isMetric, final double m) {
     	final double km = m / 1000d;
     	return new DecimalFormat("#.##").format(isMetric ? km : kmToMiles(km))
 				+ (isMetric ? "km" : "mi");
 	}
 
+	/**
+	 * Formats a decimal value in metres to a short distance in metres, or converting to feet.
+	 * @param isMetric Whether to use metric or imperial units.
+	 * @param m Decimal value in metres.
+	 * @return Formatted distance string in m/ft.
+	 */
+	static String getShortDistanceString(final boolean isMetric, final double m) {
+    	return new DecimalFormat("#.#").format(isMetric ? m : metersToFeet(m))
+			+ (isMetric ? "m" : "ft");
+	}
+
 	static Location getLastBestLocation(SharedPreferences sharedPref) {
         Location location = null;
         try {
-            JSONObject lastBestPosition = new JSONObject(sharedPref.getString(
-                    PrefKeys.last_best_position, PrefConstValues.empty_json_object));
-            if (lastBestPosition.length() > 0) {
+            JSONObject lastBestLatLng = new JSONObject(sharedPref.getString(
+                    PrefKeys.last_best_lat_lng, PrefConstValues.empty_json_object));
+            if (lastBestLatLng.length() > 0) {
                 location = new Location(LocationManager.GPS_PROVIDER);
-                location.setLatitude(lastBestPosition.getDouble("latitude"));
-                location.setLongitude(lastBestPosition.getDouble("longitude"));
+                location.setLatitude(lastBestLatLng.getDouble("latitude"));
+                location.setLongitude(lastBestLatLng.getDouble("longitude"));
             }
         } catch (JSONException ex) {
             Log.e(TAG, "Failed to parse last best location.");
@@ -75,6 +87,17 @@ final class PAWSAPI {
         }
         return location;
     }
+
+    static Date parseWillyTimestamp(String timestamp) {
+		try {
+			final SimpleDateFormat inFormat = new SimpleDateFormat(
+					"yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+			return inFormat.parse(timestamp);
+		} catch (ParseException ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
 
 	// todo: resolve 12-hour time not taking effect
 
@@ -87,13 +110,27 @@ final class PAWSAPI {
 	static int getWeatherJsonIndexForTime(final JSONArray weatherArray, final long when) {
     	try {
     	    final int end = weatherArray.length();
-			for (int whichTime = 0; whichTime < end; ++whichTime)
-			    if ((weatherArray.getJSONObject(whichTime).getLong("dt") * 1000)
-                        - (1000 * 60 * 60 * (24/8)) <= when)
-                    return whichTime;
+			for (int whichTime = 0; whichTime < end; ++whichTime) {
+				Log.d(TAG, String.format("when (%s), whichTime (%s = %s), end (%s = %s)",
+						when,
+						whichTime, weatherArray.getJSONObject(whichTime).getLong("dt") * 1000,
+						end, weatherArray.getJSONObject(end - 1).getLong("dt") * 1000));
+				if ((weatherArray.getJSONObject(whichTime).getLong("dt") * 1000)
+						- (1000 * 60 * 60 * (24/8)) <= when) {
+					final long whichTimeMs = weatherArray.getJSONObject(whichTime).getLong("dt") * 1000 - (1000 * 60 * 60 * (24/8));
+					Log.d(TAG, String.format("Returning %s (which: %s - when: %s = difference: %s)",
+							whichTime,
+							whichTimeMs,
+							when,
+							whichTimeMs - when));
+					return whichTime;
+				}
+			}
 		} catch (JSONException ex) {
     		ex.printStackTrace();
 		}
+    	Log.e(TAG, String.format("Index for current time not found in weatherArray length=%s when=%s.",
+				weatherArray.length(), when));
         return -1;
 	}
 
@@ -384,22 +421,35 @@ final class PAWSAPI {
     static int minuteOfHour(final double hour)
     { return (int)((hour - (int)Math.floor(hour)) * 60); }
 
-    /**
-     * Gives the time in milliseconds, to the nearest minute, from some starting time
-     * until the next given hour and minute on a 24 hour clock.
-     * @param from Starting instance in time.
-     * @param hour Hour of the day.
-     * @param minute Minute of the hour.
-     * @return Milliseconds between starting time and the next instance of this hour and minute.
-     */
-    static long getTimeUntil(final long from, final int hour, final int minute) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(from);
-        return (hour - calendar.get(Calendar.HOUR_OF_DAY)) * 1000 * 60 * 60
-                + (minute - calendar.get(Calendar.MINUTE)) * 1000 * 60;
-    }
+	/**
+	 * Gives the time in milliseconds, to the nearest minute, from some starting time
+	 * until the given hour and minute on a 24 hour clock.
+	 * @param from Starting instance in time.
+	 * @param hour Hour of the day.
+	 * @param minute Minute of the hour.
+	 * @return Milliseconds between starting time and today's instance of this hour and minute.
+	 */
+	static long getTimeUntil(final long from, final int hour, final int minute) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(from);
+		return (hour - calendar.get(Calendar.HOUR_OF_DAY)) * 1000 * 60 * 60
+				+ (minute - calendar.get(Calendar.MINUTE)) * 1000 * 60;
+	}
 
-    /**
+	/**
+	 * Gives the time in milliseconds, to the nearest minute, from some starting time
+	 * until the next given hour and minute on a 24 hour clock.
+	 * @param from Starting instance in time.
+	 * @param hour Hour of the day.
+	 * @param minute Minute of the hour.
+	 * @return Milliseconds between starting time and the next instance of this hour and minute.
+	 */
+	static long getTimeUntilNext(final long from, final int hour, final int minute) {
+		long time = getTimeUntil(from, hour, minute);
+		return time > 1 ? time : time + 1000 * 60 * 60 * 24;
+	}
+
+	/**
      * Compiles the temperature values from a range of weather samples between some starting time
      * until the next day begins at midnight.
      * @param startTime Starting instance in time.
@@ -455,61 +505,147 @@ final class PAWSAPI {
 		return index;
 	}
 
+	static JSONObject getMostVisitedPlaceFromHistory(final Context context) {
+		JSONObject locationJson = null;
+		try {
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+			final JSONArray historyJson = new JSONArray(sharedPref.getString(
+					PrefKeys.position_history, PrefConstValues.empty_json_array));
+			locationJson = historyJson.getJSONObject(0);
+			for (int i = 0; i < historyJson.length(); ++i) {
+				if (historyJson.getJSONObject(i).getInt("weight")
+						> locationJson.getInt("weight"))
+					locationJson = historyJson.getJSONObject(i);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return locationJson;
+	}
+
     static boolean addPlaceToHistory(final Context context,
 									 final ArrayList<Address> addressResults) {
 		try {
 			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 			SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
-			JSONArray historyJson = new JSONArray(sharedPref.getString(
+			JSONArray historyJSON = new JSONArray(sharedPref.getString(
 					PrefKeys.position_history, PrefConstValues.empty_json_array));
 
 			final Address address = addressResults.get(0);
-			final int index = getPlaceIndexInHistory(historyJson,
-					AddressHandler.getBestAddressTitle(address));
+			final String title = AddressHandler.getBestAddressTitle(address);
+			final int index = getPlaceIndexInHistory(historyJSON,
+					title);
 			if (index >= 0) {
 				// Positions with a match in the device history add to their weighting,
 				// reflecting either their amount of visits or the duration spent there
 				int weight = 1;
-				if (historyJson.getJSONObject(index).has("weight"))
-					weight += historyJson.getJSONObject(index).getInt("weight");
-				historyJson.getJSONObject(index).put("weight", weight);
+				if (historyJSON.getJSONObject(index).has("weight"))
+					weight += historyJSON.getJSONObject(index).getInt("weight");
+				historyJSON.getJSONObject(index).put("weight", weight);
 				Log.d(TAG, "Matched coordinates: "
 						+ "Location revisited, weighted at " + weight
-						+ ", favourited: " + historyJson.getJSONObject(index).get("favorite"));
-				sharedEditor.putString(PrefKeys.position_history, historyJson.toString());
+						+ ", favourited: " + historyJSON.getJSONObject(index).get("favorite"));
+				sharedEditor.putString(PrefKeys.position_history, historyJSON.toString());
 				sharedEditor.apply();
 			} else {
-				// New positions are added to the device history
+				// Ignored positions are not added again
+				JSONArray ignoredJSON = new JSONArray(sharedPref.getString(
+						PrefKeys.position_ignored, PrefConstValues.empty_json_array));
+				for (int i = 0; i < ignoredJSON.length(); ++i) {
+					if (ignoredJSON.getString(i).equals(title)) {
+
+						Log.d(TAG, "Revisited blocked location (" + title + "), ignoring.");
+
+						return false;
+					}
+				}
+
+				// New positions are added to the device history:
 
 				// Add new element
-				final int i = historyJson.length();
-				historyJson.put(i, new JSONObject());
+				final int i = historyJSON.length();
+				historyJSON.put(i, new JSONObject());
 
 				Log.d(TAG, "Adding newly visited location to element " + i + ".");
 
 				// Add values
-				historyJson.getJSONObject(i).put("title",
-						AddressHandler.getBestAddressTitle(address));
-				historyJson.getJSONObject(i).put("subtitle",
+				historyJSON.getJSONObject(i).put("title",
+						title);
+				historyJSON.getJSONObject(i).put("subtitle",
 						String.format("%s %s",
 								AddressHandler.getAustralianStateCode(address),
 								address.getPostalCode()));
-				historyJson.getJSONObject(i).put("lat_lng",
+				historyJSON.getJSONObject(i).put("lat_lng",
 						new JSONObject(getLatLngJsonObjectString(
 								address.getLatitude(), address.getLongitude())));
-				historyJson.getJSONObject(i).put("favorite",
+				historyJSON.getJSONObject(i).put("favorite",
 						false);
-				historyJson.getJSONObject(i).put("weight",
+				historyJSON.getJSONObject(i).put("weight",
 						1);
 
 				// Apply changes to live JSON in preferences
-				sharedEditor.putString(PrefKeys.position_history,
-						historyJson.toString());
+				sharedEditor.putString(PrefKeys.position_history, historyJSON.toString());
 				sharedEditor.apply();
-				Log.d(TAG, "Added: " + historyJson.getJSONObject(i).toString());
+				Log.d(TAG, "Added: " + historyJSON.getJSONObject(i).toString());
 			}
 			return true;
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
+	 * Attempts to remove a place from history by title match, if found.
+	 * @param context Context.
+	 * @param title Best available place title.
+	 * @param ignored Whether to add the place title to the place ignore list,
+	 *                   preventing it from being re-added to history.
+	 * @return Whether the place was found and successfully removed.
+	 */
+	static boolean removePlaceFromHistory(final Context context,
+										  final String title, final boolean ignored) {
+		try {
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+			SharedPreferences.Editor sharedEditor = sharedPref.edit();
+
+			JSONArray historyJSON = new JSONArray(sharedPref.getString(
+				 PrefKeys.position_history, PrefConstValues.empty_json_array));
+
+			for (int i = 0; i < historyJSON.length(); ++i) {
+				if (historyJSON.getJSONObject(i).getString("title").equals(title)) {
+
+					// Attempt to block ignored places
+					boolean found = false;
+					JSONArray ignoredJSON = new JSONArray(sharedPref.getString(
+							PrefKeys.position_ignored, PrefConstValues.empty_json_array));
+					if (ignored) {
+						for (int j = 0; j < ignoredJSON.length(); ++j) {
+							if (ignoredJSON.getString(i).equals(title)) {
+								found = true;
+								break;
+							}
+						}
+						if (!found)
+							ignoredJSON.put(title);
+					}
+
+					historyJSON.remove(i);
+					sharedEditor.putString(PrefKeys.position_history, historyJSON.toString());
+					sharedEditor.putString(PrefKeys.position_ignored, ignoredJSON.toString());
+					sharedEditor.apply();
+
+					Toast.makeText(context,
+							String.format("%s %s from your places.",
+									ignored ? "Blocked" : "Removed",
+									title),
+							Toast.LENGTH_LONG).show();
+
+					return true;
+				}
+			}
+
 		} catch (JSONException ex) {
 			ex.printStackTrace();
 		}
@@ -549,7 +685,7 @@ final class PAWSAPI {
 		SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
 		// Clear last location and full location history
-		sharedEditor.putString(PrefKeys.last_best_position,
+		sharedEditor.putString(PrefKeys.last_best_lat_lng,
 				PrefConstValues.empty_json_object);
 		sharedEditor.putString(PrefKeys.position_history,
 				PrefConstValues.empty_json_array);
@@ -565,7 +701,7 @@ final class PAWSAPI {
      * Wipes all data related to the personalisation features and personality survey.
      * @param context Context.
      */
-    static void resetProfileData(final Context context) {
+    static boolean resetProfileData(final Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
 
@@ -580,5 +716,7 @@ final class PAWSAPI {
         Toast.makeText(context,
                 R.string.app_reset_survey,
                 Toast.LENGTH_LONG).show();
+
+        return true;
     }
 }

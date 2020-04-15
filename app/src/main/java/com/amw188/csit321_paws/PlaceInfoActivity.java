@@ -1,9 +1,10 @@
 package com.amw188.csit321_paws;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
 import android.location.Address;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -17,6 +18,27 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
+import com.github.mikephil.charting.animation.ChartAnimator;
+import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.dataprovider.BarDataProvider;
+import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
+import com.github.mikephil.charting.renderer.BarChartRenderer;
+import com.github.mikephil.charting.renderer.CombinedChartRenderer;
+import com.github.mikephil.charting.renderer.DataRenderer;
+import com.github.mikephil.charting.renderer.LineChartRenderer;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -24,6 +46,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 public class PlaceInfoActivity
         extends BottomNavBarActivity
@@ -53,8 +78,9 @@ public class PlaceInfoActivity
     }
 
     private boolean init(Bundle savedInstanceState) {
-        if (initActivity() && initClickables())
+        if (initActivity() && initClickables()) {
             return initWeatherData(getTargetPositionFromExtras(savedInstanceState));
+        }
         return false;
     }
 
@@ -98,18 +124,18 @@ public class PlaceInfoActivity
             ex.printStackTrace();
         }
 
-        // Fetch the address to try and add this place to history
+        if (latLng == null)
+            return false;
+
+        // Fetch the address to try and add this place to history and fetch tidal data
         new AddressHandler(this, this).awaitAddress(latLng);
 
         // Call and await an update to the weather JSON string in shared prefs
-        final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
-        if (!new WeatherHandler(this, this).awaitWeatherUpdate(
-                latLng, isMetric)) {
+        if (!new OpenWeatherHandler(this, this).awaitWeatherUpdate(latLng)) {
             // Initialise weather displays with last best values if none are being updated
-            return initWeatherDisplay(
-                    latLng, mSharedPref.getString(
-                            PrefKeys.last_weather_json, PrefConstValues.empty_json_object),
-                    isMetric);
+			Log.d(TAG, "initWeatherDisplay from initWeatherData using lastWeatherJSON");
+            return initWeatherDisplay(mSharedPref.getString(
+                    PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
         }
         return true;
     }
@@ -126,11 +152,29 @@ public class PlaceInfoActivity
     @Override
     public void onAddressReceived(ArrayList<Address> addressResults) {
         PAWSAPI.addPlaceToHistory(this, addressResults);
+
+        // Call and await an update to tidal info from WillyWeather
+        new WillyWeatherHandler(this, this).awaitWeatherUpdate(
+                WeatherHandler.REQUEST_WILLY_FORECAST, addressResults.get(0),
+				"?days=2&forecasts=tides,swell");
     }
 
     @Override
-    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
-        initWeatherDisplay(latLng, response, isMetric);
+    public void onWeatherReceived(int requestCode, String response) {
+        try {
+            if (requestCode == WeatherHandler.REQUEST_WILLY_FORECAST) {
+                JSONObject forecastJSON = new JSONObject(response).getJSONObject("forecasts");
+                if (forecastJSON.has("tides") && forecastJSON.has("swell"))
+                    initWeatherCharts(new JSONObject(response));
+                else
+                    findViewById(R.id.layChart).setVisibility(View.GONE);
+            } else if (requestCode == WeatherHandler.REQUEST_OPEN_WEATHER) {
+				Log.d(TAG, "initWeatherDisplay from onWeatherReceived using response");
+                initWeatherDisplay(response);
+            }
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -139,24 +183,394 @@ public class PlaceInfoActivity
         return true;
     }
 
-    private boolean initWeatherDisplay(LatLng latLng, String response, boolean isMetric) {
-        String str;
-        Double dbl;
-
-        // Update LatLng value for returning to MapsActivity with the weather data location
-        mPlaceLatLng = latLng;
-
-        final int elemsPerDay = 24 / 3;
-        final int pad = Math.round(getResources().getDimension(R.dimen.app_spacing_medium));
-
+    private List<String> getAxisLabelValues(final JSONObject forecastJSON) {
+        List<String> axisLabelValues = new ArrayList<>();
         try {
+            JSONObject tidesJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("tides");
+            final int count = tidesJSON.getJSONArray("days").getJSONObject(0)
+                    .getJSONArray("entries").length();
+            for (int i = 0; i < count; ++i) {
+                final JSONObject entry = tidesJSON.getJSONArray("days").getJSONObject(0)
+                        .getJSONArray("entries").getJSONObject(i);
+                final Date when = PAWSAPI.parseWillyTimestamp(entry.getString("dateTime"));
+                if (when == null)
+                    return null;
+                axisLabelValues.add(PAWSAPI.getClockString(this, when.getTime(), false));
+            }
+            // Data continues to next day's first period
+			axisLabelValues.add(axisLabelValues.get(0));
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+        //Log.d(TAG, "axisLabelValues: " + axisLabelValues.toString());
+
+        return axisLabelValues;
+    }
+
+    private LineDataSet getTidalDataSet(final JSONObject forecastJSON) {
+        List<Entry> entries = new ArrayList<>();
+        try {
+            JSONObject tidesJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("tides");
+
+            // Populate data for chart
+            final int count = tidesJSON.getJSONArray("days").getJSONObject(0)
+                    .getJSONArray("entries").length();
+            for (int i = 0; i < count; ++i) {
+                final JSONObject entry = tidesJSON.getJSONArray("days").getJSONObject(0)
+                        .getJSONArray("entries").getJSONObject(i);
+                entries.add(new Entry((float)i, (float)entry.getDouble("height")));
+            }
+
+            // Add a final entry to bring the data set up to the next morning
+            final JSONObject entry = tidesJSON.getJSONArray("days").getJSONObject(1)
+                    .getJSONArray("entries").getJSONObject(0);
+            entries.add(new Entry((float) count, (float) entry.getDouble("height")));
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return new LineDataSet(entries, getString(R.string.wa_chart_tides_label));
+    }
+
+    private LineDataSet getSwellDataSet(final JSONObject forecastJSON) {
+        List<Entry> entries = new ArrayList<>();
+        try {
+            JSONObject swellJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("swell");
+
+            int tideIndex = 0;
+
+            // todo: resolve this data set having conflicting sample count with tidal data set
+
+            // Populate data for chart
+            final int count = swellJSON.getJSONArray("days").getJSONObject(0)
+                    .getJSONArray("entries").length();
+            for (int i = 0; i < count; ++i) {
+                final JSONObject entry = swellJSON.getJSONArray("days").getJSONObject(0)
+                        .getJSONArray("entries").getJSONObject(i);
+                entries.add(new Entry((float)i, (float)entry.getDouble("height")));
+            }
+
+            final Date whenCompar = PAWSAPI.parseWillyTimestamp(forecastJSON.getJSONObject("forecasts")
+                    .getJSONObject("tides")
+                    .getJSONArray("days").getJSONObject(1)
+                    .getJSONArray("entries").getJSONObject(0)
+                    .getString("dateTime"));
+            final String clockCompar = PAWSAPI.getClockString(this, whenCompar.getTime(), false);
+
+            // Add enough entries from the next day to complete the chart, matching tide data window
+            for (int i = 0; i < count; ++i) {
+                JSONObject entry = swellJSON.getJSONArray("days").getJSONObject(1)
+                        .getJSONArray("entries").getJSONObject(i);
+                entries.add(new Entry((float) i, (float) entry.getDouble("height")));
+
+                final Date when = PAWSAPI.parseWillyTimestamp(entry.getString("dateTime"));
+                final String clock = PAWSAPI.getClockString(this, when.getTime(), false);
+
+                if (clock.equals(clockCompar)) {
+                    break;
+                }
+            }
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return new LineDataSet(entries, getString(R.string.wa_chart_swell_label));
+    }
+
+	static class CustomLineChartRenderer extends LineChartRenderer {
+		CustomLineChartRenderer(
+				LineDataProvider chart, ChartAnimator animator, ViewPortHandler viewPortHandler) {
+			super(chart, animator, viewPortHandler);
+		}
+
+		@Override
+		public void drawValue(Canvas c, String valueText, float x, float y, int color) {
+			mValuePaint.setColor(color);
+
+			//final int index =
+			//float value = -1f;
+			//if (SwellDirections.containsKey(entry) && SwellDirections.get(entry) != null)
+			//	value = SwellDirections.get(entry);
+
+			//Log.d(TAG, String.format("Value of (%s) (color: %s) x%s y%s = %s", valueText, color, x, y, value));
+
+			c.save();
+			//if (value != -1f)
+			//	c.rotate(value, x, y);
+
+			c.drawText(valueText, x, y, mValuePaint);
+			//c.drawText("⬆", x, y, mValuePaint);
+			c.restore();
+		}
+	}
+
+	public static class CustomBarChartRenderer extends BarChartRenderer {
+
+		private List<Float> SwellDirections = new ArrayList<>();
+		private int Index;
+
+		CustomBarChartRenderer(
+				BarDataProvider chart, ChartAnimator animator, ViewPortHandler viewPortHandler,
+				List<Float> swellDirections) {
+			super(chart, animator, viewPortHandler);
+			SwellDirections = swellDirections;
+			Index = 0;
+		}
+
+		@Override
+		public void drawValue(Canvas c, String valueText, float x, float y, int color) {
+			mValuePaint.setColor(color);
+
+			float value = SwellDirections.get(Index);
+			//Log.d(TAG, String.format("Value of (%s) (index: %s) x%s y%s = %s", valueText, Index, x, y, value));
+
+			c.save();
+			c.rotate(value, x, y);
+
+			//c.drawText(valueText, x, y, mValuePaint);
+			//c.drawText("⬆", x, y, mValuePaint);
+			c.drawText("\uD83D\uDD3C", x, y, mValuePaint);
+			c.restore();
+
+			Index = ++Index % SwellDirections.size();
+		}
+	}
+
+    private LineDataSet applyStyleToDataSet(LineDataSet dataSet) {
+        final int fillAlpha = 80;
+        final float lineRigidity = 0.2f;
+        final float lineWidth = 3f;
+        final float circleRadius = 7f;
+        final float circleHoleRadius = circleRadius * 0.25f;
+
+        dataSet.setLineWidth(lineWidth);
+        dataSet.setDrawFilled(true);
+        dataSet.setFillAlpha(fillAlpha);
+        dataSet.setCircleRadius(circleRadius);
+        dataSet.setCircleHoleRadius(circleHoleRadius);
+        dataSet.setDrawValues(true);
+
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        dataSet.setCubicIntensity(lineRigidity);
+
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+        return dataSet;
+    }
+
+    private boolean initWeatherCharts(final JSONObject forecastJSON) {
+        final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
+
+        LinearLayout parentLayout = findViewById(R.id.layChart);
+        parentLayout.setVisibility(View.VISIBLE);
+        CombinedChart chart = findViewById(R.id.chartTidesSwell);
+
+        // Parse data from forecast JSON
+        //List<ILineDataSet> dataSetList = new ArrayList<>();
+        LineDataSet tideDataSet
+                //= getTidalDataSet(forecastJSON)
+                ;
+        BarDataSet swellDataSet
+                //= getSwellDataSet(forecastJSON)
+                ;
+
+        // todo: return solution to method
+        Random random = new Random();
+        List<Entry> tideEntries = new ArrayList<>();
+        List<BarEntry> swellEntries = new ArrayList<>();
+		List<Float> swellDirections = new ArrayList<>();
+        try {
+			JSONObject swellJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("swell");
+            JSONObject tidesJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("tides");
+
+            // Populate data for chart
+			final int swellCount = swellJSON.getJSONArray("days").getJSONObject(0)
+					.getJSONArray("entries").length();
+            final int tidesCount = tidesJSON.getJSONArray("days").getJSONObject(0)
+                    .getJSONArray("entries").length();
+
+            //Log.d(TAG, String.format("tidesCount: %s swellCount: %s", tidesCount, swellCount));
+
+            for (int i = 0; i < tidesCount; ++i) {
+                // Populate each data set to match their entry counts
+				final int swellIndex = i * swellCount / tidesCount;
+				final JSONObject tideEntryJSON = tidesJSON.getJSONArray("days").getJSONObject(0)
+						.getJSONArray("entries").getJSONObject(i);
+				final JSONObject swellEntryJSON = swellJSON.getJSONArray("days").getJSONObject(0)
+						.getJSONArray("entries").getJSONObject(swellIndex);
+				final Entry tideEntry = new Entry(
+						(float) i,
+						(float) tideEntryJSON.getDouble("height"));
+				final BarEntry swellEntry = new BarEntry(
+						(float) i,
+						(float) swellEntryJSON.getDouble("height"));
+				tideEntries.add(tideEntry);
+				swellEntries.add(swellEntry);
+				swellDirections.add((float) swellEntryJSON.getDouble("direction"));
+				//Log.d(TAG, String.format("Adding entry to tides/swell: i=%s swellIndex=%s tide=%s swell=%s", i, swellIndex, tideEntry.getY(), swellEntry.getY()));
+            }
+
+            // Add a final entry to bring the data set up to the next morning
+            final JSONObject tideEntryJSON = tidesJSON.getJSONArray("days").getJSONObject(1)
+                    .getJSONArray("entries").getJSONObject(0);
+            final JSONObject swellEntryJSON = swellJSON.getJSONArray("days").getJSONObject(0)
+                    .getJSONArray("entries").getJSONObject(0);
+            final Entry tideEntry = new Entry((float) tidesCount, (float) tideEntryJSON.getDouble("height"));
+			final BarEntry swellEntry = new BarEntry((float) tidesCount, (float) swellEntryJSON.getDouble("height"));
+			final float value = (float) swellEntryJSON.getDouble("direction");
+			tideEntries.add(tideEntry);
+            swellEntries.add(swellEntry);
+            swellDirections.add(value);
+			//Log.d(TAG, String.format("Adding entry to tides/swell: i=%s swellIndex=%s tide=%s swell=%s", 0, 0, tideEntry.getY(), swellEntry.getY()));
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            //return null;
+        }
+        //return new LineDataSet(entries, getString(R.string.wa_chart_tides_label));
+        tideDataSet = new LineDataSet(tideEntries, getString(R.string.wa_chart_tides_label));
+        swellDataSet = new BarDataSet(swellEntries, getString(R.string.wa_chart_swell_label));
+        // todo: return solution to method
+
+        // Style data
+		final float barValueSize = 20f;
+
+        tideDataSet = applyStyleToDataSet(tideDataSet);
+       	//swellDataSet = applyStyleToDataSet(swellDataSet);
+
+        swellDataSet.setDrawIcons(true);
+
+        tideDataSet.setColor(ContextCompat.getColor(this, R.color.color_accent_alt));
+        tideDataSet.setFillColor(ContextCompat.getColor(this, R.color.color_primary));
+        tideDataSet.setCircleColor(ContextCompat.getColor(this, R.color.color_accent_alt));
+
+        swellDataSet.setColor(ContextCompat.getColor(this, R.color.color_error));
+        swellDataSet.setValueTextSize(barValueSize);
+        //swellDataSet.setFillColor(ContextCompat.getColor(this, R.color.color_error));
+        //swellDataSet.setCircleColor(ContextCompat.getColor(this, R.color.color_error));
+
+        // Add both data sets as lines to the chart
+        //dataSetList.add(tideDataSet);
+        //dataSetList.add(swellDataSet);
+        //LineData lineData = new LineData(dataSetList);
+        LineData lineData = new LineData(tideDataSet);
+        lineData.setDrawValues(false);
+        BarData barData = new BarData(swellDataSet);
+        CombinedData combinedData = new CombinedData();
+        combinedData.setData(lineData);
+        combinedData.setData(barData);
+		combinedData.setHighlightEnabled(false);
+        chart.setData(combinedData);
+        chart.setNoDataText(getString(R.string.wa_chart_no_data));
+
+        List<String> axisLabelValues = getAxisLabelValues(forecastJSON);
+		ValueFormatter formatterX = new ValueFormatter() {
+			@Override
+			public String getAxisLabel(float value, AxisBase axis) {
+				return axisLabelValues.get((int) value);
+			}
+		};
+        ValueFormatter formatterY = new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, AxisBase axis) {
+                return PAWSAPI.getShortDistanceString(isMetric, value);
+            }
+        };
+
+        // Style chart axes
+        final int textColor = R.color.color_accent;
+        final float labelTextSize = 14f;
+
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextSize(labelTextSize);
+        xAxis.setTextColor(textColor);
+        xAxis.setDrawGridLines(false);
+        xAxis.setValueFormatter(formatterX);
+
+        YAxis yAxis = chart.getAxisLeft();
+        yAxis.setTextSize(labelTextSize);
+        xAxis.setTextColor(textColor);
+        yAxis.setDrawGridLines(false);
+        yAxis.setValueFormatter(formatterY);
+
+        chart.getAxisRight().setEnabled(false);
+
+		CombinedChartRenderer combinedRenderer = new CombinedChartRenderer(
+				chart, chart.getAnimator(), chart.getViewPortHandler());
+		CustomLineChartRenderer lineRenderer = new CustomLineChartRenderer(
+				chart, chart.getAnimator(), chart.getViewPortHandler());
+		CustomBarChartRenderer barRenderer = new CustomBarChartRenderer(
+				chart, chart.getAnimator(), chart.getViewPortHandler(),
+				swellDirections);
+		List<DataRenderer> subRenderers = new ArrayList<>();
+		subRenderers.add(barRenderer);
+		subRenderers.add(lineRenderer);
+		combinedRenderer.setSubRenderers(subRenderers);
+		chart.setRenderer(combinedRenderer);
+
+        chart.getXAxis().setLabelCount(axisLabelValues.size());
+        chart.getLegend().setTextSize(labelTextSize);
+
+        // Replace default chart label
+        final String chartLabel = getString(R.string.wa_chart_title);
+        ((TextView)findViewById(R.id.txtChartTitle)).setText(chartLabel);
+        Description desc = new Description();
+        desc.setEnabled(false);
+        chart.setDescription(desc);
+
+        // Update chart display
+		final float pad = 15f;
+		final float ratio = 0.5f;
+        /*
+        chart.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                height));
+        chart.setPadding(pad, pad, pad, pad);
+        */
+
+        // Fit chart to screen, and fit data to chart
+        chart.getXAxis().setAxisMinimum(-ratio);
+        chart.getXAxis().setAxisMaximum(chart.getXAxis().mAxisMaximum + ratio);
+        chart.setExtraOffsets(pad, pad, pad, pad);
+        chart.setDoubleTapToZoomEnabled(false);
+
+        chart.invalidate();
+
+        return true;
+    }
+
+    private boolean initCurrentWeather(final JSONObject forecastJSON) {
+        try {
+            String str;
+            Double dbl;
+
+            final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
+
             // Fetch the latest weather forecast for the provided location
-            final JSONObject weatherForecastJSON = new JSONObject(response);
-            final JSONObject currentWeatherJson = weatherForecastJSON.getJSONArray("list")
+            final JSONObject currentWeatherJson = forecastJSON.getJSONArray("list")
                     .getJSONObject(0);
 
+            // Update LatLng value for returning to MapsActivity with the weather data location
+            final LatLng latLng;
+            if (forecastJSON.has("lat_lng")) {
+            	Log.d(TAG, "LatLng data for forecast identified.");
+				latLng = new LatLng(
+						forecastJSON.getJSONObject("lat_lng").getDouble("latitude"),
+						forecastJSON.getJSONObject("lat_lng").getDouble("longitude"));
+			}
+            else {
+				Log.d(TAG, "No existing LatLng data for forecast.");
+            	final Location lastBestLocation = PAWSAPI.getLastBestLocation(mSharedPref);
+            	latLng = new LatLng(
+            			lastBestLocation.getLatitude(),
+						lastBestLocation.getLongitude());
+			}
+            mPlaceLatLng = latLng;
+
             // Weather title -- City of forecast
-            str = weatherForecastJSON.getJSONObject("city").getString("name");
+            str = forecastJSON.getJSONObject("city").getString("name");
             ((TextView)findViewById(R.id.txtWeatherCity)).setText(str);
 
             // Weather subtitle -- Nearby place from maps marker
@@ -202,13 +616,27 @@ public class PlaceInfoActivity
             dbl = (double)currentWeatherJson.getJSONObject("main").getInt("humidity");
             str = PAWSAPI.getSimplePercentageString(dbl);
             ((TextView)findViewById(R.id.txtHumidityCurrent)).setText(str);
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 
-            /* Populate today's weather: */
+    private boolean initTodaysWeather(final JSONObject forecastJSON) {
+        try {
+            String str;
+            Double dbl;
+
+            final int elemsPerDay = 24 / 3;
+            final int pad = Math.round(getResources().getDimension(R.dimen.app_spacing_medium));
+
+            final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
 
             // todo: prevent today's weather from accumulating
             LinearLayout layParent = findViewById(R.id.layWeatherToday);
             for (int elem = 0; elem < elemsPerDay + 1; elem++) {
-                final JSONObject periodicWeatherJson = weatherForecastJSON
+                final JSONObject periodicWeatherJson = forecastJSON
                         .getJSONArray("list").getJSONObject(elem);
 
                 // Create a new LinearLayout child
@@ -300,29 +728,44 @@ public class PlaceInfoActivity
                 layParent.addView(layout);
             }
 
-            /* Populate the 5-day forecast: */
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 
+    private boolean initWeeklyWeather(final JSONObject forecastJSON) {
+        try {
             // todo: prevent the 5-day forecast from accumulating
 
             // todo: rewrite the 4 (!) different loops over the week in every iteration of this loop
 
-            double tempHigh = weatherForecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
-                            .getJSONObject("main")
-                            .getDouble("temp");
+            String str;
+            Double dbl;
+
+            final int elemsPerDay = 24 / 3;
+            final int pad = Math.round(getResources().getDimension(R.dimen.app_spacing_medium));
+
+            final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
+
+            double tempHigh = forecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
+                    .getJSONObject("main")
+                    .getDouble("temp");
             double tempLow = tempHigh;
-            String icon = weatherForecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
+            String icon = forecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
                     .getJSONArray("weather").getJSONObject(0)
                     .getString("icon");
             String icon2 = icon;
-            int weatherId1 = weatherForecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
+            int weatherId1 = forecastJSON.getJSONArray("list").getJSONObject(elemsPerDay)
                     .getJSONArray("weather").getJSONObject(0)
                     .getInt("id");
             int weatherId2 = weatherId1;
 
-            layParent = findViewById(R.id.layWeatherWeekly);
-            final int elemCount = weatherForecastJSON.getJSONArray("list").length();
+            LinearLayout layParent = findViewById(R.id.layWeatherWeekly);
+            final int elemCount = forecastJSON.getJSONArray("list").length();
             for (int elem = elemsPerDay; elem < elemCount; ++elem) {
-                final JSONObject periodicWeatherJson = weatherForecastJSON
+                final JSONObject periodicWeatherJson = forecastJSON
                         .getJSONArray("list").getJSONObject(elem);
 
                 if ((elem + 1) % elemsPerDay == 0) {
@@ -354,7 +797,7 @@ public class PlaceInfoActivity
 
                     // Write the day's title
                     str = DateFormat.format("E",
-                            weatherForecastJSON.getJSONArray("list")
+                            forecastJSON.getJSONArray("list")
                                     .getJSONObject(elem - 8)
                                     .getLong("dt") * 1000).toString();
                     txt = new TextView(this);
@@ -446,7 +889,7 @@ public class PlaceInfoActivity
                     // Create a wind bearing icon
                     dbl = 0d;
                     for (int i = elem - elemsPerDay; i < elem; i++)
-                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                        dbl += forecastJSON.getJSONArray("list").getJSONObject(i)
                                 .getJSONObject("wind")
                                 .getDouble("deg");
                     dbl /= elemsPerDay;
@@ -467,7 +910,7 @@ public class PlaceInfoActivity
                     // Add the predicted average wind speed
                     dbl = 0d;
                     for (int i = elem - elemsPerDay - 1; i < elem; i++)
-                        dbl += weatherForecastJSON.getJSONArray("list").getJSONObject(i)
+                        dbl += forecastJSON.getJSONArray("list").getJSONObject(i)
                                 .getJSONObject("wind").getDouble("speed");
                     str = PAWSAPI.getWindSpeedString(dbl / elemsPerDay, isMetric);
                     txt = new TextView(this);
@@ -490,17 +933,17 @@ public class PlaceInfoActivity
                             // Rainy weather, measurements as daily total volume in millimetres
                             dbl = 0d;
                             for (int i = elem - elemsPerDay - 1; i < elem; i++) {
-                                if (weatherForecastJSON.getJSONArray("list")
+                                if (forecastJSON.getJSONArray("list")
                                         .getJSONObject(i).has("rain")) {
-                                    if (weatherForecastJSON.getJSONArray("list")
+                                    if (forecastJSON.getJSONArray("list")
                                             .getJSONObject(i).getJSONObject("rain")
                                             .has("3h")) {
                                         Log.d(TAG,
                                                 "Sampling rain/3h from element " + i + ". ("
-                                                + weatherForecastJSON.getJSONArray("list")
-                                                .getJSONObject(i).getJSONObject("rain")
-                                                .getDouble("3h") + ")");
-                                        dbl += weatherForecastJSON.getJSONArray("list")
+                                                        + forecastJSON.getJSONArray("list")
+                                                        .getJSONObject(i).getJSONObject("rain")
+                                                        .getDouble("3h") + ")");
+                                        dbl += forecastJSON.getJSONArray("list")
                                                 .getJSONObject(i)
                                                 .getJSONObject("rain").getDouble("3h");
                                     }
@@ -516,11 +959,11 @@ public class PlaceInfoActivity
                         dbl = 0d;
                         for (int i = elem - elemsPerDay - 1; i < elem; i++) {
                             Log.d(TAG, "Sampling clouds/all from element " + i + ". ("
-                                    + weatherForecastJSON.getJSONArray("list")
+                                    + forecastJSON.getJSONArray("list")
                                     .getJSONObject(i).getJSONObject("clouds")
                                     .getInt("all") + ")");
                             dbl += Double.parseDouble(
-                                    weatherForecastJSON.getJSONArray("list")
+                                    forecastJSON.getJSONArray("list")
                                             .getJSONObject(i).getJSONObject("clouds")
                                             .getString("all"));
                         }
@@ -591,35 +1034,54 @@ public class PlaceInfoActivity
                             .getJSONObject(0).getString("icon");
                 }
             }
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 
-            // Fill in other weather details
+    private boolean initWeatherDisplay(final String response) {
+        try {
+            final JSONObject forecastJSON = new JSONObject(response);
+
+            if (!initCurrentWeather(forecastJSON)
+                    || !initTodaysWeather(forecastJSON)
+                    || !initWeeklyWeather(forecastJSON)) {
+                Log.e(TAG, "Failed to initialise the place info weather display.");
+                return false;
+            }
+
+            /* Fill in other weather details */
 
             // TODO : Guarantee sunrise/sunset uses local timezone rather than system timezone.
 
+            String str;
+
             // Sunrise and sunset
             str = PAWSAPI.getClockString(this,
-                    weatherForecastJSON.getJSONObject("city").getLong("sunrise") * 1000,
+                    forecastJSON.getJSONObject("city").getLong("sunrise") * 1000,
                     true);
             ((TextView)findViewById(R.id.txtSunriseTime)).setText(str);
 
             str = PAWSAPI.getClockString(this,
-                    weatherForecastJSON.getJSONObject("city").getLong("sunset") * 1000,
+                    forecastJSON.getJSONObject("city").getLong("sunset") * 1000,
                     true);
             ((TextView)findViewById(R.id.txtSunsetTime)).setText(str);
 
             // Timestamp for current weather sample
             final int whichTime = PAWSAPI.getWeatherJsonIndexForTime(
-                    weatherForecastJSON.getJSONArray("list"), System.currentTimeMillis());
+                    forecastJSON.getJSONArray("list"), System.currentTimeMillis());
             if (whichTime >= 0) {
                 str = PAWSAPI.getWeatherTimestampString(this,
-                        weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
+                        forecastJSON.getJSONArray("list").getJSONObject(whichTime)
                                 .getLong("dt") * 1000);
                 ((TextView)findViewById(R.id.txtWeatherTimestamp)).setText(str);
             } else {
                 Log.e(TAG, "Invalid or obsolete weather JSON.");
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (JSONException ex) {
+            ex.printStackTrace();
             return false;
         }
         return true;

@@ -2,7 +2,6 @@ package com.amw188.csit321_paws;
 
 import android.Manifest;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -73,6 +72,7 @@ public class MapsActivity
                 AddressHandler.AddressReceivedListener,
                 LocationHandler.LocationReceivedListener,
 				ServiceHandler.ConnectionListener,
+                WeatherHandler.WeatherReceivedListener,
                 OnMapReadyCallback,
                 GoogleMap.OnPoiClickListener,
                 GoogleMap.OnMarkerClickListener
@@ -98,11 +98,29 @@ public class MapsActivity
     private CameraPosition mCameraPosition;
 
     // Map elements
-    private Marker mMarker;
     private boolean mIsPolyDrawing;
     private Polyline mPolyLine;
     private List<Polygon> mPolyList = new ArrayList<>();
     private View mInfoWindow;
+
+    private Marker mMarker;
+    private MarkerContents mMarkerContents = new MarkerContents();
+    private class MarkerContents {
+        Address address;
+        JSONObject weather;
+
+        MarkerContents() {}
+
+        MarkerContents(Address address, JSONObject weather) {
+            this.address = address;
+            this.weather = weather;
+        }
+
+        void clear() {
+            address = null;
+            weather = null;
+        }
+    }
 
     // OpenWeatherMaps
     private Map<String, TileOverlay> mTileOverlayMap;
@@ -152,12 +170,12 @@ public class MapsActivity
         Location lastBestLocation = PAWSAPI.getLastBestLocation(sharedPref);
         if (lastBestLocation != null)
             ((TextView)mInfoWindow.findViewById(R.id.txtInfoDistance)).setText(
-                    PAWSAPI.getDistanceString(isMetric,
+                    PAWSAPI.getLongDistanceString(isMetric,
                             lastBestLocation.distanceTo(selectedLocation)));
 
         // Body text - Place and weather summary
-        ((TextView)mInfoWindow.findViewById(R.id.txtInfoContent)).setText(
-                marker.getSnippet());
+
+        //((TextView)mInfoWindow.findViewById(R.id.txtInfoContent)).setText(marker.getSnippet());
 
         // todo: check for favourite location
         try {
@@ -436,33 +454,34 @@ public class MapsActivity
         // todo: redirect marker to nearest location when address invalid or null
     }
 
-    private void placeNewMarker(ArrayList<Address> addressResults) {
+    private void placeNewMarker(MarkerContents markerContents) {
         try {
-            if (addressResults == null || addressResults.size() <= 0)
+            if (markerContents == null
+                    || markerContents.address == null || markerContents.weather == null)
                 return;
 
             // Values outside of Australia are excluded and ignored
-            final Address address = addressResults.get(0);
-            if (!address.getCountryCode().equals("AU"))
+            if (!mMarkerContents.address.getCountryCode().equals("AU"))
                 return;
 
-            mSelectedAddress = address;
+            mSelectedAddress = mMarkerContents.address;
 
             // Remove existing marker
             if (mMarker != null)
                 mMarker.remove();
 
             // Place a new marker on the held location and move the camera
-            final LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            final LatLng latLng = new LatLng(
+                    mMarkerContents.address.getLatitude(), mMarkerContents.address.getLongitude());
             mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
 
             // Update the global location information
             mSelectedLocation = new Location(LocationManager.GPS_PROVIDER);
-            mSelectedLocation.setLatitude(address.getLatitude());
-            mSelectedLocation.setLongitude(address.getLongitude());
+            mSelectedLocation.setLatitude(mMarkerContents.address.getLatitude());
+            mSelectedLocation.setLongitude(mMarkerContents.address.getLongitude());
 
             // Update activity
-            updateLocationDisplay(address);
+            updateLocationDisplay(mMarkerContents);
         } catch (NullPointerException ex) {
             Log.e(TAG, "Failed to generate marker from null address.");
             ex.printStackTrace();
@@ -617,7 +636,7 @@ public class MapsActivity
                 layer, new UrlTileProvider(MAP_TILE_WIDTH, MAP_TILE_WIDTH) {
                     @Override
                     public URL getTileUrl(int x, int y, int zoom) {
-                        String url = OpenWeatherMapIntegration.getOWMTileURL(layer, x, y, zoom);
+                        String url = OpenWeatherIntegration.getOpenWeatherTileURL(layer, x, y, zoom);
                         try {
                             return new URL(url);
                         } catch (MalformedURLException ex) {
@@ -716,7 +735,7 @@ public class MapsActivity
 					SharedPreferences sharedPref = PreferenceManager
                             .getDefaultSharedPreferences(this);
 					JSONObject positionJson = new JSONObject(sharedPref.getString(
-							PrefKeys.last_best_position, PrefConstValues.empty_json_object));
+							PrefKeys.last_best_lat_lng, PrefConstValues.empty_json_object));
 					if (positionJson.length() == 0) {
 					    mServiceHandler.service().awaitLocation(this);
 						Log.e(TAG, "Failed to read last best location.");
@@ -808,7 +827,26 @@ public class MapsActivity
 
     @Override
     public void onAddressReceived(ArrayList<Address> addressResults) {
-        placeNewMarker(addressResults);
+        // Update marker with address from address handler
+        mMarkerContents.address = addressResults.get(0);
+        // Fetch location weather data for marker
+        new WillyWeatherHandler(this, this).awaitWeatherUpdate(
+                WeatherHandler.REQUEST_WILLY_FORECAST, mMarkerContents.address,
+                "?days=1&forecasts=uv");
+    }
+
+    @Override
+    public void onWeatherReceived(final int requestCode, String response) {
+        if (requestCode == WeatherHandler.REQUEST_WILLY_SUMMARY) {
+            // todo: weather received routines
+        } else if (requestCode == WeatherHandler.REQUEST_WILLY_FORECAST) {
+            try {
+                mMarkerContents.weather = new JSONObject(response);
+                placeNewMarker(mMarkerContents);
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
 	private LatLng getLatLngFromIntent(Bundle extras) {
@@ -819,7 +857,7 @@ public class MapsActivity
 		return latLng;
 	}
 
-    private void updateLocationDisplay(Address address) {
+    private void updateLocationDisplay(MarkerContents markerContents) {
         Log.d(TAG, "updateLocationDisplay");
         String str;
 
@@ -834,14 +872,15 @@ public class MapsActivity
         // Add marker info
         ((TextView)findViewById(R.id.txtSheetTitle)).setText("");
         ((TextView)findViewById(R.id.txtSheetCoordinates)).setText("");
-        if (address != null) {
+
+        if (markerContents.address != null) {
 
             // Set the location title
             // eg. 95 Iris St, Beacon Hill NSW 2100, Australia
             // ==> Beacon Hill NSW 2100
-            str = address.getLocality() +
-                    ", " + AddressHandler.getAustralianStateCode(address) +
-                    " " + address.getPostalCode();
+            str = markerContents.address.getLocality() +
+                    ", " + AddressHandler.getAustralianStateCode(markerContents.address) +
+                    " " + markerContents.address.getPostalCode();
             ((TextView)findViewById(R.id.txtSheetTitle)).setText(str);
 
             // Give address to the InfoWindow view to format
@@ -849,13 +888,33 @@ public class MapsActivity
 
             // todo: infowindow body text
             // Fill out body text summary for the location
-            str = getString(R.string.app_txt_placeholder);
-            mMarker.setSnippet("");
+
+            try {
+                JSONArray uvDaily = markerContents.weather.getJSONObject("forecasts")
+                        .getJSONObject("uv").getJSONArray("days").getJSONObject(0)
+                        .getJSONArray("entries");
+                JSONObject lowEntry = uvDaily.getJSONObject(0);
+                JSONObject highEntry = lowEntry;
+                for (int i = 0; i < uvDaily.length(); ++i) {
+                    int curIndex = uvDaily.getJSONObject(i).getInt("index");
+                    if (curIndex < lowEntry.getInt("index"))
+                        lowEntry = uvDaily.getJSONObject(i);
+                    if (curIndex > highEntry.getInt("index"))
+                        highEntry = uvDaily.getJSONObject(i);
+                }
+
+                // todo: uv index
+
+                mMarker.setSnippet("");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             mMarker.showInfoWindow();
 
             // Set the coordinates setupInfoWindow.
-            final double lng = address.getLongitude();
-            final double lat = address.getLatitude();
+            final double lng = markerContents.address.getLongitude();
+            final double lat = markerContents.address.getLatitude();
             final char bearingLng = lng > 0 ? 'E' : 'W';
             final char bearingLat = lat > 0 ? 'N' : 'S';
             str = new DecimalFormat("#.##").format(Math.abs(lng)) + " " + bearingLng
@@ -869,9 +928,12 @@ public class MapsActivity
 		Log.d(TAG, "in onServiceConnected()");
 
 		// Debug code: Reveal test buttons.
-		findViewById(R.id.btnDebugSendNotification).setOnClickListener(
-				this::debugSendNotification);
-		findViewById(R.id.btnDebugSendNotification).setVisibility(VISIBLE);
+        findViewById(R.id.btnDebugSendWeather).setOnClickListener(
+                this::debugSendWeather);
+        findViewById(R.id.btnDebugSendWeather).setVisibility(VISIBLE);
+        findViewById(R.id.btnDebugSendAlert).setOnClickListener(
+                this::debugSendAlert);
+        findViewById(R.id.btnDebugSendAlert).setVisibility(VISIBLE);
 		findViewById(R.id.btnDebugToggleLocation).setOnClickListener(
 				this::debugToggleLocation);
 		findViewById(R.id.btnDebugToggleLocation).setVisibility(VISIBLE);
@@ -884,10 +946,15 @@ public class MapsActivity
 			mServiceHandler.service().toggleLocationUpdates();
 	}
 
-	private void debugSendNotification(View view) {
-		Log.d(TAG, "in debugSendNotification()");
-		mServiceHandler.service().pushOneTimeWeatherNotification();
-	}
+    private void debugSendWeather(View view) {
+        Log.d(TAG, "in debugSendNotification()");
+        mServiceHandler.service().pushOneTimeWeatherNotification();
+    }
+
+    private void debugSendAlert(View view) {
+        Log.d(TAG, "in debugSendNotification()");
+        mServiceHandler.service().pushOneTimeAlertNotification();
+    }
 
 	private void debugToggleLocation(View view) {
 		Log.d(TAG, "in debugToggleLocation()");

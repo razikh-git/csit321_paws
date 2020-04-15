@@ -24,11 +24,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 
 public class DailyWeatherWorker
         extends Worker
         implements WeatherHandler.WeatherReceivedListener {
-    private static final String TAG = PrefConstValues.tag_prefix + "dww";
+    private static final String TAG = PrefConstValues.tag_prefix + "worker_weather";
 
     private static final int WEATHER_ID = 1338;
     private static final String WEATHER_TAG = "paws_weather_channel";
@@ -65,7 +66,6 @@ public class DailyWeatherWorker
 
         if (timeUntilStart < 0 && timeUntilEnd > 0) {
             Log.d(TAG, "Within hourly bounds for sending notification.");
-
             try {
                 final JSONObject debugJSON = new JSONObject(mSharedPref.getString(
                         PrefKeys.last_weather_json, PrefConstValues.empty_json_object))
@@ -73,11 +73,10 @@ public class DailyWeatherWorker
                 final LatLng latLng = new LatLng(debugJSON.getDouble("latitude"),
                         debugJSON.getDouble("longitude"));
                 Log.d(TAG, "Weather Notification URL: " +
-                        OpenWeatherMapIntegration.getOWMWeatherURL(
+                        OpenWeatherIntegration.getOpenWeatherURL(
                                 mContext, latLng, true));
 
-                if (!new WeatherHandler(this, mContext).awaitWeatherUpdate(
-                		latLng, PAWSAPI.preferredMetric(mSharedPref))) {
+                if (!new OpenWeatherHandler(this, mContext).awaitWeatherUpdate(latLng)) {
                     result = pushWeatherNotification();
                 }
             } catch (JSONException ex) {
@@ -93,7 +92,8 @@ public class DailyWeatherWorker
     }
 
     @Override
-    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
+    public void onWeatherReceived(int requestCode, String response) {
+        Log.d(TAG, "onWeatherReceived: " + response);
         pushWeatherNotification();
     }
 
@@ -112,6 +112,7 @@ public class DailyWeatherWorker
         final Notification notif = getWeatherNotification();
         if (notif == null)
             return Result.failure();
+        Log.d(TAG, "Pushing weather notification: " + notif.toString());
         manager.notify(WEATHER_TAG, WEATHER_ID, notif);
         return Result.success();
     }
@@ -129,12 +130,12 @@ public class DailyWeatherWorker
         // todo: mention whether there's a chance of rain later?
 
         final String notifTitle = mContext.getString(R.string.notif_title_weather);
-        String weatherTitle = "%s at %s";
-        String weatherMessage = "%s and %s"
+        String title = "%s at %s";
+        String message = "%s and %s"
                 + "\n\nWinds are %s %s."
                 + "\nDaily high and low temperatures of %s to %s."
                 + "\nCurrently feels like %s.";
-        Bitmap weatherIcon;
+        Bitmap icon;
 
         try {
             // Fetch the last best weather forecast from storage
@@ -158,27 +159,42 @@ public class DailyWeatherWorker
 
             // Update the daily weather values when the day passes
             // todo: ensure this is called for all common interval settings and notice time ranges
-            if (mDailyTemps == null || now - mLastDailySample >= 1000 * 60 * 60 * 24) {
-                final long startTime = mDailyTemps != null
-                        ? now + PAWSAPI.getTimeUntil(now, 0, 0)
-                        : now;
-                mDailyTemps = PAWSAPI.getDailyTemperatures(
-                        startTime, weatherJson.getJSONArray("list"));
-                mLastDailySample = now;
+            // todo: what the hell even is this
+            final long timeDifference = now - mLastDailySample;
+            final long msPerDay = 1000 * 60 * 60 * 24;
+            Log.d(TAG, "timeDifference=" + timeDifference + ", lastDailySample=" + mLastDailySample);
+            if (mLastDailySample == 0) {
+                Log.d(TAG, "No last daily sample exists.");
+            }
+            else if (timeDifference >= msPerDay) {
+                Log.d(TAG, "Last daily sample is "
+                        + (now - mLastDailySample)
+                        + "ms out of date "
+                        + "(" + msPerDay + "ms daily limit)");
+            } else {
+                Log.d(TAG, "Daily weather's up to date: out by " + timeDifference + "ms "
+                        + "(" + msPerDay + "ms daily limit)");
             }
 
+            final long startTime = mDailyTemps != null
+                    ? now + PAWSAPI.getTimeUntil(now, 0, 0)
+                    : now;
+            mDailyTemps = PAWSAPI.getDailyTemperatures(
+                    startTime, weatherJson.getJSONArray("list"));
+            mLastDailySample = now;
+
             // Set the notification icon for the coming weather conditions
-            weatherIcon = PAWSAPI.getWeatherBitmap(mContext,
+            icon = PAWSAPI.getWeatherBitmap(mContext,
                     timeJSON.getJSONArray("weather").getJSONObject(0)
                     .getString("icon"));
 
             // Format the notification with the coming weather data
             final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
-            weatherTitle = String.format(Locale.getDefault(), weatherTitle,
+            title = String.format(Locale.getDefault(), title,
                     weatherJson.getJSONObject("city").getString("name"),
                     DateFormat.format(
                             "h a", timeJSON.getLong("dt") * 1000));
-            weatherMessage = String.format(Locale.getDefault(), weatherMessage,
+            message = String.format(Locale.getDefault(), message,
 
                     // Weather summary
                     PAWSAPI.getTemperatureString(
@@ -207,7 +223,14 @@ public class DailyWeatherWorker
             Log.e(TAG, "Failed to initialise weather JSON object.");
             ex.printStackTrace();
             return null;
+        } catch (NoSuchElementException ex) {
+            Log.e(TAG, "Failed to read daily values from a null array.");
+            ex.printStackTrace();
+            return null;
         }
+
+        Log.d(TAG, "title: " + title);
+        Log.d(TAG, "message: " + message);
 
         // Assemble and build the notification
         PendingIntent contentIntent = PendingIntent.getActivity(
@@ -217,13 +240,13 @@ public class DailyWeatherWorker
                 mContext, WEATHER_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_paws_icon)
                 .setContentIntent(contentIntent)
-                .setContentTitle(weatherTitle)
-                .setContentText(weatherMessage.split("\n")[0])
-                .setLargeIcon(weatherIcon)
+                .setContentTitle(title)
+                .setContentText(message.split("\n")[0])
+                .setLargeIcon(icon)
                 .setStyle(new NotificationCompat.BigTextStyle()
-                        .setBigContentTitle(weatherTitle)
+                        .setBigContentTitle(title)
                         .setSummaryText(notifTitle)
-                        .bigText(weatherMessage))
+                        .bigText(message))
                 .setPriority(Notification.PRIORITY_DEFAULT);
         return builder.build();
     }

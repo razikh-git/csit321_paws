@@ -236,6 +236,53 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Tide/Swell graph card. -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="0dp">
+
+                <!-- Horizontal divider between scrollable and static elements. -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/app_spacing_large"
+                    android:layout_marginEnd="@dimen/app_spacing_large"
+                    android:background="@color/color_primary"
+                    android:alpha="0.75"
+                    android:visibility="gone"/>
+
+                <LinearLayout
+                    android:id="@+id/layChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:paddingStart="@dimen/app_spacing_medium"
+                    android:paddingEnd="@dimen/app_spacing_medium"
+                    android:paddingTop="@dimen/app_spacing_medium"
+                    android:paddingBottom="@dimen/app_spacing_large"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/txtChartTitle"
+                        style="@style/TextAppearance.Paws.Medium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:layout_gravity="center_horizontal"
+                        android:textColor="@color/color_primary_alt"/>
+
+                    <com.github.mikephil.charting.charts.CombinedChart
+                        android:id="@+id/chartTidesSwell"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/height_chart_feature"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Sunrise/Sunset card. -->
 
             <com.google.android.material.card.MaterialCardView
@@ -243,96 +290,96 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="0dp">
 
-            <!-- Horizontal divider between scrollable and static elements. -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="@dimen/app_spacing_large"
-                android:layout_marginEnd="@dimen/app_spacing_large"
-                android:background="@color/color_primary"
-                android:alpha="0.75"
-                android:visibility="gone"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:paddingStart="@dimen/app_spacing_medium"
-                android:paddingEnd="@dimen/app_spacing_medium"
-                android:paddingTop="@dimen/app_spacing_medium"
-                android:paddingBottom="@dimen/app_spacing_large"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="@dimen/dimen_icon_medium"
-                    android:layout_height="@dimen/dimen_icon_medium"
+                <!-- Horizontal divider between scrollable and static elements. -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/app_spacing_large"
                     android:layout_marginEnd="@dimen/app_spacing_large"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_sunset"/>
+                    android:background="@color/color_primary"
+                    android:alpha="0.75"
+                    android:visibility="gone"/>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:paddingStart="@dimen/app_spacing_medium"
+                    android:paddingEnd="@dimen/app_spacing_medium"
+                    android:paddingTop="@dimen/app_spacing_medium"
+                    android:paddingBottom="@dimen/app_spacing_large"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/dimen_icon_medium"
+                        android:layout_height="@dimen/dimen_icon_medium"
+                        android:layout_marginEnd="@dimen/app_spacing_large"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_sunset"/>
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:layout_marginEnd="@dimen/app_spacing_small"
-                            android:text="@string/wa_sunrise"
-                            android:textAlignment="center"
-                            android:textAppearance="@style/TextAppearance.Paws.Medium"/>
+                            android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/txtSunriseTime"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:layout_marginEnd="@dimen/app_spacing_small"
+                                android:text="@string/wa_sunrise"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
+
+                            <TextView
+                                android:id="@+id/txtSunriseTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textAlignment="center"
-                            android:textAppearance="@style/TextAppearance.Paws.Medium"/>
+                            android:layout_marginTop="@dimen/app_spacing_medium"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:layout_marginEnd="@dimen/app_spacing_small"
+                                android:text="@string/wa_sunset"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
+
+                            <TextView
+                                android:id="@+id/txtSunsetTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:textAlignment="center"
+                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/app_spacing_medium"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:layout_marginEnd="@dimen/app_spacing_small"
-                            android:text="@string/wa_sunset"
-                            android:textAlignment="center"
-                            android:textAppearance="@style/TextAppearance.Paws.Medium"/>
-
-                        <TextView
-                            android:id="@+id/txtSunsetTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textAlignment="center"
-                            android:textAppearance="@style/TextAppearance.Paws.Medium"/>
-
-                    </LinearLayout>
+                    <View
+                        android:layout_width="@dimen/dimen_icon_medium"
+                        android:layout_height="@dimen/dimen_icon_medium"
+                        android:layout_marginStart="@dimen/app_spacing_large"
+                        android:layout_gravity="center"/>
 
                 </LinearLayout>
-
-                <View
-                    android:layout_width="@dimen/dimen_icon_medium"
-                    android:layout_height="@dimen/dimen_icon_medium"
-                    android:layout_marginStart="@dimen/app_spacing_large"
-                    android:layout_gravity="center"/>
-
-            </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 

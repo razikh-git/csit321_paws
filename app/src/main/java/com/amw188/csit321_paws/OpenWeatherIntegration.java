@@ -9,13 +9,13 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Locale;
 
-class OpenWeatherMapIntegration {
+class OpenWeatherIntegration {
     private static final String app_url_owm_weather_root = "https://api.openweathermap.org/";
     private static final String app_url_owm_tile_root = "https://tile.openweathermap.org/map/";
 
     private static final String app_owm_api_key = "442dabf9a4b790d1198c03fbd0d31550";
 
-    static String getOWMWeatherURL(final Context context, final LatLng latLng, boolean isWeekly) {
+    static String getOpenWeatherURL(final Context context, final LatLng latLng, boolean isWeekly) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         final String units = sharedPref.getString(PrefKeys.units, PrefDefValues.units);
         return app_url_owm_weather_root
@@ -28,7 +28,7 @@ class OpenWeatherMapIntegration {
                 + "&appid=" + app_owm_api_key;
     }
 
-    static String getOWMTileURL(final String layer, final int x, final int y, final int zoom) {
+    static String getOpenWeatherTileURL(final String layer, final int x, final int y, final int zoom) {
         return String.format(Locale.US, "%s%s/%s/%d/%d.png?appid=%s",
                 app_url_owm_tile_root,
                 layer, zoom, x, y,

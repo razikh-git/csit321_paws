@@ -1,34 +1,47 @@
 package com.amw188.csit321_paws;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.card.MaterialCardView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 public class HomeActivity
-        extends LocationActivity
-        implements WeatherHandler.WeatherReceivedListener
+        extends
+			LocationActivity
+        implements
+			AddressHandler.AddressReceivedListener,
+			WeatherHandler.WeatherReceivedListener
 {
     private static final String TAG = PrefConstValues.tag_prefix + "a_home";
 
@@ -62,6 +75,7 @@ public class HomeActivity
             findViewById(R.id.cardWarningBanner).setOnClickListener(this::onClickProfiling);
             findViewById(R.id.cardWeather).setOnClickListener(this::onClickWeather);
             findViewById(R.id.cardMaps).setOnClickListener(this::onClickMaps);
+            findViewById(R.id.cardPlaces).setOnClickListener(this::onClickPlaces);
             findViewById(R.id.btnSettings).setOnClickListener(this::onClickSettings);
             findViewById(R.id.btnProfile).setOnClickListener(this::onClickProfiling);
             findViewById(R.id.btnHelp).setOnClickListener(this::onClickHelp);
@@ -237,8 +251,8 @@ public class HomeActivity
                 final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
                 LatLng latLng = new LatLng(
                         mSelectedLocation.getLatitude(), mSelectedLocation.getLongitude());
-                if (!new WeatherHandler(this, this).awaitWeatherUpdate(
-                        latLng, isMetric)) {
+                new AddressHandler(this, this).awaitAddress(latLng);
+                if (!new OpenWeatherHandler(this, this).awaitWeatherUpdate(latLng)) {
                     // Initialise weather displays with last best values if none are being updated
                     success = initWeatherDisplay(mSharedPref.getString(
                             PrefKeys.last_weather_json, PrefConstValues.empty_json_object));
@@ -309,17 +323,111 @@ public class HomeActivity
         return true;
     }
 
+	private boolean initNoticesDisplay(String response) {
+		Log.d(TAG, "welcome to initNoticesDisplay");
+
+		MaterialCardView cardView = findViewById(R.id.cardNotices);
+		ScrollView scrollView = findViewById(R.id.scrollNotices);
+		JSONArray warningJSON;
+
+		try {
+			warningJSON = new JSONArray(response);
+			if (warningJSON.length() == 0) {
+                Log.d(TAG, "No warnings found for this period.");
+                return true;
+            }
+			Log.d(TAG, "Found " + warningJSON.length() + " warnings.");
+
+			for (int i = 0; i < warningJSON.length(); ++i) {
+			    final JSONObject warningObj = warningJSON.getJSONObject(i);
+
+			    // Each element container has a horizontal layout for icon and info
+                LinearLayout elementLayout = new LinearLayout(this);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                elementLayout.setOrientation(LinearLayout.HORIZONTAL);
+                elementLayout.setLayoutParams(params);
+
+                // with the icon image on the left
+                ImageView imageView = new ImageView(this);
+                imageView.setImageDrawable(getDrawable(R.drawable.ic_warning));
+                imageView.setColorFilter(ContextCompat.getColor(this, R.color.color_error));
+                elementLayout.addView(imageView);
+
+                // and with info text in a vertical sublayout
+                LinearLayout subLayout = new LinearLayout(this);
+                LinearLayout.LayoutParams subParams = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+                subLayout.setOrientation(LinearLayout.VERTICAL);
+                subLayout.setLayoutParams(subParams);
+
+                // containing the name and time of the warning
+                TextView textTitle = new TextView(this, null,
+                        R.style.TextAppearance_Paws_Medium);
+                TextView textSubtitle = new TextView(this, null,
+                        R.style.TextAppearance_Paws_Caption);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd", Locale.getDefault());
+                final String timestampStart = sdf.format(Date.valueOf(warningObj.getString("issueDateTime")));
+                final String timestampEnd = sdf.format(Date.valueOf(warningObj.getString("endDateTime")));
+                final String title = String.format("%s",
+                        warningObj.getString("name"));
+                final String subtitle = String.format("%s – %s\n%s",
+                        timestampStart, timestampEnd,
+                        warningObj.getString("code"));
+
+                textTitle.setText(title);
+                textSubtitle.setText(subtitle);
+
+                elementLayout.addView(textTitle);
+                elementLayout.addView(textSubtitle);
+
+                cardView.addView(elementLayout);
+                scrollView.addView(cardView);
+            }
+			if (false) {
+			    TextView textView = new TextView(this);
+			    textView.setText("Statewide");
+			    MaterialCardView dividerCard = new MaterialCardView(this);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                dividerCard.setLayoutParams(params);
+                dividerCard.addView(textView);
+                dividerCard.setOnClickListener(this::onClickWarningItem);
+			    scrollView.addView(dividerCard);
+            }
+
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+	private void onClickWarningItem(View view) {
+        JSONObject warningJSON = (JSONObject) view.getTag();
+    }
+
     private void onClickWeather(View view) {
         // Redirect to Weather Activity
         Intent intent = new Intent(this, PlaceInfoActivity.class);
         startActivity(intent);
     }
 
-    private void onClickMaps(View view) {
-        // Redirect to Maps Activity
-        Intent intent = new Intent(this, MapsActivity.class);
-        startActivity(intent);
-    }
+	private void onClickMaps(View view) {
+		// Redirect to Maps Activity
+		Intent intent = new Intent(this, MapsActivity.class);
+		startActivity(intent);
+	}
+
+	private void onClickPlaces(View view) {
+		// Redirect to Place History Activity
+		Intent intent = new Intent(this, PlaceHistoryActivity.class);
+		startActivity(intent);
+	}
 
     private void onClickSettings(View view) {
         // Redirect to App Settings Activity
@@ -357,18 +465,29 @@ public class HomeActivity
      * Override of WeatherHandler.WeatherReceivedListener.
      * Called from WeatherHandler.getWeather in WeatherHandler.awaitWeatherUpdate.
      * Acts on the weather forecast for the coming week.
-     * Updates weather display fields in the activity, and handles
-     * weather update notifictions from the service.
-     * @param latLng Latitude/longitude of weather data batch.
+     * Updates weather display fields in the activity, and handles weather update notifictions from services.
      * @param response Incredibly long string containing weather 5-day forecast.
-     * @param isMetric Metric or imperial measurements.
      */
     @Override
-    public void onWeatherReceived(LatLng latLng, String response, boolean isMetric) {
-        initWeatherDisplay(response);
+    public void onWeatherReceived(int requestCode, String response) {
+    	if (requestCode == WeatherHandler.REQUEST_OPEN_WEATHER) {
+			initWeatherDisplay(response);
+		}
+    	else if (requestCode == WeatherHandler.REQUEST_WILLY_WARNING) {
+			if (!initNoticesDisplay(response)) {
+				Log.e(TAG, "Failed to update notice elements.");
+			}
+		}
     }
 
-    /**
+	@Override
+	public void onAddressReceived(ArrayList<Address> addressResults) {
+		new WillyWeatherHandler(this, this).awaitWeatherUpdate(
+				WeatherHandler.REQUEST_WILLY_WARNING, addressResults.get(0),
+				"?days=5");
+	}
+
+	/**
      * Override of LocationActivity.onLocationReceived.
      * Called from LocationActivity.awaitLocation.
      * Redirects to initLocationDisplay to update data displays in the activity.
