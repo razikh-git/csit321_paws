@@ -8,13 +8,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.os.ResultReceiver;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
 class AddressHandler {
-	private static final String TAG = PrefConstValues.tag_prefix + "_h_a";
+	private static final String TAG = PrefConstValues.tag_prefix + "h_a";
 
 	private Context mContext;
 	private AddressHandler.AddressReceivedListener mHostListener;
@@ -45,6 +46,8 @@ class AddressHandler {
 						Log.d(TAG, address.getAddressLine(i));
 
 				mHostListener.onAddressReceived(addressResults);
+			} else {
+				Toast.makeText(mContext, error, Toast.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -68,17 +71,42 @@ class AddressHandler {
 	}
 
 	static String getAustralianStateCode(final Address address) {
-		Log.d(TAG, "Address: " + address.toString());
-		final int areaInfoIndex = address.getAddressLine(0).length() > 2
-				? 1 : 0;
-		final String[] area = address.getAddressLine(0)
-				.split(", ")[areaInfoIndex]
-				.split(" ");
-		final int stateCodeIndex = area.length < 2
-				? area.length - 1 : area.length - 2 ;
-		if (area.length > 0)
-			return area[stateCodeIndex];
-		return null;
+
+		String stateCode;
+		final String stateName = address.getAdminArea();
+		switch (stateName) {
+			case "New South Wales":
+				stateCode = "NSW";
+				break;
+			case "Victoria":
+				stateCode = "VIC";
+				break;
+			case "Tasmania":
+				stateCode = "TAS";
+				break;
+			case "Queensland":
+				stateCode = "QLD";
+				break;
+			case "South Australia":
+				stateCode = "SA";
+				break;
+			case "Western Australia":
+				stateCode = "WA";
+				break;
+			case "Northern Territory":
+				stateCode = "NT";
+				break;
+			case "Australian Capital Territory":
+				stateCode = "ACT";
+				break;
+			default:
+				stateCode = "";
+				break;
+		}
+		Log.d(TAG, "getAustralianStateCode:\n"
+				+ "Address: " + address.toString() + "\n"
+				+ "State: " + stateName + " (" + stateCode + ")");
+		return stateCode;
 	}
 
 	static String getBestAddressTitle(final Address address) {
@@ -110,7 +138,8 @@ class AddressHandler {
 	void awaitAddress(final Location location) {
 		AddressReceiver addressReceiver =
 				new AddressHandler.AddressReceiver(new Handler());
-		FetchAddressIntentService.startActionFetchAddress(
+		Log.w(TAG, "mContext is null: " + (mContext == null));
+		new FetchAddressIntentService().startActionFetchAddress(
 				mContext, addressReceiver, location);
 	}
 }
