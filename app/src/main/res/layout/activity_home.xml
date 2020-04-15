@@ -69,6 +69,8 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Scrollable home screen contents. -->
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -293,114 +295,192 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Vertical layout for all home screen
+            elements after the weather preview. -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipChildren="false"
                 android:orientation="vertical">
 
-                <!-- Mapping Button. -->
-
+                <!-- Outstanding weather alerts and warnings card. -->
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardMaps"
+                    android:id="@+id/cardNotices"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/app_spacing_huge">
-
+                    android:layout_marginTop="@dimen/app_spacing_large"
+                    android:layout_marginLeft="@dimen/app_spacing_medium"
+                    android:layout_marginRight="@dimen/app_spacing_medium">
+                    
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical">
 
+                        <!-- Heading text. -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:paddingStart="@dimen/app_spacing_huge"
-                            android:background="@color/color_primary_alt">
+                            android:padding="@dimen/app_spacing_medium"
+                            android:background="@color/color_primary">
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:paddingTop="@dimen/app_spacing_large"
-                                android:paddingBottom="@dimen/app_spacing_medium"
-                                android:text="@string/home_card_maps_title"
+                                android:textAppearance="@style/TextAppearance.Paws.Large"
+                                android:textColor="@color/color_on_primary"
                                 android:textAlignment="viewStart"
-                                android:textAppearance="@style/TextAppearance.Paws.Huge"
-                                android:textColor="@color/color_on_primary"/>
+                                android:text="Notices"/>
 
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:paddingTop="@dimen/app_spacing_tiny"
-                            android:paddingBottom="@dimen/app_spacing_tiny"
-                            android:background="@color/color_primary"
-                            android:orientation="horizontal">
+                            android:padding="@dimen/app_spacing_medium">
 
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_weight="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Caption"
-                                android:textAlignment="center"
-                                android:textColor="@color/color_on_primary"
-                                android:text="@string/home_card_maps_subtitle_1"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_weight="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Caption"
-                                android:textAlignment="center"
-                                android:textColor="@color/color_on_primary"
-                                android:text="@string/home_card_maps_subtitle_2"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:layout_weight="1"
-                                android:textAppearance="@style/TextAppearance.Paws.Caption"
-                                android:textAlignment="center"
-                                android:textColor="@color/color_on_primary"
-                                android:text="@string/home_card_maps_subtitle_3"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:paddingTop="@dimen/app_spacing_large"
-                            android:paddingStart="@dimen/app_spacing_large"
-                            android:paddingEnd="@dimen/app_spacing_large"
-                            android:orientation="vertical">
-
-                            <TextView
+                            <ScrollView
+                                android:id="@+id/scrollNotices"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="@string/home_card_maps_info_large"
-                                android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Medium"/>
+                                android:maxHeight="@dimen/app_spacing_immense">
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="@string/home_card_maps_info_small"
-                                android:textAlignment="center"
-                                android:textAppearance="@style/TextAppearance.Paws.Small"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAppearance="@style/TextAppearance.Paws.Medium"
+                                    android:text="There are no outstanding weather alerts for your area."/>
+
+                            </ScrollView>
 
                         </LinearLayout>
 
                     </LinearLayout>
-
+                    
                 </com.google.android.material.card.MaterialCardView>
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/app_spacing_large"
+                    android:layout_marginLeft="@dimen/app_spacing_medium"
+                    android:layout_marginRight="@dimen/app_spacing_medium"
+                    android:orientation="horizontal">
+
+                    <!-- Maps redirect button. -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardMaps"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@color/color_primary_alt">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:paddingTop="@dimen/app_spacing_large"
+                                    android:paddingBottom="@dimen/app_spacing_medium"
+                                    android:text="Maps"
+                                    android:textAppearance="@style/TextAppearance.Paws.Huge"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/color_on_primary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="@dimen/app_spacing_tiny"
+                                android:paddingBottom="@dimen/app_spacing_tiny"
+                                android:background="@color/color_primary"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_weight="1"
+                                    android:textAppearance="@style/TextAppearance.Paws.Caption"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/color_on_primary"
+                                    android:text="Weather and surf maps"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <View
+                        android:layout_width="@dimen/app_spacing_medium"
+                        android:layout_height="match_parent"/>
+
+                    <!-- Place history redirect button. -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardPlaces"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@color/color_primary_alt">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:paddingTop="@dimen/app_spacing_large"
+                                    android:paddingBottom="@dimen/app_spacing_medium"
+                                    android:text="Places"
+                                    android:textAppearance="@style/TextAppearance.Paws.Huge"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/color_on_primary"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="@dimen/app_spacing_tiny"
+                                android:paddingBottom="@dimen/app_spacing_tiny"
+                                android:background="@color/color_primary"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_weight="1"
+                                    android:textAppearance="@style/TextAppearance.Paws.Caption"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/color_on_primary"
+                                    android:text="Where you've been"/>
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
 
                 <!-- Settings and Profile Container. -->
 
@@ -426,7 +506,7 @@
                             android:layout_height="@dimen/height_home_cards"
                             android:layout_margin="@dimen/app_spacing_medium"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/color_primary"
+                            android:backgroundTint="@color/color_primary_alt"
                             android:tint="@color/color_on_primary"
                             android:scaleType="fitCenter"
                             android:src="@drawable/ic_settings_box"/>
@@ -439,7 +519,7 @@
                             android:layout_height="@dimen/height_home_cards"
                             android:layout_margin="@dimen/app_spacing_medium"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/color_primary"
+                            android:backgroundTint="@color/color_primary_alt"
                             android:tint="@color/color_on_primary"
                             android:scaleType="fitCenter"
                             android:src="@drawable/ic_account_box"/>
@@ -452,7 +532,7 @@
                             android:layout_height="@dimen/height_home_cards"
                             android:layout_margin="@dimen/app_spacing_medium"
                             android:layout_weight="1"
-                            android:backgroundTint="@color/color_primary"
+                            android:backgroundTint="@color/color_primary_alt"
                             android:scaleType="fitCenter"
                             android:src="@drawable/ic_help_box"
                             android:tint="@color/color_on_primary"/>
