@@ -11,10 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.TextViewCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -24,8 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.Date;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -182,7 +181,7 @@ public class HomeActivity
             // Wind (speed)
             dbl = weatherForecastJSON.getJSONArray("list").getJSONObject(whichTime)
                     .getJSONObject("wind").getDouble("speed");
-            str = PAWSAPI.getWindSpeedString(dbl, isMetric);
+            str = PAWSAPI.getWindSpeedString(dbl, isMetric, false);
             ((TextView)findViewById(R.id.txtWindSpeed)).setText(str);
 
             // Wind (bearing)
@@ -327,16 +326,33 @@ public class HomeActivity
 		Log.d(TAG, "welcome to initNoticesDisplay");
 
 		MaterialCardView cardView = findViewById(R.id.cardNotices);
-		ScrollView scrollView = findViewById(R.id.scrollNotices);
+		LinearLayout parentLayout = findViewById(R.id.layNotices);
 		JSONArray warningJSON;
+
+		// Hide network failure notice
+        findViewById(R.id.txtNoticeUnavailable).setVisibility(GONE);
 
 		try {
 			warningJSON = new JSONArray(response);
 			if (warningJSON.length() == 0) {
                 Log.d(TAG, "No warnings found for this period.");
+
+                TextView textView = new TextView(this);
+                TextViewCompat.setTextAppearance(textView, R.style.TextAppearance_Paws_Medium);
+                textView.setTextColor(ContextCompat.getColor(this, R.color.color_on_background));
+                textView.setText("No weather warnings are issued for your places at this time.");
+                textView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+
+                parentLayout.addView(textView);
+
                 return true;
             }
 			Log.d(TAG, "Found " + warningJSON.length() + " warnings.");
+
+            findViewById(R.id.layNoticesHeader).setBackgroundColor(
+                    ContextCompat.getColor(this, R.color.color_secondary));
+			cardView.setStrokeColor(ContextCompat.getColor(this, R.color.color_secondary));
+			cardView.setStrokeWidth(2);
 
 			for (int i = 0; i < warningJSON.length(); ++i) {
 			    final JSONObject warningObj = warningJSON.getJSONObject(i);
@@ -349,43 +365,68 @@ public class HomeActivity
                 elementLayout.setOrientation(LinearLayout.HORIZONTAL);
                 elementLayout.setLayoutParams(params);
 
+                // with a clicky to view the full warning
+                elementLayout.setTag(warningObj);
+                elementLayout.setOnClickListener(this::onClickWarningItem);
+
                 // with the icon image on the left
+                final int dimen = Math.round(getResources().getDimension(R.dimen.dimen_icon_medium));
+                params = new LinearLayout.LayoutParams(dimen, dimen);
+                params.topMargin = Math.round(getResources().getDimension(R.dimen.text_size_medium));
                 ImageView imageView = new ImageView(this);
+                imageView.setLayoutParams(params);
                 imageView.setImageDrawable(getDrawable(R.drawable.ic_warning));
-                imageView.setColorFilter(ContextCompat.getColor(this, R.color.color_error));
+                imageView.setColorFilter(ContextCompat.getColor(this, R.color.color_secondary));
                 elementLayout.addView(imageView);
 
                 // and with info text in a vertical sublayout
+                final int margin = Math.round(getResources().getDimension(R.dimen.app_spacing_medium));
                 LinearLayout subLayout = new LinearLayout(this);
                 LinearLayout.LayoutParams subParams = new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT);
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.rightMargin = margin;
                 subLayout.setOrientation(LinearLayout.VERTICAL);
                 subLayout.setLayoutParams(subParams);
 
                 // containing the name and time of the warning
-                TextView textTitle = new TextView(this, null,
-                        R.style.TextAppearance_Paws_Medium);
-                TextView textSubtitle = new TextView(this, null,
-                        R.style.TextAppearance_Paws_Caption);
+                TextView textTitle = new TextView(this);
+                TextView textSubtitle = new TextView(this);
+                TextView textId = new TextView(this);
+                TextViewCompat.setTextAppearance(textTitle, R.style.TextAppearance_Paws_Medium);
+                TextViewCompat.setTextAppearance(textSubtitle, R.style.TextAppearance_Paws_Medium);
+                TextViewCompat.setTextAppearance(textId, R.style.TextAppearance_Paws_Caption);
+                textSubtitle.setTextColor(ContextCompat.getColor(this, R.color.color_secondary));
+                //textId.setTextSize(getResources().getDimension(R.dimen.text_size_tiny));
 
                 SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd", Locale.getDefault());
-                final String timestampStart = sdf.format(Date.valueOf(warningObj.getString("issueDateTime")));
-                final String timestampEnd = sdf.format(Date.valueOf(warningObj.getString("endDateTime")));
+                final String timestampStart = sdf.format(
+                        PAWSAPI.parseWillyTimestamp(warningObj.getString("issueDateTime")));
+                final String timestampEnd = sdf.format(
+                        PAWSAPI.parseWillyTimestamp(warningObj.getString("expireDateTime")));
                 final String title = String.format("%s",
                         warningObj.getString("name"));
-                final String subtitle = String.format("%s – %s\n%s",
-                        timestampStart, timestampEnd,
+                final String subtitle = String.format("%s – %s",
+                        timestampStart, timestampEnd);
+                final String id = String.format("%s",
                         warningObj.getString("code"));
 
                 textTitle.setText(title);
                 textSubtitle.setText(subtitle);
+                textId.setText(id);
 
-                elementLayout.addView(textTitle);
-                elementLayout.addView(textSubtitle);
+                subLayout.addView(textTitle);
+                subLayout.addView(textSubtitle);
+                subLayout.addView(textId);
+                elementLayout.addView(subLayout);
 
-                cardView.addView(elementLayout);
-                scrollView.addView(cardView);
+                parentLayout.addView(elementLayout);
+
+                // Add dividers between elements
+                if (i != warningJSON.length() - 1) {
+                    parentLayout.addView(PAWSAPI.getDividerLineView(this,
+                                    true, R.color.color_on_background));
+                }
             }
 			if (false) {
 			    TextView textView = new TextView(this);
@@ -396,8 +437,7 @@ public class HomeActivity
                         ViewGroup.LayoutParams.WRAP_CONTENT);
                 dividerCard.setLayoutParams(params);
                 dividerCard.addView(textView);
-                dividerCard.setOnClickListener(this::onClickWarningItem);
-			    scrollView.addView(dividerCard);
+                parentLayout.addView(dividerCard);
             }
 
 		} catch (JSONException ex) {
@@ -409,6 +449,12 @@ public class HomeActivity
 
 	private void onClickWarningItem(View view) {
         JSONObject warningJSON = (JSONObject) view.getTag();
+        try {
+            final String title = warningJSON.getString("name");
+            Toast.makeText(this, "clicky on " + title, Toast.LENGTH_LONG).show();
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void onClickWeather(View view) {

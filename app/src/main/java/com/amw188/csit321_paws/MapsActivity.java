@@ -712,7 +712,7 @@ public class MapsActivity
 
         // Setup map polyline graphics
         PolylineOptions polyOptions = new PolylineOptions();
-        polyOptions.color(ContextCompat.getColor(this, R.color.color_error));
+        polyOptions.color(ContextCompat.getColor(this, R.color.color_secondary));
         polyOptions.pattern(Arrays.asList(
                 new Dash(DASH_WIDTH), new Gap(GAP_WIDTH)
         ));
@@ -928,15 +928,18 @@ public class MapsActivity
 		Log.d(TAG, "in onServiceConnected()");
 
 		// Debug code: Reveal test buttons.
-        findViewById(R.id.btnDebugSendWeather).setOnClickListener(
-                this::debugSendWeather);
-        findViewById(R.id.btnDebugSendWeather).setVisibility(VISIBLE);
-        findViewById(R.id.btnDebugSendAlert).setOnClickListener(
-                this::debugSendAlert);
-        findViewById(R.id.btnDebugSendAlert).setVisibility(VISIBLE);
-		findViewById(R.id.btnDebugToggleLocation).setOnClickListener(
-				this::debugToggleLocation);
-		findViewById(R.id.btnDebugToggleLocation).setVisibility(VISIBLE);
+        if (PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(PrefKeys.debug_mode, false)) {
+            findViewById(R.id.btnDebugSendWeather).setOnClickListener(
+                    this::debugSendWeather);
+            findViewById(R.id.btnDebugSendWeather).setVisibility(VISIBLE);
+            findViewById(R.id.btnDebugSendAlert).setOnClickListener(
+                    this::debugSendAlert);
+            findViewById(R.id.btnDebugSendAlert).setVisibility(VISIBLE);
+            findViewById(R.id.btnDebugToggleLocation).setOnClickListener(
+                    this::debugToggleLocation);
+            findViewById(R.id.btnDebugToggleLocation).setVisibility(VISIBLE);
+        }
 	}
 
 	@Override

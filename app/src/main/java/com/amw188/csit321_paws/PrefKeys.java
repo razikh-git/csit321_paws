@@ -1,8 +1,11 @@
 package com.amw188.csit321_paws;
 
+import com.android.volley.toolbox.StringRequest;
+
 final class PrefKeys {
 	// App
 	final static String app_init = "app_init";
+	final static String debug_mode = "debug_mode";
 
 	// General
 	final static String units = "units";

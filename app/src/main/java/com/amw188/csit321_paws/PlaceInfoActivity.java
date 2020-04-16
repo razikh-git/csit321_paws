@@ -2,6 +2,7 @@ package com.amw188.csit321_paws;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.location.Address;
 import android.location.Location;
@@ -10,6 +11,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,28 +21,24 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
-import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.interfaces.dataprovider.BarDataProvider;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
-import com.github.mikephil.charting.renderer.BarChartRenderer;
-import com.github.mikephil.charting.renderer.CombinedChartRenderer;
-import com.github.mikephil.charting.renderer.DataRenderer;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.renderer.LineChartRenderer;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.card.MaterialCardView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,7 +46,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 public class PlaceInfoActivity
         extends BottomNavBarActivity
@@ -156,7 +153,7 @@ public class PlaceInfoActivity
         // Call and await an update to tidal info from WillyWeather
         new WillyWeatherHandler(this, this).awaitWeatherUpdate(
                 WeatherHandler.REQUEST_WILLY_FORECAST, addressResults.get(0),
-				"?days=2&forecasts=tides,swell");
+				"?days=2&forecasts=wind,tides,swell");
     }
 
     @Override
@@ -164,7 +161,9 @@ public class PlaceInfoActivity
         try {
             if (requestCode == WeatherHandler.REQUEST_WILLY_FORECAST) {
                 JSONObject forecastJSON = new JSONObject(response).getJSONObject("forecasts");
-                if (forecastJSON.has("tides") && forecastJSON.has("swell"))
+                if (forecastJSON.has("wind")
+						&& forecastJSON.has("tides")
+						&& forecastJSON.has("swell"))
                     initWeatherCharts(new JSONObject(response));
                 else
                     findViewById(R.id.layChart).setVisibility(View.GONE);
@@ -305,7 +304,7 @@ public class PlaceInfoActivity
 			c.restore();
 		}
 	}
-
+/*
 	public static class CustomBarChartRenderer extends BarChartRenderer {
 
 		private List<Float> SwellDirections = new ArrayList<>();
@@ -337,7 +336,7 @@ public class PlaceInfoActivity
 			Index = ++Index % SwellDirections.size();
 		}
 	}
-
+*/
     private LineDataSet applyStyleToDataSet(LineDataSet dataSet) {
         final int fillAlpha = 80;
         final float lineRigidity = 0.2f;
@@ -365,25 +364,26 @@ public class PlaceInfoActivity
 
         LinearLayout parentLayout = findViewById(R.id.layChart);
         parentLayout.setVisibility(View.VISIBLE);
-        CombinedChart chart = findViewById(R.id.chartTidesSwell);
+        LineChart chart = findViewById(R.id.chartTidesSwell);
 
         // Parse data from forecast JSON
-        //List<ILineDataSet> dataSetList = new ArrayList<>();
+        List<ILineDataSet> dataSetList = new ArrayList<>();
         LineDataSet tideDataSet
                 //= getTidalDataSet(forecastJSON)
                 ;
-        BarDataSet swellDataSet
+		LineDataSet swellDataSet
                 //= getSwellDataSet(forecastJSON)
                 ;
 
         // todo: return solution to method
-        Random random = new Random();
         List<Entry> tideEntries = new ArrayList<>();
-        List<BarEntry> swellEntries = new ArrayList<>();
-		List<Float> swellDirections = new ArrayList<>();
+        List<Entry> swellEntries = new ArrayList<>();
+		List<JSONObject> swellInfo = new ArrayList<>();
+		List<JSONObject> windInfo = new ArrayList<>();
         try {
 			JSONObject swellJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("swell");
-            JSONObject tidesJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("tides");
+			JSONObject tidesJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("tides");
+			JSONObject windJSON = forecastJSON.getJSONObject("forecasts").getJSONObject("wind");
 
             // Populate data for chart
 			final int swellCount = swellJSON.getJSONArray("days").getJSONObject(0)
@@ -395,11 +395,13 @@ public class PlaceInfoActivity
 
             for (int i = 0; i < tidesCount; ++i) {
                 // Populate each data set to match their entry counts
-				final int swellIndex = i * swellCount / tidesCount;
+				final int periodIndex = i * swellCount / tidesCount;
 				final JSONObject tideEntryJSON = tidesJSON.getJSONArray("days").getJSONObject(0)
 						.getJSONArray("entries").getJSONObject(i);
 				final JSONObject swellEntryJSON = swellJSON.getJSONArray("days").getJSONObject(0)
-						.getJSONArray("entries").getJSONObject(swellIndex);
+						.getJSONArray("entries").getJSONObject(periodIndex);
+				final JSONObject windEntryJSON = windJSON.getJSONArray("days").getJSONObject(0)
+						.getJSONArray("entries").getJSONObject(periodIndex);
 				final Entry tideEntry = new Entry(
 						(float) i,
 						(float) tideEntryJSON.getDouble("height"));
@@ -408,21 +410,25 @@ public class PlaceInfoActivity
 						(float) swellEntryJSON.getDouble("height"));
 				tideEntries.add(tideEntry);
 				swellEntries.add(swellEntry);
-				swellDirections.add((float) swellEntryJSON.getDouble("direction"));
-				//Log.d(TAG, String.format("Adding entry to tides/swell: i=%s swellIndex=%s tide=%s swell=%s", i, swellIndex, tideEntry.getY(), swellEntry.getY()));
+				swellInfo.add(swellEntryJSON);
+				windInfo.add(windEntryJSON);
+				//Log.d(TAG, String.format("Adding entry to tides/swell: i=%s periodIndex=%s tide=%s swell=%s", i, periodIndex, tideEntry.getY(), swellEntry.getY()));
             }
 
             // Add a final entry to bring the data set up to the next morning
             final JSONObject tideEntryJSON = tidesJSON.getJSONArray("days").getJSONObject(1)
                     .getJSONArray("entries").getJSONObject(0);
-            final JSONObject swellEntryJSON = swellJSON.getJSONArray("days").getJSONObject(0)
-                    .getJSONArray("entries").getJSONObject(0);
+			final JSONObject swellEntryJSON = swellJSON.getJSONArray("days").getJSONObject(0)
+					.getJSONArray("entries").getJSONObject(0);
+			final JSONObject windEntryJSON = windJSON.getJSONArray("days").getJSONObject(0)
+					.getJSONArray("entries").getJSONObject(0);
             final Entry tideEntry = new Entry((float) tidesCount, (float) tideEntryJSON.getDouble("height"));
 			final BarEntry swellEntry = new BarEntry((float) tidesCount, (float) swellEntryJSON.getDouble("height"));
-			final float value = (float) swellEntryJSON.getDouble("direction");
+			//final float value = (float) swellEntryJSON.getDouble("direction");
 			tideEntries.add(tideEntry);
             swellEntries.add(swellEntry);
-            swellDirections.add(value);
+            swellInfo.add(swellEntryJSON);
+            windInfo.add(windEntryJSON);
 			//Log.d(TAG, String.format("Adding entry to tides/swell: i=%s swellIndex=%s tide=%s swell=%s", 0, 0, tideEntry.getY(), swellEntry.getY()));
         } catch (JSONException ex) {
             ex.printStackTrace();
@@ -430,38 +436,34 @@ public class PlaceInfoActivity
         }
         //return new LineDataSet(entries, getString(R.string.wa_chart_tides_label));
         tideDataSet = new LineDataSet(tideEntries, getString(R.string.wa_chart_tides_label));
-        swellDataSet = new BarDataSet(swellEntries, getString(R.string.wa_chart_swell_label));
+        swellDataSet = new LineDataSet(swellEntries, getString(R.string.wa_chart_swell_label));
         // todo: return solution to method
 
         // Style data
-		final float barValueSize = 20f;
+		//final float barValueSize = 20f;
 
         tideDataSet = applyStyleToDataSet(tideDataSet);
-       	//swellDataSet = applyStyleToDataSet(swellDataSet);
+       	swellDataSet = applyStyleToDataSet(swellDataSet);
 
-        swellDataSet.setDrawIcons(true);
+        //swellDataSet.setDrawIcons(true);
 
         tideDataSet.setColor(ContextCompat.getColor(this, R.color.color_accent_alt));
         tideDataSet.setFillColor(ContextCompat.getColor(this, R.color.color_primary));
         tideDataSet.setCircleColor(ContextCompat.getColor(this, R.color.color_accent_alt));
+		tideDataSet.setDrawValues(false);
+		tideDataSet.setHighlightEnabled(false);
 
-        swellDataSet.setColor(ContextCompat.getColor(this, R.color.color_error));
-        swellDataSet.setValueTextSize(barValueSize);
-        //swellDataSet.setFillColor(ContextCompat.getColor(this, R.color.color_error));
-        //swellDataSet.setCircleColor(ContextCompat.getColor(this, R.color.color_error));
+        swellDataSet.setColor(ContextCompat.getColor(this, R.color.color_secondary));
+        swellDataSet.setFillColor(ContextCompat.getColor(this, R.color.color_secondary));
+        swellDataSet.setCircleColor(ContextCompat.getColor(this, R.color.color_secondary));
+		swellDataSet.setDrawValues(false);
+		swellDataSet.setHighlightEnabled(false);
 
         // Add both data sets as lines to the chart
-        //dataSetList.add(tideDataSet);
-        //dataSetList.add(swellDataSet);
-        //LineData lineData = new LineData(dataSetList);
-        LineData lineData = new LineData(tideDataSet);
-        lineData.setDrawValues(false);
-        BarData barData = new BarData(swellDataSet);
-        CombinedData combinedData = new CombinedData();
-        combinedData.setData(lineData);
-        combinedData.setData(barData);
-		combinedData.setHighlightEnabled(false);
-        chart.setData(combinedData);
+        dataSetList.add(tideDataSet);
+        dataSetList.add(swellDataSet);
+        LineData lineData = new LineData(dataSetList);
+		chart.setData(lineData);
         chart.setNoDataText(getString(R.string.wa_chart_no_data));
 
         List<String> axisLabelValues = getAxisLabelValues(forecastJSON);
@@ -479,66 +481,341 @@ public class PlaceInfoActivity
         };
 
         // Style chart axes
-        final int textColor = R.color.color_accent;
         final float labelTextSize = 14f;
 
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextSize(labelTextSize);
-        xAxis.setTextColor(textColor);
         xAxis.setDrawGridLines(false);
         xAxis.setValueFormatter(formatterX);
+        xAxis.setTextColor(ContextCompat.getColor(this, R.color.color_on_background));
 
         YAxis yAxis = chart.getAxisLeft();
         yAxis.setTextSize(labelTextSize);
-        xAxis.setTextColor(textColor);
         yAxis.setDrawGridLines(false);
         yAxis.setValueFormatter(formatterY);
+		yAxis.setTextColor(ContextCompat.getColor(this, R.color.color_on_background));
 
         chart.getAxisRight().setEnabled(false);
 
-		CombinedChartRenderer combinedRenderer = new CombinedChartRenderer(
-				chart, chart.getAnimator(), chart.getViewPortHandler());
 		CustomLineChartRenderer lineRenderer = new CustomLineChartRenderer(
 				chart, chart.getAnimator(), chart.getViewPortHandler());
-		CustomBarChartRenderer barRenderer = new CustomBarChartRenderer(
-				chart, chart.getAnimator(), chart.getViewPortHandler(),
-				swellDirections);
-		List<DataRenderer> subRenderers = new ArrayList<>();
-		subRenderers.add(barRenderer);
-		subRenderers.add(lineRenderer);
-		combinedRenderer.setSubRenderers(subRenderers);
-		chart.setRenderer(combinedRenderer);
+		chart.setRenderer(lineRenderer);
 
         chart.getXAxis().setLabelCount(axisLabelValues.size());
-        chart.getLegend().setTextSize(labelTextSize);
 
-        // Replace default chart label
+        // Style chart legend
+        chart.getLegend().setTextSize(labelTextSize);
+        chart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        chart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        chart.getLegend().setEnabled(false);
+
+        // Style custom chart label
         final String chartLabel = getString(R.string.wa_chart_title);
         ((TextView)findViewById(R.id.txtChartTitle)).setText(chartLabel);
-        Description desc = new Description();
+		final int nightMode = getResources().getConfiguration()
+				.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+		if (nightMode == Configuration.UI_MODE_NIGHT_YES)
+			((TextView)findViewById(R.id.txtChartTitle)).setTextColor(
+					ContextCompat.getColor(this, R.color.color_on_background));
+
+		Description desc = new Description();
         desc.setEnabled(false);
         chart.setDescription(desc);
 
-        // Update chart display
-		final float pad = 15f;
+        // Add the sample place name
+		try {
+			final String chartPlaceName = forecastJSON.getJSONObject("location").getString("name");
+			((TextView)findViewById(R.id.txtChartPlaceName)).setText(chartPlaceName);
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+		}
+
+		// Update chart display
+		final float padChart = getResources().getDimension(R.dimen.app_spacing_medium);
 		final float ratio = 0.5f;
         /*
         chart.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 height));
-        chart.setPadding(pad, pad, pad, pad);
+        chart.setPadding(padChart, padChart, padChart, padChart);
         */
 
         // Fit chart to screen, and fit data to chart
         chart.getXAxis().setAxisMinimum(-ratio);
         chart.getXAxis().setAxisMaximum(chart.getXAxis().mAxisMaximum + ratio);
-        chart.setExtraOffsets(pad, pad, pad, pad);
+        chart.setExtraOffsets(padChart, padChart / 2, padChart, padChart / 2);
         chart.setDoubleTapToZoomEnabled(false);
 
         chart.invalidate();
 
-        return true;
+		try {
+			// Add display for today's swell direction and wind direction
+
+			TextView textView;
+			LinearLayout.LayoutParams params;
+			final int pad = Math.round(getResources().getDimension(R.dimen.app_spacing_small));
+			final int padTiny = Math.round(getResources().getDimension(R.dimen.app_spacing_tiny));
+
+			// Swell data:
+
+			// Title
+			/*
+			params = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			textView = new TextView(this, null, R.style.TextAppearance_Paws_Medium);
+			textView.setTextColor(ContextCompat.getColor(this, R.color.color_on_background));
+			textView.setText("Swell and Period");
+			textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+			textView.setLayoutParams(params);
+			textView.setPadding(0, pad, 0, 0);
+			parentLayout.addView(textView);
+			*/
+
+			LinearLayout subLayout = new LinearLayout(this);
+			subLayout.setOrientation(LinearLayout.HORIZONTAL);
+			params = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			subLayout.setLayoutParams(params);
+			subLayout.setPadding(
+					//Math.round(getResources().getDimension(R.dimen.app_spacing_immense)),
+					0,
+					0,
+					Math.round(getResources().getDimension(R.dimen.app_spacing_huge)),
+					0);
+
+			// Add layout containing labels
+			LinearLayout labelsLayout = new LinearLayout(this);
+			labelsLayout.setOrientation(LinearLayout.VERTICAL);
+			params = new LinearLayout.LayoutParams(
+					Math.round(getResources().getDimension(R.dimen.app_spacing_immense)),
+					ViewGroup.LayoutParams.MATCH_PARENT);
+			labelsLayout.setLayoutParams(params);
+			labelsLayout.setPadding(
+					padTiny,
+					0,
+					padTiny,
+					0);
+
+			// Add tides title label in a coloured card
+			MaterialCardView cardView = new MaterialCardView(this);
+			cardView.setBackgroundColor(ContextCompat.getColor(this, R.color.color_ref_brand_alt));
+
+			LinearLayout cardLayout = new LinearLayout(this);
+
+			textView = new TextView(this);
+			params = new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.MATCH_PARENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER;
+			textView.setLayoutParams(params);
+			textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+			textView.setText("Tides");
+			textView.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
+			textView.setTextColor(ContextCompat.getColor(
+					this, R.color.color_on_primary));
+
+			cardLayout.addView(textView);
+			cardView.addView(cardLayout);
+			labelsLayout.addView(cardView);
+
+			// Divide cards
+			labelsLayout.addView(PAWSAPI.getDividerSpaceView(this, false,
+					R.dimen.app_spacing_small));
+
+			// Add swell title label in a coloured card
+			cardView = new MaterialCardView(this);
+			cardView.setBackgroundColor(ContextCompat.getColor(this, R.color.color_secondary));
+
+			cardLayout = new LinearLayout(this);
+
+			textView = new TextView(this);
+			params = new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.MATCH_PARENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER;
+			textView.setLayoutParams(params);
+			textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+			textView.setText("Swell");
+			textView.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
+			textView.setTextColor(ContextCompat.getColor(
+					this, R.color.color_on_primary));
+
+			cardLayout.addView(textView);
+			cardView.addView(cardLayout);
+			labelsLayout.addView(cardView);
+
+			// Divide cards
+			labelsLayout.addView(PAWSAPI.getDividerSpaceView(this, false,
+					R.dimen.app_spacing_small));
+
+			// Add the swell period label
+			textView = new TextView(this);
+			params = new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.MATCH_PARENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER;
+			//params.topMargin = Math.round(getResources().getDimension(R.dimen.app_spacing_tiny));
+			//params.bottomMargin = 2 * params.topMargin;
+			textView.setLayoutParams(params);
+			textView.setText("Period");
+			textView.setTextAppearance(this, R.style.TextAppearance_Paws_Small);
+			textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+			labelsLayout.addView(textView);
+
+			subLayout.addView(labelsLayout);
+
+			// Divide cards
+			labelsLayout.addView(PAWSAPI.getDividerSpaceView(this, false,
+					R.dimen.app_spacing_small));
+
+			// Add wind title label in a coloured card
+			cardView = new MaterialCardView(this);
+			cardView.setBackgroundColor(ContextCompat.getColor(this, R.color.color_on_background));
+
+			cardLayout = new LinearLayout(this);
+
+			textView = new TextView(this);
+			params = new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.MATCH_PARENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER;
+			textView.setLayoutParams(params);
+			textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+			textView.setText("Wind");
+			textView.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
+			textView.setTextColor(ContextCompat.getColor(
+					this, R.color.color_background));
+
+			cardLayout.addView(textView);
+			cardView.addView(cardLayout);
+			labelsLayout.addView(cardView);
+
+			// Add extra weather elements layout container alongside the label container
+			LinearLayout elementsContainerLayout = new LinearLayout(this);
+			elementsContainerLayout.setOrientation(LinearLayout.HORIZONTAL);
+			params = new LinearLayout.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+			elementsContainerLayout.setLayoutParams(params);
+			subLayout.addView(elementsContainerLayout);
+
+			// Populate layout with swell elements
+			for (int i = 0; i < swellInfo.size(); ++i) {
+				LinearLayout elementLayout = new LinearLayout(this);
+				elementLayout.setOrientation(LinearLayout.VERTICAL);
+				params = new LinearLayout.LayoutParams(
+						ViewGroup.LayoutParams.MATCH_PARENT,
+						ViewGroup.LayoutParams.WRAP_CONTENT);
+				params.weight = 1f;
+				elementLayout.setLayoutParams(params);
+
+				// Add bearing icons
+				ImageView imageView;
+				float direction = (float)swellInfo.get(i).getDouble("direction");
+				imageView = new ImageView(this);
+				imageView.setImageDrawable(getDrawable(R.drawable.ic_navigation));
+				imageView.setColorFilter(ContextCompat.getColor(
+						this, R.color.color_secondary));
+				imageView.setRotation(direction);
+				params = new LinearLayout.LayoutParams(
+						Math.round(getResources().getDimension(R.dimen.dimen_icon_small)),
+						Math.round(getResources().getDimension(R.dimen.dimen_icon_small)));
+				params.gravity = Gravity.CENTER;
+				params.topMargin = pad;
+				params.bottomMargin = pad;
+				imageView.setLayoutParams(params);
+				elementLayout.addView(imageView);
+
+				// Add the swell direction label
+				textView = new TextView(this);
+				params = new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.MATCH_PARENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT);
+				params.gravity = Gravity.CENTER;
+				textView.setLayoutParams(params);
+				textView.setText(swellInfo.get(i).getString("directionText"));
+				textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+				textView.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
+				textView.setTextColor(ContextCompat.getColor(
+						this, R.color.color_on_background));
+				elementLayout.addView(textView);
+
+				// Add the swell period value
+				final int period = (int)Math.round(swellInfo.get(i).getDouble("period"));
+				textView = new TextView(this);
+				params = new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.MATCH_PARENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT);
+				params.gravity = Gravity.CENTER;
+				textView.setLayoutParams(params);
+				textView.setText(String.format("%ss", period));
+				textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+				textView.setTextAppearance(this, R.style.TextAppearance_Paws_Small);
+				textView.setTextColor(ContextCompat.getColor(
+						this, R.color.color_on_background));
+				elementLayout.addView(textView);
+
+				// Add wind data for the day
+
+				// Add bearing icons
+				direction = (float)windInfo.get(i).getDouble("direction");
+				imageView = new ImageView(this);
+				imageView.setImageDrawable(getDrawable(R.drawable.ic_navigation));
+				imageView.setColorFilter(ContextCompat.getColor(
+						this, R.color.color_on_background));
+				imageView.setRotation(direction);
+				params = new LinearLayout.LayoutParams(
+						Math.round(getResources().getDimension(R.dimen.dimen_icon_small)),
+						Math.round(getResources().getDimension(R.dimen.dimen_icon_small)));
+				params.gravity = Gravity.CENTER;
+				params.topMargin = pad;
+				params.bottomMargin = pad;
+				imageView.setLayoutParams(params);
+				elementLayout.addView(imageView);
+
+				// Add the wind direction label
+				textView = new TextView(this);
+				params = new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.MATCH_PARENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT);
+				params.gravity = Gravity.CENTER;
+				textView.setLayoutParams(params);
+				textView.setText(windInfo.get(i).getString("directionText"));
+				textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+				textView.setTextAppearance(this, R.style.TextAppearance_Paws_Medium);
+				textView.setTextColor(ContextCompat.getColor(
+						this, R.color.color_on_background));
+				elementLayout.addView(textView);
+
+				// Add the wind speed value
+				final int speed = (int)Math.round(windInfo.get(i).getDouble("speed"));
+				textView = new TextView(this);
+				params = new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.MATCH_PARENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT);
+				params.gravity = Gravity.CENTER;
+				textView.setLayoutParams(params);
+				textView.setText(PAWSAPI.getWindSpeedString(speed, isMetric, true));
+				textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+				textView.setTextAppearance(this, R.style.TextAppearance_Paws_Tiny);
+				textView.setTextColor(ContextCompat.getColor(
+						this, R.color.color_on_background));
+				elementLayout.addView(textView);
+
+				elementsContainerLayout.addView(elementLayout);
+			}
+
+			// Show the data views if no errors are hit
+			parentLayout.addView(subLayout);
+
+		} catch (JSONException ex) {
+			ex.printStackTrace();
+		}
+
+		return true;
     }
 
     private boolean initCurrentWeather(final JSONObject forecastJSON) {
@@ -601,7 +878,7 @@ public class PlaceInfoActivity
 
             // Current wind
             dbl = currentWeatherJson.getJSONObject("wind").getDouble("speed");
-            str = PAWSAPI.getWindSpeedString(dbl, isMetric);
+            str = PAWSAPI.getWindSpeedString(dbl, isMetric, false);
             ((TextView)findViewById(R.id.txtWindCurrent)).setText(str);
 
             // Current precipitation
@@ -633,8 +910,8 @@ public class PlaceInfoActivity
 
             final boolean isMetric = PAWSAPI.preferredMetric(mSharedPref);
 
-            // todo: prevent today's weather from accumulating
-            LinearLayout layParent = findViewById(R.id.layWeatherToday);
+            LinearLayout parentLayout = findViewById(R.id.layWeatherToday);
+            parentLayout.removeAllViewsInLayout();
             for (int elem = 0; elem < elemsPerDay + 1; elem++) {
                 final JSONObject periodicWeatherJson = forecastJSON
                         .getJSONArray("list").getJSONObject(elem);
@@ -725,7 +1002,7 @@ public class PlaceInfoActivity
                 layout.addView(txt);
 
                 // Add the child to the hierarchy
-                layParent.addView(layout);
+                parentLayout.addView(layout);
             }
 
         } catch (JSONException ex) {
@@ -737,8 +1014,6 @@ public class PlaceInfoActivity
 
     private boolean initWeeklyWeather(final JSONObject forecastJSON) {
         try {
-            // todo: prevent the 5-day forecast from accumulating
-
             // todo: rewrite the 4 (!) different loops over the week in every iteration of this loop
 
             String str;
@@ -763,6 +1038,7 @@ public class PlaceInfoActivity
             int weatherId2 = weatherId1;
 
             LinearLayout layParent = findViewById(R.id.layWeatherWeekly);
+			layParent.removeAllViewsInLayout();
             final int elemCount = forecastJSON.getJSONArray("list").length();
             for (int elem = elemsPerDay; elem < elemCount; ++elem) {
                 final JSONObject periodicWeatherJson = forecastJSON
@@ -773,15 +1049,8 @@ public class PlaceInfoActivity
 
                     // Create a vertical divider between children
                     if (elem / elemsPerDay > 1) {
-                        View view = new View(this);
-                        params = new LinearLayout.LayoutParams(
-                                1,
-                                LinearLayout.LayoutParams.MATCH_PARENT);
-                        view.setLayoutParams(params);
-                        view.setBackgroundColor(ContextCompat.getColor(
-                                this, R.color.color_primary));
-                        view.setAlpha(0.75f);
-                        layParent.addView(view);
+                        layParent.addView(PAWSAPI.getDividerLineView(this,
+								true, R.color.color_primary));
                     }
 
                     // Create a new LinearLayout child
@@ -912,7 +1181,7 @@ public class PlaceInfoActivity
                     for (int i = elem - elemsPerDay - 1; i < elem; i++)
                         dbl += forecastJSON.getJSONArray("list").getJSONObject(i)
                                 .getJSONObject("wind").getDouble("speed");
-                    str = PAWSAPI.getWindSpeedString(dbl / elemsPerDay, isMetric);
+                    str = PAWSAPI.getWindSpeedString(dbl / elemsPerDay, isMetric, false);
                     txt = new TextView(this);
                     params = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,

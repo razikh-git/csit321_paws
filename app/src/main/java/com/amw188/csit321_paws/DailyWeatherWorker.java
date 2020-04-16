@@ -204,7 +204,7 @@ public class DailyWeatherWorker
 
                     // Wind data
                     PAWSAPI.getWindSpeedString(
-                            timeJSON.getJSONObject("wind").getDouble("speed"), isMetric),
+                            timeJSON.getJSONObject("wind").getDouble("speed"), isMetric, false),
                     PAWSAPI.getWindBearingString(mContext,
                             timeJSON.getJSONObject("wind").getDouble("deg"),
                             true),

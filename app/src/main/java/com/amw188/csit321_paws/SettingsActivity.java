@@ -112,11 +112,7 @@ public class SettingsActivity
 					mSharedPref.getString(preference.getKey(), "NIL") +
 					" => " + newValue);
 			if (preference.getKey().equals(PrefKeys.location_rate)) {
-				if (mServiceHandler.service().rescheduleNotifications())
-					Log.d(TAG, "Rescheduled notifications.");
-				else
-					Log.d(TAG, "No notifications were scheduled already.");
-			} else if (preference.getKey().equals(PrefKeys.hourformat)) {
+				mServiceHandler.service().rescheduleWork();
 			}
 			return true;
 		}

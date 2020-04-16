@@ -89,4 +89,15 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="Debugging">
+
+        <SwitchPreference
+            android:key="debug_mode"
+            android:defaultValue="false"
+            android:title="Debug mode"
+            android:summary="Feature testing routines."/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

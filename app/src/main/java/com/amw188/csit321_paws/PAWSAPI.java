@@ -9,8 +9,11 @@ import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import org.json.JSONArray;
@@ -87,6 +90,27 @@ final class PAWSAPI {
         }
         return location;
     }
+
+	static View getDividerLineView(final Context context, final boolean isVertical, final int colorId) {
+		View view = new View(context);
+		view.setBackgroundColor(ContextCompat.getColor(context, colorId));
+		view.setAlpha(0.75f);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+				isVertical ? 1 : LinearLayout.LayoutParams.MATCH_PARENT,
+				isVertical ? LinearLayout.LayoutParams.MATCH_PARENT : 1);
+		view.setLayoutParams(params);
+		return view;
+	}
+
+	static View getDividerSpaceView(final Context context, final boolean isVertical, final int dimenId) {
+		View view = new View(context);
+		final int dimen = Math.round(context.getResources().getDimension(dimenId));
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+				isVertical ? dimen : LinearLayout.LayoutParams.MATCH_PARENT,
+				isVertical ? LinearLayout.LayoutParams.MATCH_PARENT : dimen);
+		view.setLayoutParams(params);
+		return view;
+	}
 
     static Date parseWillyTimestamp(String timestamp) {
 		try {
@@ -255,13 +279,16 @@ final class PAWSAPI {
 
     /**
      * Formats a string for some wind speed in appropriate units.
+	 * @param speed Value to show and convert.
      * @param isMetric Value conversion and units to display for metric or non-metric preferences.
-     * @param speed Value to show and convert.
+     * @param isKmph Whether the value is already given in kilometres per hour, ie. WillyWeather data.
      * @return Formatted string.
      */
-    static String getWindSpeedString(final double speed, final boolean isMetric) {
+    static String getWindSpeedString(final double speed, final boolean isMetric, final boolean isKmph) {
         return isMetric
-                ? new DecimalFormat("#").format(msToKilometresPerHour(speed)) + " km/h"
+                ? (isKmph
+					? new DecimalFormat("#").format(speed) + " km/h"
+					: new DecimalFormat("#").format(msToKilometresPerHour(speed)) + " km/h")
                 : new DecimalFormat("#").format(speed) + " mph";
     }
 

@@ -17,7 +17,7 @@
         android:id="@+id/cardWarningBanner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/color_error"
+        android:backgroundTint="@color/color_secondary"
         android:visibility="gone"
         app:cardElevation="@dimen/elevation_banners"
         app:cardCornerRadius="0dp">
@@ -320,6 +320,7 @@
 
                         <!-- Heading text. -->
                         <LinearLayout
+                            android:id="@+id/layNoticesHeader"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="@dimen/app_spacing_medium"
@@ -335,26 +336,30 @@
 
                         </LinearLayout>
 
-                        <LinearLayout
+                        <ScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="@dimen/app_spacing_medium">
+                            android:maxHeight="@dimen/app_spacing_immense">
 
-                            <ScrollView
-                                android:id="@+id/scrollNotices"
+                            <LinearLayout
+                                android:id="@+id/layNotices"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:maxHeight="@dimen/app_spacing_immense">
+                                android:padding="@dimen/app_spacing_medium"
+                                android:orientation="vertical">
 
                                 <TextView
-                                    android:layout_width="wrap_content"
+                                    android:id="@+id/txtNoticeUnavailable"
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:textAppearance="@style/TextAppearance.Paws.Medium"
-                                    android:text="There are no outstanding weather alerts for your area."/>
+                                    android:textAlignment="viewStart"
+                                    android:text="Unable to connect to web service."
+                                    android:visibility="visible"/>
 
-                            </ScrollView>
+                            </LinearLayout>
 
-                        </LinearLayout>
+                        </ScrollView>
 
                     </LinearLayout>
                     

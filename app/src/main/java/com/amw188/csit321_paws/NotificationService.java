@@ -341,20 +341,9 @@ public class NotificationService
 		doSomethingWithWeather(requestCode, response);
 	}
 
-	private boolean isWeatherScheduled() {
+	private boolean isWorkScheduled(final String workTag) {
 		try {
-			return WorkManager.getInstance(this).getWorkInfosByTag(
-					DailyWeatherWorker.WORK_TAG).get().size() <= 0;
-		} catch (ExecutionException | InterruptedException ex) {
-			ex.printStackTrace();
-		}
-		return false;
-	}
-
-	private boolean isAlertScheduled() {
-		try {
-			return WorkManager.getInstance(this).getWorkInfosByTag(
-					DailyAlertWorker.WORK_TAG).get().size() <= 0;
+			return WorkManager.getInstance(this).getWorkInfosByTag(workTag).get().size() <= 0;
 		} catch (ExecutionException | InterruptedException ex) {
 			ex.printStackTrace();
 		}
@@ -370,12 +359,12 @@ public class NotificationService
 				sharedEditor.putString(PrefKeys.position_weather, response);
 				sharedEditor.apply();
 
-				if (!isAlertScheduled()) {
+				if (!isWorkScheduled(DailyAlertWorker.WORK_TAG)) {
 					Log.d(TAG, "Scheduling alert notifications.");
 					scheduleAlertNotifications();
 				}
 			}
-			else if (!isWeatherScheduled()) {
+			else if (!isWorkScheduled(DailyWeatherWorker.WORK_TAG)) {
 				Log.d(TAG, "Scheduling weather notifications.");
 				scheduleWeatherNotifications();
 			}
@@ -541,18 +530,6 @@ public class NotificationService
 				periodicWorkRequest);
 	}
 
-	boolean rescheduleNotifications() {
-		if (isWeatherScheduled()) {
-			// Cancel existing work
-			WorkManager.getInstance(this).cancelAllWorkByTag(DailyWeatherWorker.WORK_TAG);
-
-			// Schedule new work with new parameters from settings
-			scheduleWeatherNotifications();
-			return true;
-		}
-		return false;
-	}
-
 	private void schedulePeriodicDataUpdates() {
 		PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
 				PeriodicDataUpdateWorker.class, 3, TimeUnit.HOURS)
@@ -562,6 +539,32 @@ public class NotificationService
 		WorkManager.getInstance(this).enqueueUniquePeriodicWork(
 				PeriodicDataUpdateWorker.WORK_TAG, ExistingPeriodicWorkPolicy.REPLACE,
 				periodicWorkRequest);
+	}
+
+	void cancelWork(final String workTag) {
+		WorkManager.getInstance(this).cancelAllWorkByTag(workTag);
+	}
+
+	/**
+	 * Cancels and restarts enabled workers with up-to-date settings.
+	 */
+	void rescheduleWork() {
+		String workTag;
+		workTag = DailyWeatherWorker.WORK_TAG;
+		if (isWorkScheduled(workTag)) {
+			cancelWork(workTag);
+			scheduleWeatherNotifications();
+		}
+		workTag = DailyAlertWorker.WORK_TAG;
+		if (isWorkScheduled(workTag)) {
+			cancelWork(workTag);
+			scheduleAlertNotifications();
+		}
+		workTag = PeriodicDataUpdateWorker.WORK_TAG;
+		if (isWorkScheduled(workTag)) {
+			cancelWork(workTag);
+			schedulePeriodicDataUpdates();
+		}
 	}
 
 	private Constraints getWorkConstraints() {
