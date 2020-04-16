@@ -119,7 +119,7 @@
                     android:backgroundTintMode="src_over"
                     android:clipChildren="false"
                     android:clipToPadding="false"
-                    app:strokeColor="@color/color_error"
+                    app:strokeColor="@color/color_secondary"
                     app:strokeWidth="@dimen/width_stroke">
 
                     <LinearLayout

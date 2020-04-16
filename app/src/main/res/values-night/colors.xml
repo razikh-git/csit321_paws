@@ -6,7 +6,7 @@
 
     <color name="color_primary">@color/color_ref_black_alt</color>
     <color name="color_primary_alt">@color/color_ref_black_alt</color>
-    <color name="color_error">#D58560</color>
+    <color name="color_secondary">#D58560</color>
     <color name="color_accent">@color/color_ref_brand</color>
     <color name="color_accent_alt">@color/color_ref_brand_alt</color>
     <color name="color_midtone">@color/color_ref_grey</color>

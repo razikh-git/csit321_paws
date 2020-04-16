@@ -1,6 +1,5 @@
 package com.amw188.csit321_paws;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -140,7 +139,7 @@ public class SurveyEntryActivity
 
             // Change card style
             ((MaterialCardView)findViewById(R.id.cardSurveyResults)).setStrokeColor(
-                    getResources().getColor(R.color.color_error));
+                    getResources().getColor(R.color.color_secondary));
 
         } else {
             // Completed profiling surveys:
